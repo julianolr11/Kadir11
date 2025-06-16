@@ -157,11 +157,18 @@
 
         #status-pet-image {
             position: relative;
-            width: 256px;
-            height: 256px;
+            width: 96px;
+            height: 96px;
             border: 2px solid #ffffff;
             border-radius: 7px;
             z-index: 3;
+        }
+
+        /* Imagens que não são GIF usam estilo pixelado e tamanho maior */
+        #status-pet-image:not([src$=".gif"]) {
+            image-rendering: pixelated;
+            width: 160px;
+            height: 160px;
         }
 
         #status-bio-image {
