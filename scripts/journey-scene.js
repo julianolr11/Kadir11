@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.electronAPI.on('scene-data', (event, data) => {
         if (data.background && bg) bg.src = data.background;
-        if (data.playerPet && player) player.src = data.playerPet;
+        if (data.playerPet && player) player.src = `Assets/Mons/${data.playerPet}`;
         if (data.enemyPet && enemy) enemy.src = data.enemyPet;
-        if (data.playerPet && playerFront) playerFront.src = data.playerPet;
+        if (data.playerPet && playerFront) playerFront.src = `Assets/Mons/${data.playerPet}`;
         if (data.enemyPet && enemyFront) {
             const frontPath = data.enemyPet.replace(/idle\.gif$/i, 'front.gif');
             enemyFront.src = frontPath;
