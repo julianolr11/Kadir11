@@ -427,7 +427,7 @@ ipcMain.on('open-journey-scene-window', async (event, data) => {
     console.log('Recebido open-journey-scene-window');
     const win = createJourneySceneWindow();
     if (!win) return;
-    const enemy = await getRandomEnemyFront(currentPet ? currentPet.statusImage : null);
+    const enemy = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
     win.webContents.on('did-finish-load', () => {
         win.webContents.send('scene-data', {
             background: data.background,
@@ -494,10 +494,10 @@ ipcMain.handle('get-journey-images', async () => {
     }
 });
 
-let frontGifsCache = null;
+let idleGifsCache = null;
 
-async function loadFrontGifs() {
-    if (frontGifsCache) return frontGifsCache;
+async function loadIdleGifs() {
+    if (idleGifsCache) return idleGifsCache;
     const dir = path.join(__dirname, 'Assets', 'Mons');
     const result = [];
     async function walk(folder) {
@@ -506,18 +506,18 @@ async function loadFrontGifs() {
             const full = path.join(folder, entry.name);
             if (entry.isDirectory()) {
                 await walk(full);
-            } else if (entry.isFile() && entry.name.toLowerCase() === 'front.gif') {
+            } else if (entry.isFile() && entry.name.toLowerCase() === 'idle.gif') {
                 result.push(full.replace(/\\/g, '/'));
             }
         }
     }
     await walk(dir);
-    frontGifsCache = result;
-    return frontGifsCache;
+    idleGifsCache = result;
+    return idleGifsCache;
 }
 
-async function getRandomEnemyFront(exclude) {
-    const list = await loadFrontGifs();
+async function getRandomEnemyIdle(exclude) {
+    const list = await loadIdleGifs();
     let filtered = list;
     if (exclude) {
         const normalized = exclude.replace(/\\/g, '/');

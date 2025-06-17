@@ -48,13 +48,9 @@ function ensureStatusImage(pet) {
     if (relativeDir && relativeDir !== '.') {
         if (!pet.statusImage) {
             const baseDir = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir);
-            const gifPath = path.join(baseDir, 'front.gif');
-            const pngPath = path.join(baseDir, 'front.png');
-
+            const gifPath = path.join(baseDir, 'idle.gif');
             if (fsSync.existsSync(gifPath)) {
-                pet.statusImage = path.posix.join(relativeDir, 'front.gif');
-            } else if (fsSync.existsSync(pngPath)) {
-                pet.statusImage = path.posix.join(relativeDir, 'front.png');
+                pet.statusImage = path.posix.join(relativeDir, 'idle.gif');
             }
         }
     }

@@ -239,7 +239,7 @@ function showNameSelection(element) {
             race = info.race || null;
             if (info.race) {
                 const base = info.element ? `${info.dir}/${info.element}/${info.race}` : `${info.dir}/${info.race}`;
-                statusImage = `${base}/front.gif`;
+                statusImage = `${base}/idle.gif`;
             }
         }
         if (!statusImage) {
