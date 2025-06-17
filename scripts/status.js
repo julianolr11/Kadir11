@@ -3,6 +3,34 @@ console.log('status.js carregado com sucesso');
 
 let pet = {};
 
+let tooltipEl = null;
+function showTooltip(event) {
+    const text = event.currentTarget.dataset.tooltip;
+    if (!text) return;
+    tooltipEl = document.createElement('div');
+    tooltipEl.className = 'tooltip';
+    tooltipEl.textContent = text;
+    document.body.appendChild(tooltipEl);
+    const rect = event.currentTarget.getBoundingClientRect();
+    const left = rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2;
+    const top = rect.top + window.scrollY - tooltipEl.offsetHeight - 5;
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
+}
+
+function hideTooltip() {
+    if (tooltipEl) {
+        tooltipEl.remove();
+        tooltipEl = null;
+    }
+}
+
+function setupTooltip(el, text) {
+    el.dataset.tooltip = text;
+    el.addEventListener('mouseenter', showTooltip);
+    el.addEventListener('mouseleave', hideTooltip);
+}
+
 function setImageWithFallback(imgElement, relativePath) {
     if (!imgElement) return;
     if (!relativePath) {
@@ -141,6 +169,7 @@ function updateStatus() {
         slot.className = 'move-slot';
         if (pet.moves && pet.moves[i]) {
             slot.textContent = pet.moves[i].name;
+            setupTooltip(slot, pet.moves[i].description || '');
         } else {
             const btn = document.createElement('button');
             btn.className = 'button add-move-button';

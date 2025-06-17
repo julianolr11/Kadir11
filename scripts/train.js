@@ -2,6 +2,34 @@ console.log('train.js carregado');
 
 let pet = null;
 
+let tooltipEl = null;
+function showTooltip(event) {
+    const text = event.currentTarget.dataset.tooltip;
+    if (!text) return;
+    tooltipEl = document.createElement('div');
+    tooltipEl.className = 'tooltip';
+    tooltipEl.textContent = text;
+    document.body.appendChild(tooltipEl);
+    const rect = event.currentTarget.getBoundingClientRect();
+    const left = rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2;
+    const top = rect.top + window.scrollY - tooltipEl.offsetHeight - 5;
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
+}
+
+function hideTooltip() {
+    if (tooltipEl) {
+        tooltipEl.remove();
+        tooltipEl = null;
+    }
+}
+
+function setupTooltip(el, text) {
+    el.dataset.tooltip = text;
+    el.addEventListener('mouseenter', showTooltip);
+    el.addEventListener('mouseleave', hideTooltip);
+}
+
 function closeWindow() {
     window.close();
 }
@@ -37,7 +65,7 @@ function renderMoves(moves) {
             return;
         }
         const tr = document.createElement('tr');
-        tr.title = move.description;
+        setupTooltip(tr, move.description);
         let action = 'Aprender';
         const known = pet.moves && pet.moves.some(m => m.name === move.name);
         if (known) action = 'Reaprender';
