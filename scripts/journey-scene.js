@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.background && bg) bg.src = data.background;
         if (data.playerPet && player) player.src = data.playerPet;
         if (data.enemyPet && enemy) enemy.src = data.enemyPet;
-        if (data.playerPet && playerFront) playerFront.src = data.playerPet;
-        if (data.enemyPet && enemyFront) enemyFront.src = data.enemyPet;
+        if (data.playerFront && playerFront) playerFront.src = data.playerFront;
+        if (data.enemyFront && enemyFront) enemyFront.src = data.enemyFront;
     });
 });

@@ -427,12 +427,15 @@ ipcMain.on('open-journey-scene-window', async (event, data) => {
     console.log('Recebido open-journey-scene-window');
     const win = createJourneySceneWindow();
     if (!win) return;
-    const enemy = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
+    const enemyIdle = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
+    const enemyFront = enemyIdle ? enemyIdle.replace(/idle\.gif$/i, 'front.gif') : null;
     win.webContents.on('did-finish-load', () => {
         win.webContents.send('scene-data', {
             background: data.background,
             playerPet: currentPet ? (currentPet.statusImage || currentPet.image) : null,
-            enemyPet: enemy
+            playerFront: currentPet ? (currentPet.statusImage || currentPet.image) : null,
+            enemyPet: enemyIdle,
+            enemyFront: enemyFront
         });
     });
 });
