@@ -432,7 +432,9 @@ ipcMain.on('open-journey-scene-window', async (event, data) => {
         win.webContents.send('scene-data', {
             background: data.background,
             playerPet: currentPet ? (currentPet.statusImage || currentPet.image) : null,
-            enemyPet: enemy
+            enemyPet: enemy ? enemy.idle : null,
+            playerFront: currentPet ? (currentPet.statusImage || null) : null,
+            enemyFront: enemy ? enemy.front : null
         });
     });
 });
@@ -525,8 +527,12 @@ async function getRandomEnemyIdle(exclude) {
     }
     if (filtered.length === 0) filtered = list;
     if (filtered.length === 0) return null;
-    const choice = filtered[Math.floor(Math.random() * filtered.length)];
-    return path.relative(__dirname, choice).replace(/\\/g, '/');
+    const idleChoice = filtered[Math.floor(Math.random() * filtered.length)];
+    const frontChoice = idleChoice.replace(/idle\.gif$/i, 'front.gif');
+    return {
+        idle: path.relative(__dirname, idleChoice).replace(/\\/g, '/'),
+        front: path.relative(__dirname, frontChoice).replace(/\\/g, '/')
+    };
 }
 
 module.exports = { app, ipcMain, globalShortcut, windowManager, petManager };

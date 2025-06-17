@@ -30,8 +30,69 @@
         }
         .pet {
             position: absolute;
+        #player-pet { left: 120px; transform: scaleX(-1); }
+        #enemy-pet { right: 120px; transform: scaleX(1); }
 
-            bottom: 120px;
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            padding: 0 10px;
+        }
+
+        .hud-section {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hud-section img {
+            width: 70px;
+            height: 70px;
+        }
+
+        .health-bar,
+        .energy-bar {
+            width: 50px;
+            height: 6px;
+            background-color: #444;
+            border: 1px solid #fff;
+            border-radius: 3px;
+            margin-bottom: 3px;
+            position: relative;
+        }
+
+        .health-bar .bar,
+        .energy-bar .bar {
+            height: 100%;
+            border-radius: 3px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .health-bar .bar { background-color: #ff0000; }
+        .energy-bar .bar { background-color: #00b7eb; }
+        <div id="hud">
+            <div id="player-hud" class="hud-section">
+                <img id="player-hud-img" src="" alt="player front">
+                <div>
+                    <div class="health-bar"><div class="bar" id="player-health-fill"></div></div>
+                    <div class="energy-bar"><div class="bar" id="player-energy-fill"></div></div>
+                </div>
+            </div>
+            <div id="enemy-hud" class="hud-section">
+                <div>
+                    <div class="health-bar"><div class="bar" id="enemy-health-fill"></div></div>
+                    <div class="energy-bar"><div class="bar" id="enemy-energy-fill"></div></div>
+                </div>
+                <img id="enemy-hud-img" src="" alt="enemy front">
+            </div>
+        </div>
             width: 150px;
             image-rendering: pixelated;
         }
