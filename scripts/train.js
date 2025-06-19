@@ -68,10 +68,17 @@ function renderMoves(moves) {
         tr.addEventListener('mouseleave', hideDescription);
 
         let action = 'Aprender';
+        let disabled = false;
         const known = pet.moves && pet.moves.some(m => m.name === move.name);
-        if (known) action = 'Reaprender';
-        if (pet.moves && pet.moves.length >= 4 && !known) action = 'Trocar';
-        if (pet.level < move.level) action = 'Indisponível';
+        if (known) {
+            action = 'Ativo';
+            disabled = true;
+        } else if (pet.moves && pet.moves.length >= 4) {
+            action = 'Reaprender';
+        }
+        if (pet.level < move.level) {
+            disabled = true;
+        }
 
         const elementIcons = move.elements.map(el =>
             `<img class="element-icon" src="Assets/Elements/${el}.png" alt="${el}" style="image-rendering: pixelated;">`
@@ -85,11 +92,11 @@ function renderMoves(moves) {
             case 'Reaprender':
                 actionClass = 'action-reaprender';
                 break;
-            case 'Trocar':
-                actionClass = 'action-trocar';
+            case 'Ativo':
+                actionClass = 'action-ativo';
                 break;
             default:
-                actionClass = 'action-indisponivel';
+                actionClass = 'action-aprender';
         }
 
         const rarityStyle = rarityGradients[move.rarity] || rarityGradients['Comum'];
@@ -105,7 +112,7 @@ function renderMoves(moves) {
         `;
 
         const btn = tr.querySelector('button');
-        if (action === 'Indisponível') {
+        if (disabled) {
             btn.disabled = true;
         } else {
             btn.addEventListener('click', () => {
