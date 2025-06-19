@@ -3,41 +3,74 @@ const path = require('path');
 
 function fadeInWindow(win) {
     if (!win) return;
+    const [finalWidth, finalHeight] = win.getSize();
+    const [finalX, finalY] = win.getPosition();
+    const startScale = 0.9;
+
     win.setOpacity(0);
+    win.setSize(Math.round(finalWidth * startScale), Math.round(finalHeight * startScale));
+    win.setPosition(
+        Math.round(finalX + (finalWidth - finalWidth * startScale) / 2),
+        Math.round(finalY + (finalHeight - finalHeight * startScale) / 2)
+    );
     win.show();
-    let opacity = 0;
+
+    let progress = 0;
     const step = 0.05;
     const interval = setInterval(() => {
         if (win.isDestroyed()) {
             clearInterval(interval);
             return;
         }
-        opacity += step;
-        if (opacity >= 1) {
+        progress += step;
+        if (progress >= 1) {
             win.setOpacity(1);
+            win.setSize(finalWidth, finalHeight);
+            win.setPosition(finalX, finalY);
             clearInterval(interval);
         } else {
-            win.setOpacity(opacity);
+            win.setOpacity(progress);
+            const scale = startScale + (1 - startScale) * progress;
+            const width = Math.round(finalWidth * scale);
+            const height = Math.round(finalHeight * scale);
+            win.setSize(width, height);
+            win.setPosition(
+                Math.round(finalX + (finalWidth - width) / 2),
+                Math.round(finalY + (finalHeight - height) / 2)
+            );
         }
     }, 16);
 }
 
 function fadeOutAndDestroy(win) {
     if (!win) return;
-    let opacity = win.getOpacity();
+    const [origWidth, origHeight] = win.getSize();
+    const [origX, origY] = win.getPosition();
+    const endScale = 0.9;
+
+    let progress = 0;
     const step = 0.05;
     const interval = setInterval(() => {
         if (win.isDestroyed()) {
             clearInterval(interval);
             return;
         }
-        opacity -= step;
-        if (opacity <= 0) {
-            clearInterval(interval);
+        progress += step;
+        if (progress >= 1) {
             win.removeAllListeners('close');
             win.destroy();
+            clearInterval(interval);
         } else {
+            const opacity = 1 - progress;
+            const scale = 1 - (1 - endScale) * progress;
+            const width = Math.round(origWidth * scale);
+            const height = Math.round(origHeight * scale);
             win.setOpacity(opacity);
+            win.setSize(width, height);
+            win.setPosition(
+                Math.round(origX + (origWidth - width) / 2),
+                Math.round(origY + (origHeight - height) / 2)
+            );
         }
     }, 16);
 }
