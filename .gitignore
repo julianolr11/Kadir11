@@ -37,4 +37,4 @@ backups/
 .git
 pets/
 Assets/icons/*.png
-Assets/Modes/mapa.png
+assets/modes/journeys/mapa.png
