@@ -272,7 +272,7 @@ ipcMain.on('itens-pet', () => {
     }
 });
 
-ipcMain.on('store-pet', (event, options) => {
+ipcMain.on('store-pet', async (event, options) => {
     if (currentPet) {
         console.log('Abrindo janela de loja para:', currentPet.name);
         const win = createStoreWindow();
@@ -281,7 +281,7 @@ ipcMain.on('store-pet', (event, options) => {
                 win.webContents.send('pet-data', currentPet);
             });
 
-            // Se a loja foi aberta a partir da janela de itens, alinhar as janelas
+            // Se a loja foi aberta a partir da janela de itens, alinhar e animar as janelas
             if (options && options.fromItems && itemsWindow) {
                 try {
                     const display = screen.getPrimaryDisplay();
@@ -295,11 +295,22 @@ ipcMain.on('store-pet', (event, options) => {
                     const startX = Math.round((screenWidth - totalWidth) / 2);
                     const startY = Math.round((screenHeight - maxHeight) / 2);
 
-                    itemsWindow.setPosition(startX, startY);
-                    win.setPosition(startX + itemsBounds.width, startY);
+                    const itemsStartX = itemsBounds.x;
+                    const itemsStartY = itemsBounds.y;
+                    const storeStartX = screenWidth;
+
+                    win.setPosition(storeStartX, startY);
+                    win.show();
+
+                    await Promise.all([
+                        windowManager.animateMove(itemsWindow, itemsStartX, itemsStartY, startX, startY),
+                        windowManager.animateMove(win, storeStartX, startY, startX + itemsBounds.width, startY)
+                    ]);
                 } catch (err) {
                     console.error('Erro ao posicionar janelas:', err);
                 }
+            } else {
+                win.show();
             }
         }
     } else {

@@ -53,6 +53,37 @@ function attachFadeHandlers(win) {
     });
 }
 
+function animateMove(win, startX, startY, endX, endY, duration = 300) {
+    return new Promise((resolve) => {
+        if (!win) {
+            resolve();
+            return;
+        }
+
+        const frames = Math.max(1, Math.round(duration / 16));
+        let frame = 0;
+        win.setPosition(Math.round(startX), Math.round(startY));
+        const interval = setInterval(() => {
+            if (win.isDestroyed()) {
+                clearInterval(interval);
+                resolve();
+                return;
+            }
+
+            frame += 1;
+            const progress = Math.min(frame / frames, 1);
+            const x = Math.round(startX + (endX - startX) * progress);
+            const y = Math.round(startY + (endY - startY) * progress);
+            win.setPosition(x, y);
+
+            if (progress >= 1) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 16);
+    });
+}
+
 class WindowManager {
     constructor() {
         this.startWindow = null;
@@ -64,6 +95,10 @@ class WindowManager {
 
     attachFadeHandlers(win) {
         attachFadeHandlers(win);
+    }
+
+    animateMove(win, startX, startY, endX, endY, duration = 300) {
+        return animateMove(win, startX, startY, endX, endY, duration);
     }
 
     // Criar a janela inicial (start.html)
