@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let itemsData = [];
-    fetch('data/items.json').then(r => r.json()).then(d => { itemsData = d; }).catch(() => {});
+    fetch('../data/items.json').then(r => r.json()).then(d => { itemsData = d; }).catch(() => {});
 
     function showEventModal(text, icon) {
         if (!eventModal) return;

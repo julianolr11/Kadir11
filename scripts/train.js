@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadMoves() {
     try {
-        const response = await fetch('data/moves.json');
+        const response = await fetch('../data/moves.json');
         const moves = await response.json();
         renderMoves(moves);
     } catch (err) {
