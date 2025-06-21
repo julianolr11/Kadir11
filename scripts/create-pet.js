@@ -33,7 +33,7 @@ const specieBioImages = Object.fromEntries(
 let questions = [];
 
 function loadQuestions() {
-    return fetch('data/questions.json')
+    return fetch('../data/questions.json')
         .then(response => response.json())
         .then(data => {
             questions = data;
