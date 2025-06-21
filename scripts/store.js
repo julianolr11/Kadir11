@@ -69,9 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+const dataPrefix = window.location.pathname.endsWith('/app.html') ? 'data/' : '../data/';
+
 async function loadItemsInfo() {
     try {
-        const response = await fetch('../data/items.json');
+        const response = await fetch(`${dataPrefix}items.json`);
         const data = await response.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });

@@ -22,10 +22,11 @@ let playerIdleSrc = '';
 let playerAttackSrc = '';
 let enemyIdleSrc = '';
 let enemyAttackSrc = '';
+const dataPrefix = window.location.pathname.endsWith('/app.html') ? 'data/' : '../data/';
 
 async function loadItemsInfo() {
     try {
-        const resp = await fetch('../data/items.json');
+        const resp = await fetch(`${dataPrefix}items.json`);
         const data = await resp.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });
@@ -37,7 +38,7 @@ async function loadItemsInfo() {
 
 async function loadStatusEffectsInfo() {
     try {
-        const resp = await fetch('../data/status-effects.json');
+        const resp = await fetch(`${dataPrefix}status-effects.json`);
         const data = await resp.json();
         statusEffectsInfo = {};
         data.forEach(se => { statusEffectsInfo[se.id] = se; });

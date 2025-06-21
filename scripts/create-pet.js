@@ -31,9 +31,10 @@ const specieBioImages = Object.fromEntries(
 // Perguntas carregadas de data/questions.json
 
 let questions = [];
+const dataPrefix = window.location.pathname.endsWith('/app.html') ? 'data/' : '../data/';
 
 function loadQuestions() {
-    return fetch('../data/questions.json')
+    return fetch(`${dataPrefix}questions.json`)
         .then(response => response.json())
         .then(data => {
             questions = data;

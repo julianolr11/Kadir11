@@ -82,9 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+const dataPrefix = window.location.pathname.endsWith('/app.html') ? 'data/' : '../data/';
+
 async function loadMoves() {
     try {
-        const response = await fetch('../data/moves.json');
+        const response = await fetch(`${dataPrefix}moves.json`);
         const moves = await response.json();
         renderMoves(moves);
     } catch (err) {
