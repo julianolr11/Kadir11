@@ -99,8 +99,6 @@ async function createPet(petData) {
         energy: petData.energy || 100,
         coins: petData.coins || 20,
         kadirPoints: petData.kadirPoints || 5,
-        winStreak: 0,
-        lossStreak: 0,
         currentHealth: petData.currentHealth || (petData.attributes?.life || 100),
         maxHealth: petData.maxHealth || (petData.attributes?.life || 100),
         moves: [],
@@ -145,17 +143,11 @@ async function listPets() {
                     if (pet.coins === undefined) {
                         pet.coins = 20;
                     }
-                   if (pet.items === undefined) {
-                       pet.items = {};
-                   }
-                   if (pet.statusEffects === undefined) {
-                       pet.statusEffects = [];
-                   }
-                    if (pet.winStreak === undefined) {
-                        pet.winStreak = 0;
+                    if (pet.items === undefined) {
+                        pet.items = {};
                     }
-                    if (pet.lossStreak === undefined) {
-                        pet.lossStreak = 0;
+                    if (pet.statusEffects === undefined) {
+                        pet.statusEffects = [];
                     }
                     pet.fileName = file; // Garantir que o fileName esteja atualizado
                     ensureStatusImage(pet);
@@ -191,17 +183,11 @@ async function loadPet(petId) {
         if (pet.coins === undefined) {
             pet.coins = 20;
         }
-       if (pet.items === undefined) {
-           pet.items = {};
-       }
-       if (pet.statusEffects === undefined) {
-           pet.statusEffects = [];
-       }
-        if (pet.winStreak === undefined) {
-            pet.winStreak = 0;
+        if (pet.items === undefined) {
+            pet.items = {};
         }
-        if (pet.lossStreak === undefined) {
-            pet.lossStreak = 0;
+        if (pet.statusEffects === undefined) {
+            pet.statusEffects = [];
         }
         ensureStatusImage(pet);
         if (!pet.knownMoves) {

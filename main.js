@@ -871,23 +871,6 @@ ipcMain.on('use-item', async (event, item) => {
     }
 });
 
-ipcMain.on('use-move', async (event, move) => {
-    if (!currentPet || !move) return;
-    const cost = move.cost || 0;
-    currentPet.energy = Math.max((currentPet.energy || 0) - cost, 0);
-
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            energy: currentPet.energy
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aplicar custo do movimento:', err);
-    }
-});
-
 ipcMain.on('reward-pet', async (event, reward) => {
     if (!currentPet || !reward) return;
     if (reward.item) {
@@ -930,43 +913,6 @@ ipcMain.on('reward-pet', async (event, reward) => {
         });
     } catch (err) {
         console.error('Erro ao aplicar recompensa:', err);
-    }
-});
-
-ipcMain.on('battle-result', async (event, result) => {
-    if (!currentPet || !result) return;
-    const win = !!result.win;
-    let delta = win ? 5 : -10;
-
-    if (win) {
-        currentPet.winStreak = (currentPet.winStreak || 0) + 1;
-        currentPet.lossStreak = 0;
-        if (currentPet.winStreak >= 5) {
-            delta += 15;
-            currentPet.winStreak = 0;
-        }
-    } else {
-        currentPet.lossStreak = (currentPet.lossStreak || 0) + 1;
-        currentPet.winStreak = 0;
-        if (currentPet.lossStreak >= 5) {
-            delta -= 30;
-            currentPet.lossStreak = 0;
-        }
-    }
-
-    currentPet.happiness = Math.max(0, Math.min(100, (currentPet.happiness || 0) + delta));
-
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            happiness: currentPet.happiness,
-            winStreak: currentPet.winStreak,
-            lossStreak: currentPet.lossStreak
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao atualizar felicidade após batalha:', err);
     }
 });
 

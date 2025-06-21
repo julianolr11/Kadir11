@@ -73,8 +73,7 @@ function updateMoves() {
     pet.moves.forEach(move => {
         const btn = document.createElement('button');
         btn.className = 'button small-button';
-        const cost = move.cost || 0;
-        btn.textContent = `${move.name} (-${cost})`;
+        btn.textContent = move.name;
         btn.addEventListener('click', () => {
             performPlayerMove(move);
         });
@@ -237,7 +236,6 @@ function showVictoryModal(reward) {
 function concludeBattle(playerWon) {
     currentTurn = 'ended';
     hideMenus();
-    window.electronAPI.send('battle-result', { win: playerWon });
     if (playerWon) {
         const reward = generateReward();
         window.electronAPI.send('reward-pet', reward);
@@ -270,15 +268,6 @@ function performPlayerMove(move) {
         endPlayerTurn();
         return;
     }
-    const cost = move.cost || 0;
-    if ((pet.energy || 0) < cost) {
-        showMessage('Energia insuficiente!');
-        return;
-    }
-    pet.energy = Math.max(0, (pet.energy || 0) - cost);
-    const energyFill = document.getElementById('player-energy-fill');
-    if (energyFill) energyFill.style.width = `${pet.energy}%`;
-    window.electronAPI.send('use-move', move);
     hideMenus();
     const playerImg = document.getElementById('player-pet');
     playAttackAnimation(playerImg, playerIdleSrc, playerAttackSrc, () => {
