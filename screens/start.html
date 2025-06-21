@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; media-src 'self'">
     <title>Kadir11 - Início</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../styles/main.css">
     <style>
         html {
             width: 100%;
@@ -42,7 +42,7 @@
             align-items: center;
             padding: 0;
             margin: 0;
-            background: url(Assets/Logo/gifer.gif);
+            background: url(../Assets/Logo/gifer.gif);
             background-blend-mode: screen;
             background-size: 100%;
             position: relative;
@@ -120,16 +120,17 @@
 
 <body>
     <div class="window">
-        <img src="Assets/Logo/kadirnobg.png" alt="" style="image-rendering: pixelated;">
-        <img src="Assets/Logo/kadir11nme.png" alt="" class="animate-bg" style="image-rendering: pixelated;">
+        <img src="../Assets/Logo/kadirnobg.png" alt="" style="image-rendering: pixelated;">
+        <img src="../Assets/Logo/kadir11nme.png" alt="" class="animate-bg" style="image-rendering: pixelated;">
         <button class="button" id="start-button">Iniciar</button>
         <button class="button" id="load-button" style="display: none;">Carregar</button>
+        <button class="button" id="options-button">⚙️ Opções</button>
         <button class="button" id="exit-button">Sair</button>
         <button id="mute-button">🔊</button>
     </div>
 
     <audio id="background-music" autoplay loop>
-        <source src="Assets/Sounds/SagadoNorte.mp3" type="audio/mpeg">
+        <source src="../Assets/Sounds/SagadoNorte.mp3" type="audio/mpeg">
         Seu navegador não suporta o elemento de áudio.
     </audio>
 
@@ -143,7 +144,7 @@
         </div>
     </div>
 
-    <script src="scripts/start.js"></script>
+    <script src="../scripts/start.js"></script>
 
 </body>
 

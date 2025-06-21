@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kadir11 - Carregar Pet</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../styles/main.css">
     <style>
         html {
             width: 100%;
@@ -70,7 +70,7 @@
             left: 0;
             width: 130px;
             height: 130px;
-            background: url('Assets/Rarity/texture.png');
+            background: url('../Assets/Rarity/texture.png');
             background-size: cover;
             opacity: 0.5;
             border-radius: 7px;
@@ -221,7 +221,7 @@
     </div>
 
     <script type="module">
-        import { rarityGradients } from './scripts/constants.js';
+        import { rarityGradients } from '../scripts/constants.js';
 
         const deleteOverlay = document.getElementById('delete-confirm-overlay');
         const deleteMessage = document.getElementById('delete-confirm-message');
@@ -275,7 +275,7 @@
                             <p><img class="currency-icon" src="assets/icons/kadircoin.png" alt="Moedas"> ${pet.coins ?? 0}</p>
                         </div>
                         <button class="delete-button" data-pet-id="${pet.petId}">
-                            <img src="Assets/Icons/trash-can.svg" alt="Delete Icon" style="image-rendering: pixelated;" />
+                            <img src="../Assets/Icons/trash-can.svg" alt="Delete Icon" style="image-rendering: pixelated;" />
                         </button>
                     `;
                     petItem.addEventListener('click', () => {

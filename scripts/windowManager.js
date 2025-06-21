@@ -126,7 +126,7 @@ class WindowManager {
             },
         });
 
-        this.startWindow.loadFile('start.html');
+        this.startWindow.loadFile('screens/start.html');
         attachFadeHandlers(this.startWindow);
         this.startWindow.on('closed', () => {
             this.startWindow = null;
@@ -169,7 +169,7 @@ class WindowManager {
             },
         });
 
-        this.createPetWindow.loadFile('create-pet.html');
+        this.createPetWindow.loadFile('screens/create-pet.html');
         attachFadeHandlers(this.createPetWindow);
         this.createPetWindow.on('closed', () => {
             this.createPetWindow = null;
@@ -207,7 +207,7 @@ class WindowManager {
             },
         });
 
-        this.loadPetWindow.loadFile('load-pet.html');
+        this.loadPetWindow.loadFile('screens/load-pet.html');
         attachFadeHandlers(this.loadPetWindow);
         this.loadPetWindow.on('closed', () => {
             this.loadPetWindow = null;
@@ -263,7 +263,7 @@ class WindowManager {
             },
         });
 
-        this.trayWindow.loadFile('index.html');
+        this.trayWindow.loadFile('screens/index.html');
         attachFadeHandlers(this.trayWindow);
         this.trayWindow.on('closed', () => {
             this.trayWindow = null;
@@ -301,7 +301,7 @@ class WindowManager {
             },
         });
 
-        this.statusWindow.loadFile('status.html');
+        this.statusWindow.loadFile('screens/status.html');
         attachFadeHandlers(this.statusWindow);
         this.statusWindow.on('closed', () => {
             this.statusWindow = null;

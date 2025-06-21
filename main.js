@@ -1,4 +1,5 @@
 const { app, ipcMain, globalShortcut, BrowserWindow, screen } = require('electron');
+const { Menu } = require('electron');
 const windowManager = require('./scripts/windowManager');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
@@ -32,10 +33,20 @@ let itemsWindow = null;
 let storeWindow = null;
 let journeyImagesCache = null;
 let journeySceneWindow = null;
+const useSingleWindow = store.get("useSingleWindow", false);
+let mainWindow = null;
+function createUnifiedWindow() {
+    if (mainWindow) return mainWindow;
+    const preloadPath = path.join(__dirname, "preload.js");
+    mainWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { preload: preloadPath, nodeIntegration: false, contextIsolation: true }});
+    mainWindow.loadFile("app.html");
+    return mainWindow;
+}
+
 
 app.whenReady().then(() => {
     console.log('Aplicativo iniciado');
-    windowManager.createStartWindow();
+    useSingleWindow ? createUnifiedWindow() : windowManager.createStartWindow();
 
     globalShortcut.register('Ctrl+Shift+D', () => {
         const focusedWindow = BrowserWindow.getFocusedWindow();
@@ -49,12 +60,26 @@ app.whenReady().then(() => {
 
     startPetUpdater(() => currentPet);
 
-    app.on('activate', () => {
-        if (windowManager.getStartWindow() === null) {
-            windowManager.createStartWindow();
+    const menuTemplate = [{
+        label: "Opções",
+        submenu: [{
+            label: "Alternar modo de exibição",
+            click: () => {
+                const v = !store.get("useSingleWindow", false);
+                store.set("useSingleWindow", v);
+                app.relaunch();
+                app.exit();
+            }
+        }]
+    }];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+    app.on("activate", () => {
+        if (useSingleWindow) {
+            if (!mainWindow) createUnifiedWindow();
+        } else {
+            if (windowManager.getStartWindow() === null) windowManager.createStartWindow();
         }
     });
-});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -98,6 +123,17 @@ ipcMain.on('close-load-pet-window', () => {
 ipcMain.on('close-start-window', () => {
     console.log('Recebido close-start-window');
     windowManager.closeStartWindow();
+});
+ipcMain.on("open-options-window", () => {
+    createOptionsWindow();
+});
+ipcMain.handle("set-view-mode", (e, mode) => {
+    store.set("useSingleWindow", mode === "single");
+    app.relaunch();
+    app.exit();
+});
+ipcMain.handle("get-view-mode", () => {
+    return store.get("useSingleWindow", false) ? "single" : "multi";
 });
 
 ipcMain.on('create-pet', async (event, petData) => {
@@ -429,7 +465,7 @@ function createBattleModeWindow() {
         },
     });
 
-    battleModeWindow.loadFile('battle-mode.html');
+    battleModeWindow.loadFile('screens/battle-mode.html');
     windowManager.attachFadeHandlers(battleModeWindow);
     battleModeWindow.on('closed', () => {
         console.log('battleModeWindow fechada');
@@ -464,7 +500,7 @@ function createJourneyModeWindow() {
         },
     });
 
-    journeyModeWindow.loadFile('journey-mode.html');
+    journeyModeWindow.loadFile('screens/journey-mode.html');
     windowManager.attachFadeHandlers(journeyModeWindow);
     journeyModeWindow.on('closed', () => {
         console.log('journeyModeWindow fechada');
@@ -497,7 +533,7 @@ function createJourneySceneWindow() {
         },
     });
 
-    journeySceneWindow.loadFile('journey-scene.html');
+    journeySceneWindow.loadFile('screens/journey-scene.html');
     windowManager.attachFadeHandlers(journeySceneWindow);
     journeySceneWindow.on('closed', () => {
         journeySceneWindow = null;
@@ -529,7 +565,7 @@ function createTrainWindow() {
         },
     });
 
-    trainWindow.loadFile('train.html');
+    trainWindow.loadFile('screens/train.html');
     windowManager.attachFadeHandlers(trainWindow);
     trainWindow.on('closed', () => {
         trainWindow = null;
@@ -561,7 +597,7 @@ function createItemsWindow() {
         },
     });
 
-    itemsWindow.loadFile('items.html');
+    itemsWindow.loadFile('screens/items.html');
     windowManager.attachFadeHandlers(itemsWindow);
     itemsWindow.on('closed', () => {
         itemsWindow = null;
@@ -596,7 +632,7 @@ function createStoreWindow() {
         },
     });
 
-    storeWindow.loadFile('store.html');
+    storeWindow.loadFile('screens/store.html');
     windowManager.attachFadeHandlers(storeWindow);
     storeWindow.on('closed', () => {
         storeWindow = null;
@@ -606,6 +642,13 @@ function createStoreWindow() {
     });
 
     return storeWindow;
+}
+
+function createOptionsWindow() {
+    const preloadPath = path.join(__dirname, "preload.js");
+    const win = new BrowserWindow({ width: 300, height: 150, frame: false, transparent: true, resizable: false, webPreferences: { preload: preloadPath, nodeIntegration: false, contextIsolation: true }});
+    win.loadFile("screens/options.html");
+    return win;
 }
 
 function closeBattleModeWindow() {
