@@ -45,6 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
     descriptionEl = document.getElementById('move-description');
     trainAlert = document.getElementById('train-alert');
 
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data) {
+                pet = data;
+                if (!pet.knownMoves) {
+                    pet.knownMoves = pet.moves ? [...pet.moves] : [];
+                }
+                const kpEl = document.getElementById('train-kadir-points-value');
+                if (kpEl) kpEl.textContent = pet.kadirPoints ?? 0;
+                loadMoves();
+            }
+        });
+    }
+
     window.electronAPI.on('pet-data', (event, data) => {
         pet = data;
         if (!pet.knownMoves) {

@@ -34,6 +34,17 @@ document.addEventListener('DOMContentLoaded', () => {
     descriptionEl = document.getElementById('item-description');
     loadItemsInfo();
 
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data) {
+                pet = data;
+                const countEl = document.getElementById('coin-count');
+                if (countEl) countEl.textContent = pet.coins ?? 0;
+                updateItems();
+            }
+        });
+    }
+
     window.electronAPI.on('pet-data', (event, data) => {
         pet = data;
         const countEl = document.getElementById('coin-count');

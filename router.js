@@ -50,5 +50,8 @@ async function navigateTo(page){
 }
 window.navigateTo = navigateTo;
 window.addEventListener('DOMContentLoaded',()=>{
+  if (window.electronAPI && window.electronAPI.on) {
+    window.electronAPI.on('navigate-to', (e, page) => navigateTo(page));
+  }
   navigateTo('screens/start.html');
 });

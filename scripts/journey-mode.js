@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const loading = document.getElementById('loading');
     const grid = document.getElementById('missions-grid');
 
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data && data.level) {
+                petLevel = data.level;
+                updateLocks();
+            }
+        });
+    }
+
     window.electronAPI.getJourneyImages().then(files => {
         // Ordenar as imagens conforme a ordem definida em missionOrder
         const orderMap = missionOrder.reduce((acc, name, index) => {

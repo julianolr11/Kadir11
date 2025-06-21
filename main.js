@@ -108,14 +108,22 @@ ipcMain.on('exit-app', () => {
 
 ipcMain.on('open-create-pet-window', () => {
     console.log('Recebido open-create-pet-window');
-    windowManager.createCreatePetWindow();
+    if (useSingleWindow && mainWindow) {
+        mainWindow.webContents.send('navigate-to', 'screens/create-pet.html');
+    } else {
+        windowManager.createCreatePetWindow();
+    }
 });
 
 ipcMain.on('open-load-pet-window', () => {
     console.log('Recebido open-load-pet-window');
     // Não fechar todas as janelas para permitir voltar
     // à tela anterior (start ou index) ao sair da seleção
-    windowManager.createLoadPetWindow();
+    if (useSingleWindow && mainWindow) {
+        mainWindow.webContents.send('navigate-to', 'screens/load-pet.html');
+    } else {
+        windowManager.createLoadPetWindow();
+    }
 });
 
 ipcMain.on('close-create-pet-window', () => {
@@ -133,7 +141,11 @@ ipcMain.on('close-start-window', () => {
     windowManager.closeStartWindow();
 });
 ipcMain.on("open-options-window", () => {
-    createOptionsWindow();
+    if (useSingleWindow && mainWindow) {
+        mainWindow.webContents.send('navigate-to', 'screens/options.html');
+    } else {
+        createOptionsWindow();
+    }
 });
 ipcMain.handle("set-view-mode", (e, mode) => {
     store.set("useSingleWindow", mode === "single");
@@ -277,7 +289,12 @@ ipcMain.on('rename-pet', async (event, data) => {
 
 ipcMain.on('open-status-window', () => {
     console.log('Recebido open-status-window');
-    if (currentPet) {
+    if (useSingleWindow && mainWindow) {
+        mainWindow.webContents.send('navigate-to', 'screens/status.html');
+        if (currentPet) {
+            mainWindow.webContents.send('pet-data', currentPet);
+        }
+    } else if (currentPet) {
         const statusWindow = windowManager.createStatusWindow();
         statusWindow.webContents.on('did-finish-load', () => {
             console.log('Enviando pet-data para statusWindow:', currentPet);
@@ -291,11 +308,16 @@ ipcMain.on('open-status-window', () => {
 ipcMain.on('train-pet', async () => {
     if (currentPet) {
         console.log('Abrindo janela de treinamento para:', currentPet.name);
-        const win = createTrainWindow();
-        if (win) {
-            win.webContents.on('did-finish-load', () => {
-                win.webContents.send('pet-data', currentPet);
-            });
+        if (useSingleWindow && mainWindow) {
+            mainWindow.webContents.send('navigate-to', 'screens/train.html');
+            mainWindow.webContents.send('pet-data', currentPet);
+        } else {
+            const win = createTrainWindow();
+            if (win) {
+                win.webContents.on('did-finish-load', () => {
+                    win.webContents.send('pet-data', currentPet);
+                });
+            }
         }
     } else {
         console.error('Nenhum pet selecionado para treinar');
@@ -305,30 +327,35 @@ ipcMain.on('train-pet', async () => {
 ipcMain.on('itens-pet', (event, options) => {
     if (currentPet) {
         console.log('Abrindo janela de itens para:', currentPet.name);
-        const win = createItemsWindow();
-        if (win) {
-            win.webContents.on('did-finish-load', () => {
-                win.webContents.send('pet-data', currentPet);
-            });
+        if (useSingleWindow && mainWindow) {
+            mainWindow.webContents.send('navigate-to', 'screens/items.html');
+            mainWindow.webContents.send('pet-data', currentPet);
+        } else {
+            const win = createItemsWindow();
+            if (win) {
+                win.webContents.on('did-finish-load', () => {
+                    win.webContents.send('pet-data', currentPet);
+                });
 
-            // Se os itens foram abertos a partir da janela de loja, alinhar as janelas
-            if (options && options.fromStore && storeWindow) {
-                try {
-                    const display = screen.getPrimaryDisplay();
-                    const screenWidth = display.workAreaSize.width;
-                    const screenHeight = display.workAreaSize.height;
-                    const storeBounds = storeWindow.getBounds();
-                    const itemsBounds = win.getBounds();
-                    const totalWidth = storeBounds.width + itemsBounds.width;
-                    const maxHeight = Math.max(storeBounds.height, itemsBounds.height);
+                // Se os itens foram abertos a partir da janela de loja, alinhar as janelas
+                if (options && options.fromStore && storeWindow) {
+                    try {
+                        const display = screen.getPrimaryDisplay();
+                        const screenWidth = display.workAreaSize.width;
+                        const screenHeight = display.workAreaSize.height;
+                        const storeBounds = storeWindow.getBounds();
+                        const itemsBounds = win.getBounds();
+                        const totalWidth = storeBounds.width + itemsBounds.width;
+                        const maxHeight = Math.max(storeBounds.height, itemsBounds.height);
 
-                    const startX = Math.round((screenWidth - totalWidth) / 2);
-                    const startY = Math.round((screenHeight - maxHeight) / 2);
+                        const startX = Math.round((screenWidth - totalWidth) / 2);
+                        const startY = Math.round((screenHeight - maxHeight) / 2);
 
-                    win.setPosition(startX, startY);
-                    storeWindow.setPosition(startX + itemsBounds.width, startY);
-                } catch (err) {
-                    console.error('Erro ao posicionar janelas:', err);
+                        win.setPosition(startX, startY);
+                        storeWindow.setPosition(startX + itemsBounds.width, startY);
+                    } catch (err) {
+                        console.error('Erro ao posicionar janelas:', err);
+                    }
                 }
             }
         }
@@ -340,30 +367,35 @@ ipcMain.on('itens-pet', (event, options) => {
 ipcMain.on('store-pet', (event, options) => {
     if (currentPet) {
         console.log('Abrindo janela de loja para:', currentPet.name);
-        const win = createStoreWindow();
-        if (win) {
-            win.webContents.on('did-finish-load', () => {
-                win.webContents.send('pet-data', currentPet);
-            });
+        if (useSingleWindow && mainWindow) {
+            mainWindow.webContents.send('navigate-to', 'screens/store.html');
+            mainWindow.webContents.send('pet-data', currentPet);
+        } else {
+            const win = createStoreWindow();
+            if (win) {
+                win.webContents.on('did-finish-load', () => {
+                    win.webContents.send('pet-data', currentPet);
+                });
 
-            // Se a loja foi aberta a partir da janela de itens, alinhar as janelas
-            if (options && options.fromItems && itemsWindow) {
-                try {
-                    const display = screen.getPrimaryDisplay();
-                    const screenWidth = display.workAreaSize.width;
-                    const screenHeight = display.workAreaSize.height;
-                    const itemsBounds = itemsWindow.getBounds();
-                    const storeBounds = win.getBounds();
-                    const totalWidth = itemsBounds.width + storeBounds.width;
-                    const maxHeight = Math.max(itemsBounds.height, storeBounds.height);
+                // Se a loja foi aberta a partir da janela de itens, alinhar as janelas
+                if (options && options.fromItems && itemsWindow) {
+                    try {
+                        const display = screen.getPrimaryDisplay();
+                        const screenWidth = display.workAreaSize.width;
+                        const screenHeight = display.workAreaSize.height;
+                        const itemsBounds = itemsWindow.getBounds();
+                        const storeBounds = win.getBounds();
+                        const totalWidth = itemsBounds.width + storeBounds.width;
+                        const maxHeight = Math.max(itemsBounds.height, storeBounds.height);
 
-                    const startX = Math.round((screenWidth - totalWidth) / 2);
-                    const startY = Math.round((screenHeight - maxHeight) / 2);
+                        const startX = Math.round((screenWidth - totalWidth) / 2);
+                        const startY = Math.round((screenHeight - maxHeight) / 2);
 
-                    itemsWindow.setPosition(startX, startY);
-                    win.setPosition(startX + itemsBounds.width, startY);
-                } catch (err) {
-                    console.error('Erro ao posicionar janelas:', err);
+                        itemsWindow.setPosition(startX, startY);
+                        win.setPosition(startX + itemsBounds.width, startY);
+                    } catch (err) {
+                        console.error('Erro ao posicionar janelas:', err);
+                    }
                 }
             }
         }
@@ -710,27 +742,37 @@ function closeAllGameWindows() {
 
 ipcMain.on('open-battle-mode-window', () => {
     console.log('Recebido open-battle-mode-window');
-    createBattleModeWindow();
+    if (useSingleWindow && mainWindow) {
+        mainWindow.webContents.send('navigate-to', 'screens/battle-mode.html');
+    } else {
+        createBattleModeWindow();
+    }
 });
 
 ipcMain.on('open-journey-mode-window', () => {
     console.log('Recebido open-journey-mode-window');
-    const win = createJourneyModeWindow();
-    if (currentPet && win) {
-        win.webContents.on('did-finish-load', () => {
-            win.webContents.send('pet-data', currentPet);
-        });
+    if (useSingleWindow && mainWindow) {
+        mainWindow.webContents.send('navigate-to', 'screens/journey-mode.html');
+        if (currentPet) {
+            mainWindow.webContents.send('pet-data', currentPet);
+        }
+    } else {
+        const win = createJourneyModeWindow();
+        if (currentPet && win) {
+            win.webContents.on('did-finish-load', () => {
+                win.webContents.send('pet-data', currentPet);
+            });
+        }
     }
 });
 
 ipcMain.on('open-journey-scene-window', async (event, data) => {
     console.log('Recebido open-journey-scene-window');
-    const win = createJourneySceneWindow();
-    if (!win) return;
-    const enemy = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
-    const enemyName = enemy ? path.basename(path.dirname(enemy)) : '';
-    win.webContents.on('did-finish-load', () => {
-        win.webContents.send('scene-data', {
+    if (useSingleWindow && mainWindow) {
+        const enemy = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
+        const enemyName = enemy ? path.basename(path.dirname(enemy)) : '';
+        mainWindow.webContents.send('navigate-to', 'screens/journey-scene.html');
+        mainWindow.webContents.send('scene-data', {
             background: data.background,
             playerPet: currentPet ? resolveIdleGif(currentPet.statusImage || currentPet.image) : null,
             enemyPet: enemy,
@@ -738,9 +780,26 @@ ipcMain.on('open-journey-scene-window', async (event, data) => {
             statusEffects: currentPet ? currentPet.statusEffects || [] : []
         });
         if (currentPet) {
-            win.webContents.send('pet-data', currentPet);
+            mainWindow.webContents.send('pet-data', currentPet);
         }
-    });
+    } else {
+        const win = createJourneySceneWindow();
+        if (!win) return;
+        const enemy = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
+        const enemyName = enemy ? path.basename(path.dirname(enemy)) : '';
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('scene-data', {
+                background: data.background,
+                playerPet: currentPet ? resolveIdleGif(currentPet.statusImage || currentPet.image) : null,
+                enemyPet: enemy,
+                enemyName,
+                statusEffects: currentPet ? currentPet.statusEffects || [] : []
+            });
+            if (currentPet) {
+                win.webContents.send('pet-data', currentPet);
+            }
+        });
+    }
 });
 
 ipcMain.on('resize-journey-window', (event, size) => {
@@ -965,6 +1024,10 @@ ipcMain.on('set-mute-state', (event, isMuted) => {
     console.log('Recebido set-mute-state:', isMuted);
     store.set('isMuted', isMuted);
     console.log('Estado de mute salvo:', isMuted);
+});
+
+ipcMain.handle('get-current-pet', () => {
+    return currentPet;
 });
 
 ipcMain.handle('get-journey-images', async () => {

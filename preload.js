@@ -53,7 +53,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'show-store-error',
             'pet-created', // Novo canal pra receber a confirmação do pet criado
             'scene-data',
-            'fade-out-start-music' // Sinalizar o fade-out da música de start
+            'fade-out-start-music', // Sinalizar o fade-out da música de start
+            'navigate-to'
         ];
         if (validChannels.includes(channel)) {
             console.log(`Registrando listener para o canal: ${channel}`);
@@ -100,7 +101,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     openOptionsWindow: () => { ipcRenderer.send('open-options-window'); },
     setViewMode: (mode) => { ipcRenderer.invoke('set-view-mode', mode); },
-    getViewMode: () => ipcRenderer.invoke('get-view-mode')
+    getViewMode: () => ipcRenderer.invoke('get-view-mode'),
+    getCurrentPet: () => ipcRenderer.invoke('get-current-pet')
 });
 
 console.log('electronAPI exposto com sucesso');
