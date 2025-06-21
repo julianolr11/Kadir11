@@ -329,6 +329,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('train-moves-button element not found');
     }
 
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data) {
+                loadPet(data);
+            }
+        });
+    }
+
     // Registrar o listener para o evento pet-data dentro do DOMContentLoaded
     window.electronAPI.on('pet-data', (event, petData) => {
         console.log('Dados do pet recebidos via IPC:', petData);

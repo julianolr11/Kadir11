@@ -315,6 +315,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadItemsInfo();
     loadStatusEffectsInfo().then(updateStatusIcons);
 
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data) {
+                pet = data;
+                playerHealth = data.currentHealth ?? playerHealth;
+                playerMaxHealth = data.maxHealth ?? playerMaxHealth;
+                updateHealthBars();
+            }
+        });
+    }
+
     document.getElementById('close-journey-scene')?.addEventListener('click', closeWindow);
     document.getElementById('back-journey-scene')?.addEventListener('click', () => {
         window.electronAPI.send('open-journey-mode-window');

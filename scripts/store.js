@@ -41,6 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data) {
+                pet = data;
+                const countEl = document.getElementById('store-coin-count');
+                if (countEl) countEl.textContent = pet.coins ?? 0;
+            }
+        });
+    }
+
     window.electronAPI.on('pet-data', (event, data) => {
         pet = data;
         const countEl = document.getElementById('store-coin-count');

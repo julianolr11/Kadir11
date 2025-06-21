@@ -133,6 +133,12 @@ function setImageWithFallback(imgElement, relativePath) {
     
     // Carregar dados iniciais
     loadPet(petData);
+
+    if (window.electronAPI.getCurrentPet) {
+        window.electronAPI.getCurrentPet().then(data => {
+            if (data) loadPet(data);
+        });
+    }
     
     // Toggle entre raridade e textura
     let showRarity = true;
