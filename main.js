@@ -38,7 +38,15 @@ let mainWindow = null;
 function createUnifiedWindow() {
     if (mainWindow) return mainWindow;
     const preloadPath = path.join(__dirname, "preload.js");
-    mainWindow = new BrowserWindow({ width: 800, height: 600, webPreferences: { preload: preloadPath, nodeIntegration: false, contextIsolation: true }});
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+    mainWindow = new BrowserWindow({
+        width,
+        height,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        webPreferences: { preload: preloadPath, nodeIntegration: false, contextIsolation: true }
+    });
     mainWindow.loadFile("app.html");
     return mainWindow;
 }
