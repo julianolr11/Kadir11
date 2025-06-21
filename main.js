@@ -1027,4 +1027,6 @@ async function getRandomEnemyIdle(exclude) {
     return path.relative(__dirname, choice).replace(/\\/g, '/');
 }
 
+});
+
 module.exports = { app, ipcMain, globalShortcut, windowManager, petManager };
