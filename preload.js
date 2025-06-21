@@ -33,7 +33,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'use-move',
             'battle-result',
             'animation-finished', // Novo canal pra sinalizar o fim da animação
-            'close-start-window'  // Fechar a janela de start
+            'close-start-window', // Fechar a janela de start
+            'open-options-window',
+            'set-view-mode',
+            'get-view-mode',
         ];
         if (validChannels.includes(channel)) {
             console.log(`Enviando canal IPC: ${channel}`, data);
@@ -94,7 +97,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getJourneyImages: () => {
         console.log('Enviando get-journey-images');
         return ipcRenderer.invoke('get-journey-images');
-    }
+    },
+    openOptionsWindow: () => { ipcRenderer.send('open-options-window'); },
+    setViewMode: (mode) => { ipcRenderer.invoke('set-view-mode', mode); },
+    getViewMode: () => ipcRenderer.invoke('get-view-mode')
 });
 
 console.log('electronAPI exposto com sucesso');

@@ -85,6 +85,9 @@ document.getElementById('load-button').addEventListener('click', () => {
 });
 
 const exitOverlay = document.getElementById('exit-confirm-overlay');
+document.getElementById("options-button").addEventListener("click", () => {
+    window.electronAPI.openOptionsWindow();
+});
 const exitYesBtn = document.getElementById('exit-confirm-yes');
 const exitNoBtn = document.getElementById('exit-confirm-no');
 
