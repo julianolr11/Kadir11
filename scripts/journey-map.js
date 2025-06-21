@@ -23,8 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (eventModal) eventModal.style.display = 'none';
     });
 
+    const dataPrefix = window.location.pathname.endsWith('/app.html') ? 'data/' : '../data/';
     let itemsData = [];
-    fetch('../data/items.json').then(r => r.json()).then(d => { itemsData = d; }).catch(() => {});
+    fetch(`${dataPrefix}items.json`).then(r => r.json()).then(d => { itemsData = d; }).catch(() => {});
 
     function showEventModal(text, icon) {
         if (!eventModal) return;
