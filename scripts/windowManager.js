@@ -1,5 +1,7 @@
 const { BrowserWindow, screen } = require('electron');
 const path = require('path');
+const Store = require('electron-store');
+const store = new Store();
 
 function fadeInWindow(win) {
     if (!win) return;
@@ -193,8 +195,15 @@ class WindowManager {
         }
 
         const preloadPath = path.join(__dirname, '..', 'preload.js');
+
+        const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
+        const penSize = store.get('penSize', 'small');
+        const dims = sizeMap[penSize] || sizeMap.small;
+        const canvasWidth = (dims.w + 2) * 32;
+        const requiredWidth = Math.ceil(canvasWidth / 0.45);
+
         this.loadPetWindow = new BrowserWindow({
-            width: 600,
+            width: Math.max(600, requiredWidth),
             height: 400,
             frame: false,
             transparent: true,
