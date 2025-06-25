@@ -83,6 +83,13 @@
         }
         .store-item { display:flex; flex-direction:column; align-items:center; }
         .store-item img { width:32px; height:32px; image-rendering:pixelated; }
+        .terrain-icon {
+            width:32px;
+            height:32px;
+            image-rendering:pixelated;
+            object-fit:none;
+            object-position:-32px -32px;
+        }
         .item-price { margin:4px 0; }
         #store-item-description {
             position: fixed;
@@ -142,12 +149,12 @@
                 <button class="button small-button buy-button" data-item="staminaPotion">Comprar</button>
             </div>
             <div class="store-item" data-item="terrainMedium">
-                <img src="assets/tileset/tileset.png" alt="Terreno Médio">
+                <img class="terrain-icon" src="assets/tileset/tileset.png" alt="Terreno Médio">
                 <div class="item-price">100 moedas</div>
                 <button class="button small-button buy-button" data-item="terrainMedium">Comprar</button>
             </div>
             <div class="store-item" data-item="terrainLarge">
-                <img src="assets/tileset/tileset.png" alt="Terreno Grande">
+                <img class="terrain-icon" src="assets/tileset/tileset.png" alt="Terreno Grande">
                 <div class="item-price">200 moedas</div>
                 <button class="button small-button buy-button" data-item="terrainLarge">Comprar</button>
             </div>
