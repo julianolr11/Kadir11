@@ -10,6 +10,7 @@ const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, 
 let sprites = [];
 let lastTime = 0;
 let animationId = null;
+let lastSize = { width: 0, height: 0 };
 const MOVE_SPEED = 16; // pixels per second
 
 function drawPen() {
@@ -19,12 +20,18 @@ function drawPen() {
     const h = (dims.h + 2) * 32;
     penCanvas.width = w;
     penCanvas.height = h;
-    const rect = penCanvas.getBoundingClientRect();
-    const size = {
-        width: Math.round(rect.width) + 10,
-        height: Math.round(rect.height) + 10
-    };
-    window.electronAPI?.send('resize-pen-window', size);
+    const win = document.querySelector('.window');
+    if (win) {
+        const rect = win.getBoundingClientRect();
+        const size = {
+            width: Math.round(rect.width) + 10,
+            height: Math.round(rect.height) + 10
+        };
+        if (size.width !== lastSize.width || size.height !== lastSize.height) {
+            window.electronAPI?.send('resize-pen-window', size);
+            lastSize = size;
+        }
+    }
     penCtx.clearRect(0,0,w,h);
     for (let y=0; y<dims.h+2; y++) {
         for (let x=0; x<dims.w+2; x++) {
