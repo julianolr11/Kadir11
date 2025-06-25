@@ -22,9 +22,10 @@ function drawPen() {
     const container = document.querySelector('.pen-container');
     if (container) {
         const rect = container.getBoundingClientRect();
+        const style = window.getComputedStyle(container);
         const size = {
-            width: rect.width + 10,
-            height: rect.height + 10
+            width: Math.round(rect.width + parseFloat(style.marginLeft) + parseFloat(style.marginRight)),
+            height: Math.round(rect.height + parseFloat(style.marginTop) + parseFloat(style.marginBottom))
         };
         window.electronAPI?.send('resize-pen-window', size);
     }
