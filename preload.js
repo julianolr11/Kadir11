@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'journey-complete',
             'place-egg-in-nest',
             'hatch-egg',
+            'close-hatch-window',
             'use-move',
             'update-health',
             'kadirfull',
@@ -62,7 +63,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'fade-out-start-music', // Sinalizar o fade-out da música de start
             'pen-updated',
             'nest-updated',
-            'nests-data-updated'
+            'nests-data-updated',
+            'hatch-data'
         ];
         if (validChannels.includes(channel)) {
             console.log(`Registrando listener para o canal: ${channel}`);
@@ -78,6 +80,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     hatchEgg: (index) => {
         console.log('Enviando hatch-egg para o index:', index);
         ipcRenderer.send('hatch-egg', index);
+    },
+    onHatchData: (callback) => {
+        console.log('Registrando listener para hatch-data');
+        ipcRenderer.on('hatch-data', (event, data) => callback(data));
     },
     onPetCreated: (callback) => {
         console.log('Registrando listener para pet-created');
@@ -102,6 +108,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     closeCreatePetWindow: () => {
         console.log('Enviando close-create-pet-window');
         ipcRenderer.send('close-create-pet-window');
+    },
+    closeHatchWindow: () => {
+        console.log('Enviando close-hatch-window');
+        ipcRenderer.send('close-hatch-window');
     },
     openStartWindow: () => {
         console.log('Enviando open-start-window');

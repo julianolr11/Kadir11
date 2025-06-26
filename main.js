@@ -33,6 +33,7 @@ let storeWindow = null;
 let journeyImagesCache = null;
 let journeySceneWindow = null;
 let nestsWindow = null;
+let hatchWindow = null;
 
 function getCoins() {
     return store.get('coins', 20);
@@ -264,6 +265,11 @@ ipcMain.on("close-pen-window", () => {
     console.log("Recebido close-pen-window");
     windowManager.closePenWindow();
     closeNestsWindow();
+});
+
+ipcMain.on('close-hatch-window', () => {
+    console.log('Recebido close-hatch-window');
+    closeHatchWindow();
 });
 
 ipcMain.on('close-start-window', () => {
@@ -825,6 +831,38 @@ function createNestsWindow() {
     return nestsWindow;
 }
 
+function createHatchWindow() {
+    if (hatchWindow) {
+        hatchWindow.show();
+        hatchWindow.focus();
+        return hatchWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    hatchWindow = new BrowserWindow({
+        width: 400,
+        height: 300,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    hatchWindow.loadFile('hatch.html');
+    windowManager.attachFadeHandlers(hatchWindow);
+    hatchWindow.on('closed', () => {
+        hatchWindow = null;
+    });
+
+    return hatchWindow;
+}
+
 function closeBattleModeWindow() {
     if (battleModeWindow) {
         battleModeWindow.close();
@@ -867,6 +905,12 @@ function closeNestsWindow() {
     }
 }
 
+function closeHatchWindow() {
+    if (hatchWindow) {
+        hatchWindow.close();
+    }
+}
+
 function closeAllGameWindows() {
     windowManager.closeTrayWindow();
     windowManager.closeStatusWindow();
@@ -879,6 +923,7 @@ function closeAllGameWindows() {
     closeItemsWindow();
     closeStoreWindow();
     closeNestsWindow();
+    closeHatchWindow();
 }
 
 ipcMain.on('open-battle-mode-window', () => {
@@ -1063,6 +1108,13 @@ ipcMain.on('hatch-egg', async (event, index) => {
             if (w.webContents) w.webContents.send('nests-data-updated', nests);
             if (w.webContents) w.webContents.send('pet-created', newPet);
         });
+        const win = createHatchWindow();
+        if (win) {
+            win.webContents.once('did-finish-load', () => {
+                win.webContents.send('hatch-data', newPet);
+            });
+            windowManager.centerWindow(win);
+        }
     } catch (err) {
         console.error('Erro ao chocar ovo:', err);
     }
