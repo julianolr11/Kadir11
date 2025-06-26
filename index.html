@@ -268,7 +268,7 @@
         /* Estilo do alerta de batalha no meio da tela */
         #battle-alert {
             display: none;
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -354,10 +354,9 @@
             <!-- Imagens de alerta -->
             <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png" alt="Fome baixa" style="image-rendering: pixelated;">
             <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png" alt="Felicidade baixa" style="image-rendering: pixelated;">
-            <!-- Alerta de batalha -->
-            <div id="battle-alert"></div>
         </div>
     </div>
+    <div id="battle-alert"></div>
 
     <div id="exit-confirm-overlay">
         <div id="exit-confirm-box">
