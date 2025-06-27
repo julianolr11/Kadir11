@@ -141,6 +141,7 @@ function updateStatus() {
     const statusKadirPoints = document.getElementById('kadir-points-value');
     const statusMoves = document.getElementById('status-moves');
     const statusEquipImg = document.getElementById('status-equipped-item');
+    const unequipMenu = document.getElementById('unequip-menu');
     const statusPetImage = document.getElementById('status-pet-image');
     const statusBioImage = document.getElementById('status-bio-image');
     const bioText = document.getElementById('bio-text');
@@ -154,7 +155,7 @@ function updateStatus() {
     const statusPetImageGradient = document.getElementById('status-pet-image-gradient');
 
     // Verificar se todos os elementos estão disponíveis
-    if (!healthContainer || !hungerContainer || !happinessContainer || !energyContainer || !statusAttack || !statusDefense || !statusSpeed || !statusMagic || !statusRarityLabel || !statusHealthFill || !statusHungerFill || !statusHappinessFill || !statusEnergyFill || !statusLevel || !statusKadirPoints || !statusMoves || !statusPetImage || !statusBioImage || !titleBarElement || !titleBarPetName || !statusPetImageGradient || !bioText || !xpBarFill || !xpText || !specieText || !raceText || !elementText || !statusEquipImg) {
+    if (!healthContainer || !hungerContainer || !happinessContainer || !energyContainer || !statusAttack || !statusDefense || !statusSpeed || !statusMagic || !statusRarityLabel || !statusHealthFill || !statusHungerFill || !statusHappinessFill || !statusEnergyFill || !statusLevel || !statusKadirPoints || !statusMoves || !statusPetImage || !statusBioImage || !titleBarElement || !titleBarPetName || !statusPetImageGradient || !bioText || !xpBarFill || !xpText || !specieText || !raceText || !elementText || !statusEquipImg || !unequipMenu) {
         console.error('Um ou mais elementos do status-container ou title-bar não encontrados', {
             healthContainer: !!healthContainer,
             hungerContainer: !!hungerContainer,
@@ -182,7 +183,8 @@ function updateStatus() {
             specieText: !!specieText,
             raceText: !!raceText,
             elementText: !!elementText,
-            statusEquipImg: !!statusEquipImg
+            statusEquipImg: !!statusEquipImg,
+            unequipMenu: !!unequipMenu
         });
         return;
     }
@@ -336,6 +338,7 @@ function updateStatus() {
             statusEquipImg.style.display = 'block';
         } else {
             statusEquipImg.style.display = 'none';
+            if (unequipMenu) unequipMenu.style.display = 'none';
         }
     }
 
@@ -400,10 +403,29 @@ document.addEventListener('DOMContentLoaded', () => {
     renameInput = document.getElementById('rename-input');
     const renameOk = document.getElementById('rename-ok');
     const renameCancel = document.getElementById('rename-cancel');
+    const equipImg = document.getElementById('status-equipped-item');
+    const unequipMenu = document.getElementById('unequip-menu');
+    const unequipButton = document.getElementById('unequip-button');
     if (nameSpan) nameSpan.addEventListener('click', openRenameModal);
     if (editIcon) editIcon.addEventListener('click', openRenameModal);
     renameOk?.addEventListener('click', confirmRename);
     renameCancel?.addEventListener('click', closeRenameModal);
+
+    equipImg?.addEventListener('click', (e) => {
+        if (unequipMenu) unequipMenu.style.display = 'block';
+        e.stopPropagation();
+    });
+
+    unequipButton?.addEventListener('click', () => {
+        window.electronAPI.send('unequip-item');
+        if (unequipMenu) unequipMenu.style.display = 'none';
+    });
+
+    document.addEventListener('click', (e) => {
+        if (unequipMenu && e.target !== equipImg && !unequipMenu.contains(e.target)) {
+            unequipMenu.style.display = 'none';
+        }
+    });
 
     // Controle das abas
     document.querySelectorAll('.tab-button').forEach(button => {

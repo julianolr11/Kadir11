@@ -1109,6 +1109,24 @@ ipcMain.on('buy-item', async (event, item) => {
     });
 });
 
+ipcMain.on('unequip-item', async () => {
+    if (!currentPet || !currentPet.equippedItem) return;
+    const item = currentPet.equippedItem;
+    const items = getItems();
+    items[item] = (items[item] || 0) + 1;
+    setItems(items);
+    currentPet.items = items;
+    currentPet.equippedItem = null;
+    try {
+        await petManager.updatePet(currentPet.petId, { items, equippedItem: null });
+    } catch (err) {
+        console.error('Erro ao remover item equipado:', err);
+    }
+    BrowserWindow.getAllWindows().forEach(w => {
+        if (w.webContents) w.webContents.send('pet-data', currentPet);
+    });
+});
+
 ipcMain.on('use-item', async (event, item) => {
     if (!currentPet) return;
     const items = getItems();

@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'store-pet',
             'buy-item',
             'use-item',
+            'unequip-item',
             'train-pet',
             'learn-move',
             'rename-pet',
