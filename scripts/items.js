@@ -2,6 +2,10 @@ let pet = null;
 let itemsInfo = {};
 let descriptionEl = null;
 let cheatBuffer = '';
+let swapOverlay = null;
+let swapYesBtn = null;
+let swapNoBtn = null;
+let pendingEquipId = null;
 
 function showDescription(text, evt) {
     if (!descriptionEl) return;
@@ -30,6 +34,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('open-store-button')?.addEventListener('click', () => {
         // Indicar ao processo principal que o comando veio da tela de itens
         window.electronAPI.send('store-pet', { fromItems: true });
+    });
+
+    swapOverlay = document.getElementById('swap-confirm-overlay');
+    swapYesBtn = document.getElementById('swap-confirm-yes');
+    swapNoBtn = document.getElementById('swap-confirm-no');
+    swapYesBtn?.addEventListener('click', () => {
+        if (pendingEquipId) {
+            window.electronAPI.send('use-item', pendingEquipId);
+            pendingEquipId = null;
+        }
+        if (swapOverlay) swapOverlay.style.display = 'none';
+    });
+    swapNoBtn?.addEventListener('click', () => {
+        pendingEquipId = null;
+        if (swapOverlay) swapOverlay.style.display = 'none';
     });
 
     descriptionEl = document.getElementById('item-description');
@@ -114,14 +133,15 @@ function updateItems() {
             useBtn.textContent = info.type === 'equipment' ? 'Equipar' : 'Usar';
             useBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (info.type === 'equipment' && pet.equippedItem && pet.equippedItem !== id) {
-                    const confirmSwap = window.confirm('Deseja trocar de acessório?');
-                    if (!confirmSwap) {
+                if (info.type === 'equipment') {
+                    if (pet.equippedItem && pet.equippedItem !== id) {
+                        pendingEquipId = id;
+                        if (swapOverlay) swapOverlay.style.display = 'flex';
                         return;
                     }
-                }
-                if (info.type === 'equipment' && pet.equippedItem === id) {
-                    return;
+                    if (pet.equippedItem === id) {
+                        return;
+                    }
                 }
                 window.electronAPI.send('use-item', id);
             });
