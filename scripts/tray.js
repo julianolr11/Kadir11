@@ -258,6 +258,14 @@ function adjustWarnings() {
     // Carregar dados iniciais
     loadPet(petData);
 
+    if (statusBubble) {
+        statusBubble.style.display = 'block';
+        clearTimeout(statusBubble.hideTimeout);
+        statusBubble.hideTimeout = setTimeout(() => {
+            statusBubble.style.display = 'none';
+        }, 5000);
+    }
+
     if (petImageEl) {
         petImageEl.addEventListener('click', () => {
             if (!statusBubble) return;
@@ -361,6 +369,13 @@ function adjustWarnings() {
     window.electronAPI.on('pet-data', (event, petData) => {
     console.log('Dados do pet recebidos via IPC:', petData);
     loadPet(petData);
+    if (statusBubble) {
+        statusBubble.style.display = 'block';
+        clearTimeout(statusBubble.hideTimeout);
+        statusBubble.hideTimeout = setTimeout(() => {
+            statusBubble.style.display = 'none';
+        }, 5000);
+    }
     });
     
     // Escutar o evento de erro de batalha e exibir o alerta
