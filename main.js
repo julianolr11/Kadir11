@@ -919,7 +919,7 @@ function createNestsWindow() {
 
     nestsWindow = new BrowserWindow({
         width: 350,
-        height: 100,
+        height: 140,
         frame: false,
         transparent: true,
         resizable: false,
