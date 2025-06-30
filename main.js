@@ -884,8 +884,8 @@ function createNestsWindow() {
     const preloadPath = require('path').join(__dirname, 'preload.js');
 
     nestsWindow = new BrowserWindow({
-        width: 350,
-        height: 100,
+        width: 300,
+        height: 130,
         frame: false,
         transparent: true,
         resizable: false,
