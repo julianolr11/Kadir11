@@ -21,7 +21,7 @@ function startPointer() {
         pointerPos += step * direction;
         if (pointerPos >= 100) { pointerPos = 100; direction = -1; }
         if (pointerPos <= 0) { pointerPos = 0; direction = 1; }
-        pointer.style.left = `calc(${pointerPos}% - 8px)`;
+        pointer.style.left = `calc(${pointerPos}% - 20px)`;
         frameId = requestAnimationFrame(animate);
     }
     frameId = requestAnimationFrame(animate);
