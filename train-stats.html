@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; media-src 'self'">
+    <title>Kadir11 - Treinar Atributos</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
+        .window { position: relative; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; }
+        #stats-options { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; }
+        button:disabled { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div id="title-bar">
+            <div id="title-bar-content"><span>Treinar Atributos</span></div>
+            <div id="title-bar-buttons">
+                <div id="back-train-stats">↩</div>
+                <div id="close-train-stats">X</div>
+            </div>
+        </div>
+        <div id="stats-options">
+            <button class="button" id="train-force-button">Treinar Força</button>
+            <button class="button" id="train-defense-button" disabled>Treinar Defesa (em breve)</button>
+            <button class="button" id="train-speed-button" disabled>Treinar Velocidade (em breve)</button>
+            <button class="button" id="train-magic-button" disabled>Treinar Magia (em breve)</button>
+        </div>
+    </div>
+    <script type="module" src="scripts/train-stats.js"></script>
+</body>
+</html>

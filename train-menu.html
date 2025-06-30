@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; media-src 'self'">
+    <title>Kadir11 - Menu de Treino</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
+        .window { position: relative; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; }
+        #options { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div id="title-bar">
+            <div id="title-bar-content"><span>Treinar</span></div>
+            <div id="title-bar-buttons">
+                <div id="back-train-menu">↩</div>
+                <div id="close-train-menu">X</div>
+            </div>
+        </div>
+        <div id="options">
+            <button class="button" id="train-moves-button">Movimentos</button>
+            <button class="button" id="train-stats-button">Atributos</button>
+        </div>
+    </div>
+    <script type="module" src="scripts/train-menu.js"></script>
+</body>
+</html>
