@@ -254,7 +254,7 @@ ipcMain.on("open-pen-window", () => {
     const dims = dimsMap[info.size] || dimsMap.small;
     const w = (dims.w + 2) * 32;
     const h = (dims.h + 2) * 32;
-    const border = 4; // canvas border size
+    const border = 5; // canvas border size
     const penWin = windowManager.createPenWindow(w + border, h + border);
     let nestsWin = null;
     if (getNestCount() > 0) {
