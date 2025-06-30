@@ -343,8 +343,8 @@ function showStatusBubble() {
         exitOverlay.style.display = 'flex';
     }
     } else if (action === 'train-pet') {
-    console.log('Treinar Pet');
-    window.electronAPI.send('train-pet');
+    console.log('Abrir Menu de Treino');
+    window.electronAPI.send('open-train-menu');
     } else if (action === 'care-pet') {
     console.log('Cuidar do Pet');
     window.electronAPI.send('care-pet');

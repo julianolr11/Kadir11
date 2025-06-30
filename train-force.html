@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; media-src 'self'">
+    <title>Kadir11 - Treinar Força</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
+        .window { position: relative; width:100%; height:100%; display:flex; flex-direction:column; margin:0; padding:0; }
+        #force-container { flex:1; display:flex; justify-content:center; align-items:center; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div id="title-bar">
+            <div id="title-bar-content"><span>Treinar Força</span></div>
+            <div id="title-bar-buttons">
+                <div id="back-train-force">↩</div>
+                <div id="close-train-force">X</div>
+            </div>
+        </div>
+        <div id="force-container">Minigame de força em desenvolvimento...</div>
+    </div>
+    <script type="module" src="scripts/train-force.js"></script>
+</body>
+</html>
