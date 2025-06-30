@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'open-train-force-window',
             'use-move',
             'update-health',
+            'increase-attribute',
             'kadirfull',
             'battle-result',
             'animation-finished', // Novo canal pra sinalizar o fim da animação
