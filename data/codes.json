@@ -1,0 +1,24 @@
+{
+  "WELCOME123": {
+    "used": false,
+    "pet": {
+      "name": "Foxy",
+      "element": "puro",
+      "attributes": {"attack": 5, "defense": 5, "life": 20, "speed": 5},
+      "specie": "Fera",
+      "rarity": "Comum",
+      "image": "Fera/foxyl.png"
+    }
+  },
+  "DRAGON999": {
+    "used": false,
+    "pet": {
+      "name": "Drako",
+      "element": "fogo",
+      "attributes": {"attack": 7, "defense": 6, "life": 25, "speed": 5},
+      "specie": "Draconídeo",
+      "rarity": "Raro",
+      "image": "Draconideo/draconideo_fogo.png"
+    }
+  }
+}

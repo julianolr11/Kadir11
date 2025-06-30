@@ -189,7 +189,7 @@ function drawNests(count) {
             eggImg.className = 'egg-image';
             eggImg.style.position = 'absolute';
             eggImg.style.left = '50%';
-            eggImg.style.top = '0';
+            eggImg.style.top = '7px';
             eggImg.style.transform = 'translateX(-50%)';
             wrapper.appendChild(eggImg);
 

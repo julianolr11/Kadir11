@@ -28,6 +28,9 @@ let lastUpdate = Date.now();
 let battleModeWindow = null;
 let journeyModeWindow = null;
 let trainWindow = null;
+let trainMenuWindow = null;
+let trainStatsWindow = null;
+let trainForceWindow = null;
 let itemsWindow = null;
 let storeWindow = null;
 let journeyImagesCache = null;
@@ -332,6 +335,40 @@ ipcMain.on('create-pet', async (event, petData) => {
     }
 });
 
+// Resgatar código para ganhar um pet especial
+ipcMain.on('redeem-code', async (event, code) => {
+    const codesPath = path.join(__dirname, 'data', 'codes.json');
+    let codes = {};
+    try {
+        codes = JSON.parse(fs.readFileSync(codesPath, 'utf8'));
+    } catch (err) {
+        console.error('Erro ao ler codes.json:', err);
+        event.reply('redeem-code-result', { success: false, message: 'Falha ao verificar código' });
+        return;
+    }
+
+    const entry = codes[code];
+    if (!entry || entry.used) {
+        event.reply('redeem-code-result', { success: false, message: 'Código inválido ou já utilizado' });
+        return;
+    }
+
+    try {
+        const newPet = await petManager.createPet(entry.pet);
+        entry.used = true;
+        fs.writeFileSync(codesPath, JSON.stringify(codes, null, 2));
+        event.reply('redeem-code-result', { success: true, pet: newPet });
+        broadcastPenUpdate();
+    } catch (err) {
+        console.error('Erro ao resgatar código:', err);
+        event.reply('redeem-code-result', { success: false, message: 'Erro ao criar pet' });
+    }
+
+    // Este mecanismo lê e grava codes.json localmente. No futuro, ele pode
+    // ser substituído por uma chamada a uma API que valide o código e marque
+    // seu uso em um servidor remoto.
+});
+
 ipcMain.on('animation-finished', () => {
     console.log('Animação finalizada, prosseguindo com o redirecionamento');
     windowManager.closeCreatePetWindow();
@@ -499,6 +536,105 @@ ipcMain.on('train-pet', async () => {
         });
     }
 
+});
+
+ipcMain.on('open-train-menu', async () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar');
+        return;
+    }
+
+    console.log('Abrindo menu de treinamento para:', currentPet.name);
+    const statusWin = windowManager.createStatusWindow();
+    const menuWin = createTrainMenuWindow({
+        centerOnShow: false,
+        onReadyToShow: () => {
+            if (statusWin) {
+                windowManager.centerWindowsSideBySide(statusWin, menuWin);
+            }
+        }
+    });
+
+    if (menuWin) {
+        menuWin.webContents.on('did-finish-load', () => {
+            currentPet.coins = getCoins();
+            currentPet.items = getItems();
+            menuWin.webContents.send('pet-data', currentPet);
+        });
+    }
+
+    if (statusWin) {
+        statusWin.webContents.on('did-finish-load', () => {
+            currentPet.items = getItems();
+            statusWin.webContents.send('pet-data', currentPet);
+        });
+    }
+});
+
+ipcMain.on('train-stats', async () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar atributos');
+        return;
+    }
+
+    console.log('Abrindo janela de treino de atributos para:', currentPet.name);
+    const statusWin = windowManager.createStatusWindow();
+    const statsWin = createTrainStatsWindow({
+        centerOnShow: false,
+        onReadyToShow: () => {
+            if (statusWin) {
+                windowManager.centerWindowsSideBySide(statusWin, statsWin);
+            }
+        }
+    });
+
+    if (statsWin) {
+        statsWin.webContents.on('did-finish-load', () => {
+            currentPet.coins = getCoins();
+            currentPet.items = getItems();
+            statsWin.webContents.send('pet-data', currentPet);
+        });
+    }
+
+    if (statusWin) {
+        statusWin.webContents.on('did-finish-load', () => {
+            currentPet.items = getItems();
+            statusWin.webContents.send('pet-data', currentPet);
+        });
+    }
+});
+
+ipcMain.on('train-force', async () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar força');
+        return;
+    }
+
+    console.log('Abrindo minigame de força para:', currentPet.name);
+    const statusWin = windowManager.createStatusWindow();
+    const forceWin = createTrainForceWindow({
+        centerOnShow: false,
+        onReadyToShow: () => {
+            if (statusWin) {
+                windowManager.centerWindowsSideBySide(statusWin, forceWin);
+            }
+        }
+    });
+
+    if (forceWin) {
+        forceWin.webContents.on('did-finish-load', () => {
+            currentPet.coins = getCoins();
+            currentPet.items = getItems();
+            forceWin.webContents.send('pet-data', currentPet);
+        });
+    }
+
+    if (statusWin) {
+        statusWin.webContents.on('did-finish-load', () => {
+            currentPet.items = getItems();
+            statusWin.webContents.send('pet-data', currentPet);
+        });
+    }
 });
 
 ipcMain.on('itens-pet', (event, options) => {
@@ -801,6 +937,150 @@ function createTrainWindow(options = {}) {
     return trainWindow;
 }
 
+function createTrainMenuWindow(options = {}) {
+    const { centerOnShow = true, onReadyToShow } = options;
+
+    if (trainMenuWindow) {
+        trainMenuWindow.show();
+        trainMenuWindow.focus();
+        return trainMenuWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainMenuWindow = new BrowserWindow({
+        width: 300,
+        height: 200,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainMenuWindow.loadFile('train-menu.html');
+
+    if (centerOnShow) {
+        trainMenuWindow.once('ready-to-show', () => {
+            windowManager.centerWindow(trainMenuWindow);
+        });
+    }
+
+    if (typeof onReadyToShow === 'function') {
+        trainMenuWindow.once('ready-to-show', () => onReadyToShow(trainMenuWindow));
+    }
+
+    windowManager.attachFadeHandlers(trainMenuWindow);
+    trainMenuWindow.on('closed', () => {
+        trainMenuWindow = null;
+        if (windowManager.statusWindow) {
+            windowManager.centerWindow(windowManager.statusWindow);
+        }
+    });
+
+    return trainMenuWindow;
+}
+
+function createTrainStatsWindow(options = {}) {
+    const { centerOnShow = true, onReadyToShow } = options;
+
+    if (trainStatsWindow) {
+        trainStatsWindow.show();
+        trainStatsWindow.focus();
+        return trainStatsWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainStatsWindow = new BrowserWindow({
+        width: 300,
+        height: 250,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainStatsWindow.loadFile('train-stats.html');
+
+    if (centerOnShow) {
+        trainStatsWindow.once('ready-to-show', () => {
+            windowManager.centerWindow(trainStatsWindow);
+        });
+    }
+
+    if (typeof onReadyToShow === 'function') {
+        trainStatsWindow.once('ready-to-show', () => onReadyToShow(trainStatsWindow));
+    }
+
+    windowManager.attachFadeHandlers(trainStatsWindow);
+    trainStatsWindow.on('closed', () => {
+        trainStatsWindow = null;
+        if (windowManager.statusWindow) {
+            windowManager.centerWindow(windowManager.statusWindow);
+        }
+    });
+
+    return trainStatsWindow;
+}
+
+function createTrainForceWindow(options = {}) {
+    const { centerOnShow = true, onReadyToShow } = options;
+
+    if (trainForceWindow) {
+        trainForceWindow.show();
+        trainForceWindow.focus();
+        return trainForceWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainForceWindow = new BrowserWindow({
+        width: 800,
+        height: 500,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainForceWindow.loadFile('train-force.html');
+
+    if (centerOnShow) {
+        trainForceWindow.once('ready-to-show', () => {
+            windowManager.centerWindow(trainForceWindow);
+        });
+    }
+
+    if (typeof onReadyToShow === 'function') {
+        trainForceWindow.once('ready-to-show', () => onReadyToShow(trainForceWindow));
+    }
+
+    windowManager.attachFadeHandlers(trainForceWindow);
+    trainForceWindow.on('closed', () => {
+        trainForceWindow = null;
+        if (windowManager.statusWindow) {
+            windowManager.centerWindow(windowManager.statusWindow);
+        }
+    });
+
+    return trainForceWindow;
+}
+
 function createItemsWindow() {
     if (itemsWindow) {
         itemsWindow.show();
@@ -885,7 +1165,7 @@ function createNestsWindow() {
 
     nestsWindow = new BrowserWindow({
         width: 350,
-        height: 100,
+        height: 140,
         frame: false,
         transparent: true,
         resizable: false,
@@ -964,6 +1244,24 @@ function closeTrainWindow() {
     }
 }
 
+function closeTrainMenuWindow() {
+    if (trainMenuWindow) {
+        trainMenuWindow.close();
+    }
+}
+
+function closeTrainStatsWindow() {
+    if (trainStatsWindow) {
+        trainStatsWindow.close();
+    }
+}
+
+function closeTrainForceWindow() {
+    if (trainForceWindow) {
+        trainForceWindow.close();
+    }
+}
+
 function closeItemsWindow() {
     if (itemsWindow) {
         itemsWindow.close();
@@ -996,6 +1294,9 @@ function closeAllGameWindows() {
     closeBattleModeWindow();
     closeJourneyModeWindow();
     closeJourneySceneWindow();
+    closeTrainMenuWindow();
+    closeTrainStatsWindow();
+    closeTrainForceWindow();
     closeTrainWindow();
     closeItemsWindow();
     closeStoreWindow();

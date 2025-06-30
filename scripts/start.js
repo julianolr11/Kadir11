@@ -1,3 +1,4 @@
+import { listPets } from "./api.js";
 console.log('Script do start.js carregado');
 console.log('window.electronAPI disponível:', typeof window.electronAPI !== 'undefined');
 
@@ -73,7 +74,7 @@ if (msg) msg.textContent = 'Você já possui um pet. Exclua-o para criar outro.'
 document.getElementById('start-button').addEventListener('click', () => {
     console.log('Botão Iniciar clicado');
     if (window.electronAPI) {
-        window.electronAPI.listPets().then(pets => {
+        listPets().then(pets => {
             if (pets.length >= petLimit) {
                 if (limitOverlay) limitOverlay.style.display = 'flex';
             } else {
@@ -131,7 +132,7 @@ exitNoBtn?.addEventListener('click', () => {
 // Verificar se há pets salvos e mostrar o botão "Carregar"
 if (window.electronAPI) {
     console.log('Listando pets...');
-    window.electronAPI.listPets().then(pets => {
+    listPets().then(pets => {
         console.log('Pets recebidos:', pets);
         if (pets.length > 0) {
             document.getElementById('load-button').style.display = 'block';

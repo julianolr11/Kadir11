@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'use-item',
             'unequip-item',
             'train-pet',
+            'open-train-menu',
+            'train-stats',
+            'train-force',
             'learn-move',
             'rename-pet',
             'open-battle-mode-window',
@@ -39,6 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'hatch-egg',
             'open-hatch-window',
             'close-hatch-window',
+            'redeem-code',
             'use-move',
             'update-health',
             'kadirfull',
@@ -66,7 +70,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'pen-updated',
             'nest-updated',
             'nests-data-updated',
-            'activate-status-tab'
+            'activate-status-tab',
+            'redeem-code-result'
         ];
         if (validChannels.includes(channel)) {
             console.log(`Registrando listener para o canal: ${channel}`);
@@ -142,6 +147,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     closeHatchWindow: () => {
         console.log('Enviando close-hatch-window');
         ipcRenderer.send('close-hatch-window');
+    },
+    redeemCode: (code) => {
+        console.log('Enviando redeem-code', code);
+        ipcRenderer.send('redeem-code', code);
     }
 });
 

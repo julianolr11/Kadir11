@@ -1,3 +1,4 @@
+import { listPets } from "./api.js";
 const penCanvas = document.getElementById('pen-canvas');
 const petsLayer = document.getElementById('pets-layer');
 const nestsContainer = document.getElementById('nests-container');
@@ -143,10 +144,10 @@ function drawPets(pets) {
 }
 
 function loadPen() {
-    if (window.electronAPI && window.electronAPI.getPenInfo && window.electronAPI.listPets) {
+    if (window.electronAPI && window.electronAPI.getPenInfo) {
         Promise.all([
             window.electronAPI.getPenInfo(),
-            window.electronAPI.listPets()
+            listPets()
         ]).then(([info, pets]) => {
             penInfo = info;
             drawPen();

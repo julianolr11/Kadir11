@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; media-src 'self'">
     <title>Kadir11 - Carregar Pet</title>
     <link rel="stylesheet" href="styles/main.css">
     <style>
@@ -253,6 +254,25 @@
             margin-bottom: 8px;
         }
 
+        .code-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        #redeem-input {
+            background-color: #2a323e;
+            border: 2px solid #2a323e;
+            border-radius: 7px;
+            padding: 5px;
+            color: #ffffff;
+            font-family: 'PixelOperator', sans-serif;
+            font-size: 16px;
+            width: 200px;
+            text-align: center;
+        }
+
         .window {
             height: 430px;
         }
@@ -269,6 +289,10 @@
             <div class="button-row">
                 <button class="button" id="show-pen-button">Exibir Pets</button>
                 <button class="button" id="back-button">Voltar</button>
+            </div>
+            <div class="code-row">
+                <input type="text" id="redeem-input" placeholder="Digite o código" maxlength="20" />
+                <button class="button" id="redeem-button">Resgatar</button>
             </div>
         </div>
     </div>
@@ -374,6 +398,16 @@
                 .replace(/\b\w/g, c => c.toUpperCase()); // Capitaliza a primeira letra de cada palavra
         }
 
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return str;
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/'/g, '&#39;')
+                .replace(/"/g, '&quot;');
+        }
+
 
         // Função para recarregar a lista de pets
         function reloadPetList() {
@@ -394,14 +428,15 @@
                     const petItem = document.createElement('div');
                     petItem.className = 'pet-item';
                     petItem.setAttribute('data-element', pet.element);
+                    const safeName = escapeHtml(pet.name);
                     petItem.innerHTML = `
                         <div class="pet-image-container">
                             <div class="pet-image-background"></div>
                             <div class="pet-image-texture"></div>
-                            <img src="${pet.statusImage ? `Assets/Mons/${pet.statusImage}` : (pet.image ? `Assets/Mons/${pet.image}` : 'Assets/Mons/eggsy.png')}" alt="${pet.name}" style="image-rendering: pixelated;" />
+                            <img src="${pet.statusImage ? `Assets/Mons/${pet.statusImage}` : (pet.image ? `Assets/Mons/${pet.image}` : 'Assets/Mons/eggsy.png')}" alt="${safeName}" style="image-rendering: pixelated;" />
                         </div>
                         <div class="pet-info">
-                            <p><strong>Nome:</strong> ${pet.name}</p>
+                            <p><strong>Nome:</strong> ${safeName}</p>
                             <p><strong>Nível:</strong> ${pet.level}</p>
                             <p><strong>Raridade:</strong> ${formatRarity(pet.rarity)}</p>
                             <p><strong>Último Acesso:</strong> ${pet.lastAccessed ? formatDate(pet.lastAccessed) : 'Nunca'}</p>
@@ -425,7 +460,7 @@
                     deleteButton.addEventListener('click', (e) => {
                         e.stopPropagation();
                         petIdToDelete = pet.petId;
-                        deleteMessage.textContent = `Tem certeza que deseja excluir o pet "${pet.name}"? Essa ação não pode ser desfeita.`;
+                        deleteMessage.textContent = `Tem certeza que deseja excluir o pet "${safeName}"? Essa ação não pode ser desfeita.`;
                         deleteOverlay.style.display = 'flex';
                     });
                 });
@@ -469,6 +504,25 @@
 
         document.getElementById("show-pen-button").addEventListener("click", () => {
             window.electronAPI.send("open-pen-window");
+        });
+
+        const redeemBtn = document.getElementById('redeem-button');
+        const redeemInput = document.getElementById('redeem-input');
+        redeemBtn.addEventListener('click', () => {
+            const code = redeemInput.value.trim();
+            if (code) {
+                window.electronAPI.redeemCode(code);
+                redeemInput.value = '';
+            }
+        });
+
+        window.electronAPI.on('redeem-code-result', (event, result) => {
+            if (result.success) {
+                alert('Pet resgatado!');
+                reloadPetList();
+            } else {
+                alert(result.message || 'Código inválido');
+            }
         });
 
         // Voltar para a janela inicial

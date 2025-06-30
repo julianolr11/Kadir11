@@ -1,4 +1,16 @@
+import { createPet } from "./api.js";
 console.log('Script do create-pet.js carregado');
+
+// Escapa caracteres perigosos para evitar injeção de HTML
+function escapeHtml(str) {
+    if (typeof str !== 'string') return str;
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&#39;')
+        .replace(/"/g, '&quot;');
+}
 
 // Informações de pasta e raça para cada espécie
 const specieData = {
@@ -227,7 +239,8 @@ function showNameSelection(element) {
     document.getElementById('name-selection').style.display = 'block';
 
     document.getElementById('create-pet-button').addEventListener('click', () => {
-        const name = document.getElementById('pet-name').value.trim();
+        const rawName = document.getElementById('pet-name').value.trim();
+        const name = escapeHtml(rawName);
         if (!name) {
             alert('Por favor, insira um nome para o pet!');
             return;
@@ -292,7 +305,7 @@ function showNameSelection(element) {
         console.log('Pet a ser criado:', petData);
 
         // Enviar o pedido de criação do pet
-        window.electronAPI.createPet(petData);
+        createPet(petData);
 
         // Escutar a confirmação de criação e exibir a animação + revelar o pet
         window.electronAPI.onPetCreated((newPet) => {
