@@ -32,9 +32,12 @@ backups/
 *.snap
 *.deb
 *.rpm
-
+*.png
+*.mp4
+*.gif
 # Git
 .git
+
 
 # Pets data stored locally
 pets/
