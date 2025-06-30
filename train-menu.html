@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+    <title>Kadir11 - Treinar</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
+        .window { position:relative; width:100%; height:100%; display:flex; flex-direction:column; padding:0; margin:0; }
+        #train-menu-options { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div id="title-bar">
+            <div id="title-bar-content"><span>Treinar</span></div>
+            <div id="title-bar-buttons">
+                <div id="close-train-menu-window">X</div>
+            </div>
+        </div>
+        <div id="train-menu-options">
+            <button class="button" id="train-menu-moves">Movimentos</button>
+            <button class="button" id="train-menu-attributes">Atributos</button>
+        </div>
+    </div>
+    <script type="module" src="scripts/train-menu.js"></script>
+</body>
+</html>

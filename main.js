@@ -28,6 +28,9 @@ let lastUpdate = Date.now();
 let battleModeWindow = null;
 let journeyModeWindow = null;
 let trainWindow = null;
+let trainMenuWindow = null;
+let trainAttributesWindow = null;
+let trainForceWindow = null;
 let itemsWindow = null;
 let storeWindow = null;
 let journeyImagesCache = null;
@@ -801,6 +804,102 @@ function createTrainWindow(options = {}) {
     return trainWindow;
 }
 
+function createTrainMenuWindow() {
+    if (trainMenuWindow) {
+        trainMenuWindow.show();
+        trainMenuWindow.focus();
+        return trainMenuWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainMenuWindow = new BrowserWindow({
+        width: 300,
+        height: 180,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainMenuWindow.loadFile('train-menu.html');
+    windowManager.attachFadeHandlers(trainMenuWindow);
+    trainMenuWindow.on('closed', () => {
+        trainMenuWindow = null;
+    });
+
+    return trainMenuWindow;
+}
+
+function createTrainAttributesWindow() {
+    if (trainAttributesWindow) {
+        trainAttributesWindow.show();
+        trainAttributesWindow.focus();
+        return trainAttributesWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainAttributesWindow = new BrowserWindow({
+        width: 300,
+        height: 250,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainAttributesWindow.loadFile('train-attributes.html');
+    windowManager.attachFadeHandlers(trainAttributesWindow);
+    trainAttributesWindow.on('closed', () => {
+        trainAttributesWindow = null;
+    });
+
+    return trainAttributesWindow;
+}
+
+function createTrainForceWindow() {
+    if (trainForceWindow) {
+        trainForceWindow.show();
+        trainForceWindow.focus();
+        return trainForceWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainForceWindow = new BrowserWindow({
+        width: 300,
+        height: 200,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainForceWindow.loadFile('train-force.html');
+    windowManager.attachFadeHandlers(trainForceWindow);
+    trainForceWindow.on('closed', () => {
+        trainForceWindow = null;
+    });
+
+    return trainForceWindow;
+}
+
 function createItemsWindow() {
     if (itemsWindow) {
         itemsWindow.show();
@@ -964,6 +1063,24 @@ function closeTrainWindow() {
     }
 }
 
+function closeTrainMenuWindow() {
+    if (trainMenuWindow) {
+        trainMenuWindow.close();
+    }
+}
+
+function closeTrainAttributesWindow() {
+    if (trainAttributesWindow) {
+        trainAttributesWindow.close();
+    }
+}
+
+function closeTrainForceWindow() {
+    if (trainForceWindow) {
+        trainForceWindow.close();
+    }
+}
+
 function closeItemsWindow() {
     if (itemsWindow) {
         itemsWindow.close();
@@ -996,6 +1113,9 @@ function closeAllGameWindows() {
     closeBattleModeWindow();
     closeJourneyModeWindow();
     closeJourneySceneWindow();
+    closeTrainMenuWindow();
+    closeTrainAttributesWindow();
+    closeTrainForceWindow();
     closeTrainWindow();
     closeItemsWindow();
     closeStoreWindow();
@@ -1073,6 +1193,30 @@ ipcMain.on('resize-pen-window', (event, size) => {
         windowManager.penWindow.setSize(Math.round(size.width), Math.round(size.height));
         updateNestsPosition();
     }
+});
+
+ipcMain.on('open-train-menu-window', () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar');
+        return;
+    }
+    createTrainMenuWindow();
+});
+
+ipcMain.on('open-train-attributes-window', () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar');
+        return;
+    }
+    createTrainAttributesWindow();
+});
+
+ipcMain.on('open-train-force-window', () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar');
+        return;
+    }
+    createTrainForceWindow();
 });
 
 ipcMain.on('buy-item', async (event, item) => {
