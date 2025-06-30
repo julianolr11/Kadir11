@@ -9,7 +9,17 @@
     <style>
         html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
         .window { position:relative; width:100%; height:100%; display:flex; flex-direction:column; padding:0; margin:0; }
-        #force-content { flex:1; display:flex; align-items:center; justify-content:center; }
+        #force-content { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+        #game-area { flex:1; width:100%; display:flex; align-items:center; justify-content:center; position:relative; background:url('Assets/train/forest.png') no-repeat center/cover; }
+        #log { width:80px; image-rendering:pixelated; }
+        #hit-effect { position:absolute; width:80px; display:none; pointer-events:none; }
+        #precision-container { position:relative; width:80%; margin-top:5px; }
+        #precision-bar { width:100%; image-rendering:pixelated; }
+        #pointer { position:absolute; top:-2px; left:0; width:16px; image-rendering:pixelated; }
+        #feedback { position:absolute; top:10px; font-size:14px; pointer-events:none; opacity:0; }
+        @keyframes floatUp { from { transform:translateY(0); opacity:1; } to { transform:translateY(-20px); opacity:0; } }
+        #attempt-counter, #xp-total { font-size:14px; margin-top:2px; }
+        #force-alert { display:none; position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); padding:10px; border-radius:5px; z-index:10; }
     </style>
 </head>
 <body>
@@ -22,7 +32,19 @@
             </div>
         </div>
         <div id="force-content">
-            <p>Funcionalidade em desenvolvimento...</p>
+            <div id="game-area">
+                <img id="log" src="Assets/train/wood-1.png" alt="Tronco">
+                <img id="hit-effect" src="Assets/train/hit.gif" alt="Hit">
+                <div id="feedback"></div>
+            </div>
+            <div id="precision-container">
+                <img id="precision-bar" src="Assets/train/bar.png" alt="Barra">
+                <img id="pointer" src="Assets/train/chevron.png" alt="Ponteiro">
+            </div>
+            <div id="attempt-counter"></div>
+            <div id="xp-total"></div>
+            <button class="button small-button" id="force-back">Voltar</button>
+            <div id="force-alert"></div>
         </div>
     </div>
     <script type="module" src="scripts/train-force.js"></script>
