@@ -9,7 +9,9 @@
     <style>
         html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
         .window { position:relative; width:100%; height:100%; display:flex; flex-direction:column; padding:0; margin:0; }
-        #attribute-options { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        #attribute-options { flex:1; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:10px; }
+        .attr-button { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .attr-button img { width:32px; height:32px; image-rendering: pixelated; margin-bottom:4px; }
     </style>
 </head>
 <body>
@@ -22,10 +24,22 @@
             </div>
         </div>
         <div id="attribute-options">
-            <button class="button" id="train-force-button">Treinar Força</button>
-            <button class="button" id="train-defense-button" disabled>Treinar Defesa (em breve)</button>
-            <button class="button" id="train-speed-button" disabled>Treinar Velocidade (em breve)</button>
-            <button class="button" id="train-magic-button" disabled>Treinar Magia (em breve)</button>
+            <button class="button attr-button" id="train-force-button">
+                <img src="assets/train/forca.png" alt="Força">
+                <span>Força</span>
+            </button>
+            <button class="button attr-button" id="train-defense-button" disabled>
+                <img src="assets/train/defesa.png" alt="Defesa">
+                <span>Defesa</span>
+            </button>
+            <button class="button attr-button" id="train-speed-button" disabled>
+                <img src="assets/train/velocidade.png" alt="Velocidade">
+                <span>Velocidade</span>
+            </button>
+            <button class="button attr-button" id="train-magic-button" disabled>
+                <img src="assets/train/magia.png" alt="Magia">
+                <span>Magia</span>
+            </button>
         </div>
     </div>
     <script type="module" src="scripts/train-attributes.js"></script>
