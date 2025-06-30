@@ -1216,7 +1216,12 @@ ipcMain.on('open-train-force-window', () => {
         console.error('Nenhum pet selecionado para treinar');
         return;
     }
-    createTrainForceWindow();
+    const win = createTrainForceWindow();
+    if (win) {
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('pet-data', currentPet);
+        });
+    }
 });
 
 ipcMain.on('buy-item', async (event, item) => {
