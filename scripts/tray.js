@@ -344,7 +344,7 @@ function showStatusBubble() {
     }
     } else if (action === 'train-pet') {
     console.log('Treinar Pet');
-    window.electronAPI.send('train-pet');
+    window.electronAPI.send('open-train-menu-window');
     } else if (action === 'care-pet') {
     console.log('Cuidar do Pet');
     window.electronAPI.send('care-pet');
