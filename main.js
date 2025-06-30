@@ -878,8 +878,8 @@ function createTrainForceWindow() {
     const preloadPath = require('path').join(__dirname, 'preload.js');
 
     trainForceWindow = new BrowserWindow({
-        width: 300,
-        height: 200,
+        width: 1074,
+        height: 715,
         frame: false,
         transparent: true,
         resizable: false,
@@ -1438,6 +1438,32 @@ ipcMain.on('update-health', async (event, newHealth) => {
         });
     } catch (err) {
         console.error('Erro ao atualizar vida do pet:', err);
+    }
+});
+
+ipcMain.on('increase-attribute', async (event, payload) => {
+    if (!currentPet || !payload) return;
+    const { name, amount } = payload;
+    if (!name) return;
+    const inc = amount || 1;
+    if (!currentPet.attributes) currentPet.attributes = {};
+    currentPet.attributes[name] = (currentPet.attributes[name] || 0) + inc;
+    if (name === 'life') {
+        const ratio = currentPet.currentHealth / currentPet.maxHealth;
+        currentPet.maxHealth = currentPet.attributes.life;
+        currentPet.currentHealth = Math.round(currentPet.maxHealth * ratio);
+    }
+    try {
+        await petManager.updatePet(currentPet.petId, {
+            attributes: currentPet.attributes,
+            maxHealth: currentPet.maxHealth,
+            currentHealth: currentPet.currentHealth
+        });
+        BrowserWindow.getAllWindows().forEach(w => {
+            if (w.webContents) w.webContents.send('pet-data', currentPet);
+        });
+    } catch (err) {
+        console.error('Erro ao aumentar atributo:', err);
     }
 });
 

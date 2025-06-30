@@ -5,7 +5,7 @@ let direction = 1;
 let frameId = 0;
 let attempts = 0;
 const maxAttempts = 5;
-let totalXp = 0;
+let totalXp = 0; // acumulado de força ganha
 
 function closeWindow() {
     window.close();
@@ -15,7 +15,7 @@ function startPointer() {
     const pointer = document.getElementById('pointer');
     if (!pointer) return;
     running = true;
-    const step = 0.5; // percent per frame
+    const step = 0.75; // percent per frame (slightly faster)
     function animate() {
         if (!running) return;
         pointerPos += step * direction;
@@ -54,33 +54,36 @@ function updateCounters() {
     const counter = document.getElementById('attempt-counter');
     const total = document.getElementById('xp-total');
     if (counter) counter.textContent = `Tentativa ${attempts}/${maxAttempts}`;
-    if (total) total.textContent = attempts >= maxAttempts ? `XP total: ${totalXp}` : '';
+    if (total) total.textContent = attempts >= maxAttempts ? `Força total: ${totalXp}` : '';
 }
 
 function evaluateHit() {
     stopPointer();
     showHitEffect();
     let result = 'Errou!';
-    let xpGain = 0;
+    let attrGain = 0;
     const logImg = document.getElementById('log');
     if (pointerPos >= 90) {
-        result = '+3 XP';
-        xpGain = 3;
+        result = '+3 Força';
+        attrGain = 3;
         if (logImg) logImg.src = 'Assets/train/wood-3.png';
     } else if (pointerPos >= 70) {
-        result = '+1 XP';
-        xpGain = 1;
+        result = '+1 Força';
+        attrGain = 1;
         if (logImg) logImg.src = 'Assets/train/wood-2.png';
     } else {
         if (logImg) logImg.src = 'Assets/train/wood-1.png';
     }
-    totalXp += xpGain;
+    totalXp += attrGain;
     showFeedback(result);
     attempts += 1;
     updateCounters();
     if (pet) {
         window.electronAPI.send('use-move', { cost: 15 });
-        window.electronAPI.send('reward-pet', { experience: xpGain, kadirPoints: -1 });
+        if (attrGain > 0) {
+            window.electronAPI.send('increase-attribute', { name: 'attack', amount: attrGain });
+        }
+        window.electronAPI.send('reward-pet', { kadirPoints: -1 });
     }
     if (attempts < maxAttempts) {
         setTimeout(() => {
