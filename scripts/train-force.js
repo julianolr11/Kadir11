@@ -67,27 +67,28 @@ function showFeedback(text, success) {
 
 function updateCounters() {
     const counter = document.getElementById('attempt-counter');
-    const total = document.getElementById('xp-total');
     if (counter) counter.textContent = `Tentativa ${attempts}/${maxAttempts}`;
-    if (total) total.textContent = attempts >= maxAttempts ? `Força total: ${totalXp}` : '';
 }
 
 function showResults() {
-    const resultsEl = document.getElementById('force-results');
-    if (!resultsEl || !pet) return;
+    const overlay = document.getElementById('force-results');
+    const content = document.getElementById('force-results-content');
+    if (!overlay || !content || !pet) return;
     const atk = pet.attributes?.attack ?? initialAttributes?.attack ?? 0;
     const def = pet.attributes?.defense ?? initialAttributes?.defense ?? 0;
     const spd = pet.attributes?.speed ?? initialAttributes?.speed ?? 0;
     const mag = pet.attributes?.magic ?? initialAttributes?.magic ?? 0;
-    resultsEl.innerHTML =
+    content.innerHTML =
         `<p>Ataque: ${atk} <span class="gain">+${totalXp}</span></p>` +
         `<p>Defesa: ${def}</p>` +
         `<p>Velocidade: ${spd}</p>` +
         `<p>Magia: ${mag}</p>` +
+        `<p>Força total: ${totalXp}</p>` +
         `<button class="button small-button" id="force-results-ok">Ok</button>`;
-    resultsEl.style.display = 'block';
+    overlay.style.display = 'flex';
     const okBtn = document.getElementById('force-results-ok');
     okBtn?.addEventListener('click', closeWindow);
+    document.getElementById('close-force-results')?.addEventListener('click', closeWindow);
 }
 
 function getAttrGain(high) {
