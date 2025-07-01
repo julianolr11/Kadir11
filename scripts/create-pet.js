@@ -286,7 +286,7 @@ function showNameSelection(element) {
             currentHealth: stats.life,
             maxHealth: stats.life,
             energy: 100,
-            kadirPoints: 5
+            kadirPoints: 10
         };
 
         console.log('Pet a ser criado:', petData);

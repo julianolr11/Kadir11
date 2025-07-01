@@ -166,6 +166,11 @@ function checkEligibility() {
         alertEl.style.display = 'block';
         return false;
     }
+    if ((pet.kadirPoints || 0) < 1) {
+        alertEl.textContent = 'Seu pet não tem DNA Kadir suficiente para treinar.';
+        alertEl.style.display = 'block';
+        return false;
+    }
     alertEl.style.display = 'none';
     return true;
 }
