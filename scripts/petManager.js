@@ -1,10 +1,12 @@
 const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
+const { app } = require('electron');
 const Store = require('electron-store');
 const store = new Store();
 
-const petsDir = path.join(__dirname, '..', 'pets');
+// Diretório onde os arquivos de pets serão armazenados
+const petsDir = path.join(app.getPath('userData'), 'pets');
 let petCounter = 0;
 
 // Função para garantir que o diretório de pets exista
