@@ -172,7 +172,7 @@ function generatePetFromEgg(eggId, rarity) {
         currentHealth: attributes.life,
         maxHealth: attributes.life,
         energy: 100,
-        kadirPoints: 5
+        kadirPoints: 10
     };
 }
 
