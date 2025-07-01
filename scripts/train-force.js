@@ -81,35 +81,44 @@ function showResults() {
         `<p>Ataque: ${atk} <span class="gain">+${totalXp}</span></p>` +
         `<p>Defesa: ${def}</p>` +
         `<p>Velocidade: ${spd}</p>` +
-        `<p>Magia: ${mag}</p>`;
+        `<p>Magia: ${mag}</p>` +
+        `<button class="button small-button" id="force-results-ok">Ok</button>`;
     resultsEl.style.display = 'block';
+    const okBtn = document.getElementById('force-results-ok');
+    okBtn?.addEventListener('click', closeWindow);
 }
 
 function getAttrGain(high) {
-    const base = high ? 2 : 1;
-    const bonus = Math.floor((pet?.level || 1) / 20);
-    return base + bonus;
+    return 1; // ganho máximo de 1 ponto
 }
 
 function evaluateHit() {
     stopPointer();
     showHitEffect();
     let result = 'Errou!';
+    let success = false;
     let attrGain = 0;
     const logImg = document.getElementById('log');
     if (pointerPos >= 90) {
-        attrGain = getAttrGain(true);
-        result = `+${attrGain} Força`;
+        if (Math.random() < 0.5) {
+            attrGain = getAttrGain(true);
+            success = true;
+        }
         if (logImg) logImg.src = 'Assets/train/wood-3.png';
     } else if (pointerPos >= 70) {
-        attrGain = getAttrGain(false);
-        result = `+${attrGain} Força`;
+        if (Math.random() < 0.3) {
+            attrGain = getAttrGain(false);
+            success = true;
+        }
         if (logImg) logImg.src = 'Assets/train/wood-2.png';
     } else {
         if (logImg) logImg.src = 'Assets/train/wood-1.png';
     }
-    if (attrGain > 0) totalXp += attrGain;
-    showFeedback(result, attrGain > 0);
+    if (success) {
+        result = `+${attrGain} Força`;
+        totalXp += attrGain;
+    }
+    showFeedback(result, success);
     attempts += 1;
     updateCounters();
     if (pet) {
