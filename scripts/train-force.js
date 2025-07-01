@@ -6,6 +6,7 @@ let frameId = 0;
 let attempts = 0;
 const maxAttempts = 5;
 let totalXp = 0; // acumulado de força ganha
+let initialAttributes = null;
 
 function closeWindow() {
     window.close();
@@ -22,9 +23,8 @@ function startPointer() {
     const container = document.getElementById('precision-container');
     if (!pointer || !container) return;
     const containerWidth = container.offsetWidth;
-    const rangeStart = 15; // limites laterais
-    const rangeWidth = containerWidth - 30;
     const pointerWidth = pointer.offsetWidth;
+    const maxLeft = containerWidth - pointerWidth;
     running = true;
     const step = getPointerSpeed(pet?.level || 1);
     function animate() {
@@ -32,8 +32,8 @@ function startPointer() {
         pointerPos += step * direction;
         if (pointerPos >= 100) { pointerPos = 100; direction = -1; }
         if (pointerPos <= 0) { pointerPos = 0; direction = 1; }
-        const center = rangeStart + (pointerPos / 100) * rangeWidth;
-        pointer.style.left = `${center - pointerWidth / 2}px`;
+        const left = (pointerPos / 100) * maxLeft;
+        pointer.style.left = `${left}px`;
         frameId = requestAnimationFrame(animate);
     }
     frameId = requestAnimationFrame(animate);
@@ -68,6 +68,21 @@ function updateCounters() {
     const total = document.getElementById('xp-total');
     if (counter) counter.textContent = `Tentativa ${attempts}/${maxAttempts}`;
     if (total) total.textContent = attempts >= maxAttempts ? `Força total: ${totalXp}` : '';
+}
+
+function showResults() {
+    const resultsEl = document.getElementById('force-results');
+    if (!resultsEl || !pet) return;
+    const atk = pet.attributes?.attack ?? initialAttributes?.attack ?? 0;
+    const def = pet.attributes?.defense ?? initialAttributes?.defense ?? 0;
+    const spd = pet.attributes?.speed ?? initialAttributes?.speed ?? 0;
+    const mag = pet.attributes?.magic ?? initialAttributes?.magic ?? 0;
+    resultsEl.innerHTML =
+        `<p>Ataque: ${atk} <span class="gain">+${totalXp}</span></p>` +
+        `<p>Defesa: ${def}</p>` +
+        `<p>Velocidade: ${spd}</p>` +
+        `<p>Magia: ${mag}</p>`;
+    resultsEl.style.display = 'block';
 }
 
 function getAttrGain(high) {
@@ -111,6 +126,8 @@ function evaluateHit() {
             direction = 1;
             startPointer();
         }, 500);
+    } else {
+        setTimeout(showResults, 500);
     }
 }
 
@@ -141,6 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousedown', handleInput);
     window.electronAPI.on('pet-data', (event, data) => {
         pet = data;
+        if (!initialAttributes && pet) {
+            initialAttributes = {
+                attack: pet.attributes?.attack || 0,
+                defense: pet.attributes?.defense || 0,
+                speed: pet.attributes?.speed || 0,
+                magic: pet.attributes?.magic || 0
+            };
+        }
         if (checkEligibility()) {
             updateCounters();
             startPointer();
