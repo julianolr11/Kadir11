@@ -10,6 +10,39 @@
         html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
         .window { position:relative; width:100%; height:100%; display:flex; flex-direction:column; padding:0; margin:0; }
         #train-menu-options { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        /* Título configurado em styles/main.css */
+        #close-train-menu-window {
+            width: 20px;
+            height: 20px;
+            background-color: #ff4444;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #813a3a;
+            font-family: cursive;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: none;
+        }
+        /* title-bar-buttons configurado em styles/main.css */
+        #back-train-menu-window {
+            width: 20px;
+            height: 20px;
+            background-color: #44aaff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2a435b;
+            font-family: cursive;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -17,6 +50,7 @@
         <div id="title-bar">
             <div id="title-bar-content"><span>Treinar</span></div>
             <div id="title-bar-buttons">
+                <div id="back-train-menu-window">↩</div>
                 <div id="close-train-menu-window">X</div>
             </div>
         </div>
