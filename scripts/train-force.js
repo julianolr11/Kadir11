@@ -11,17 +11,29 @@ function closeWindow() {
     window.close();
 }
 
+function getPointerSpeed(level) {
+    const base = 0.4; // velocidade inicial mais lenta
+    const tier = Math.floor(((level || 1) - 1) / 5);
+    return Math.min(base + tier * 0.1, 1.2);
+}
+
 function startPointer() {
     const pointer = document.getElementById('pointer');
-    if (!pointer) return;
+    const container = document.getElementById('precision-container');
+    if (!pointer || !container) return;
+    const containerWidth = container.offsetWidth;
+    const rangeStart = 15; // limites laterais
+    const rangeWidth = containerWidth - 30;
+    const pointerWidth = pointer.offsetWidth;
     running = true;
-    const step = 0.75; // percent per frame (slightly faster)
+    const step = getPointerSpeed(pet?.level || 1);
     function animate() {
         if (!running) return;
         pointerPos += step * direction;
         if (pointerPos >= 100) { pointerPos = 100; direction = -1; }
         if (pointerPos <= 0) { pointerPos = 0; direction = 1; }
-        pointer.style.left = `calc(${pointerPos}% - 20px)`;
+        const center = rangeStart + (pointerPos / 100) * rangeWidth;
+        pointer.style.left = `${center - pointerWidth / 2}px`;
         frameId = requestAnimationFrame(animate);
     }
     frameId = requestAnimationFrame(animate);
@@ -39,10 +51,11 @@ function showHitEffect() {
     setTimeout(() => { effect.style.display = 'none'; }, 300);
 }
 
-function showFeedback(text) {
+function showFeedback(text, success) {
     const fb = document.getElementById('feedback');
     if (!fb) return;
     fb.textContent = text;
+    fb.style.color = success ? 'lime' : '#ff4444';
     fb.style.opacity = '1';
     fb.style.animation = 'none';
     // trigger reflow
@@ -57,6 +70,12 @@ function updateCounters() {
     if (total) total.textContent = attempts >= maxAttempts ? `Força total: ${totalXp}` : '';
 }
 
+function getAttrGain(high) {
+    const base = high ? 2 : 1;
+    const bonus = Math.floor((pet?.level || 1) / 20);
+    return base + bonus;
+}
+
 function evaluateHit() {
     stopPointer();
     showHitEffect();
@@ -64,18 +83,18 @@ function evaluateHit() {
     let attrGain = 0;
     const logImg = document.getElementById('log');
     if (pointerPos >= 90) {
-        result = '+3 Força';
-        attrGain = 3;
+        attrGain = getAttrGain(true);
+        result = `+${attrGain} Força`;
         if (logImg) logImg.src = 'Assets/train/wood-3.png';
     } else if (pointerPos >= 70) {
-        result = '+1 Força';
-        attrGain = 1;
+        attrGain = getAttrGain(false);
+        result = `+${attrGain} Força`;
         if (logImg) logImg.src = 'Assets/train/wood-2.png';
     } else {
         if (logImg) logImg.src = 'Assets/train/wood-1.png';
     }
-    totalXp += attrGain;
-    showFeedback(result);
+    if (attrGain > 0) totalXp += attrGain;
+    showFeedback(result, attrGain > 0);
     attempts += 1;
     updateCounters();
     if (pet) {
