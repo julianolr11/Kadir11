@@ -5,6 +5,8 @@ let direction = 1;
 let frameId = 0;
 let attempts = 0;
 const maxAttempts = 5;
+const energyCostPerAttempt = 3; // 5 tentativas = 15 de energia
+const maxTotalGain = 3; // limite de ganho de ataque por sessão
 let totalXp = 0; // acumulado de força ganha
 let initialAttributes = null;
 
@@ -115,14 +117,23 @@ function evaluateHit() {
         if (logImg) logImg.src = 'Assets/train/wood-1.png';
     }
     if (success) {
-        result = `+${attrGain} Força`;
-        totalXp += attrGain;
+        if (totalXp < maxTotalGain) {
+            attrGain = Math.min(attrGain, maxTotalGain - totalXp);
+            if (attrGain > 0) {
+                result = `+${attrGain} Força`;
+                totalXp += attrGain;
+            } else {
+                success = false;
+            }
+        } else {
+            success = false;
+        }
     }
     showFeedback(result, success);
     attempts += 1;
     updateCounters();
     if (pet) {
-        window.electronAPI.send('use-move', { cost: 15 });
+        window.electronAPI.send('use-move', { cost: energyCostPerAttempt });
         if (attrGain > 0) {
             window.electronAPI.send('increase-attribute', { name: 'attack', amount: attrGain });
         }
