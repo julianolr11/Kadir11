@@ -12,4 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.electronAPI.send('open-train-force-window');
         closeWindow();
     });
+    document.getElementById('train-defense-button')?.addEventListener('click', () => {
+        window.electronAPI.send('open-train-defense-window');
+        closeWindow();
+    });
 });
