@@ -2,6 +2,7 @@ let pet = null;
 let running = false;
 let pointerPos = 0;
 let direction = 1;
+let ballFromRight = false;
 let frameId = 0;
 let attempts = 0;
 const maxAttempts = 5;
@@ -36,13 +37,34 @@ function startPointer() {
         const proximity = 1 - Math.abs(50 - pointerPos) / 50;
         const step = baseSpeed * (1 + proximity);
         pointerPos += step * direction;
-        if (pointerPos >= 100) { pointerPos = 100; direction = -1; }
-        if (pointerPos <= 0) { pointerPos = 0; direction = 1; }
+        let nextBallFromRight = null;
+        if (pointerPos >= 100) {
+            pointerPos = 100;
+            direction = -1;
+            nextBallFromRight = true;
+        }
+        if (pointerPos <= 0) {
+            pointerPos = 0;
+            direction = 1;
+            nextBallFromRight = false;
+        }
         const left = (pointerPos / 100) * maxLeft;
         pointer.style.left = `${left}px`;
         if (ball && gameArea) {
-            const target = (gameArea.offsetWidth / 2) - (ball.offsetWidth / 2);
-            ball.style.left = `${(pointerPos / 100) * target}px`;
+            const center = (gameArea.offsetWidth - ball.offsetWidth) / 2;
+            const startRight = gameArea.offsetWidth - ball.offsetWidth;
+            let ballLeft;
+            if (ballFromRight) {
+                const progress = (100 - pointerPos) / 100;
+                ballLeft = startRight - progress * (startRight - center);
+            } else {
+                const progress = pointerPos / 100;
+                ballLeft = progress * center;
+            }
+            ball.style.left = `${ballLeft}px`;
+        }
+        if (nextBallFromRight !== null) {
+            ballFromRight = nextBallFromRight;
         }
         frameId = requestAnimationFrame(animate);
     }
