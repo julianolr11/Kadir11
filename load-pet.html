@@ -269,6 +269,7 @@
             <div class="button-row">
                 <button class="button" id="show-pen-button">Exibir Pets</button>
                 <button class="button" id="back-button">Voltar</button>
+                <button class="button" id="create-new-pet-button" style="display: none;">Criar novo pet</button>
             </div>
         </div>
     </div>
@@ -302,6 +303,7 @@
         const limitOverlay = document.getElementById('limit-overlay');
         const limitOkBtn = document.getElementById('limit-ok');
         const showPenButton = document.getElementById('show-pen-button');
+        const createNewPetBtn = document.getElementById('create-new-pet-button');
         let petIdToDelete = null;
         let petLimit = 3;
 
@@ -383,6 +385,9 @@
                 if (showPenButton) {
                     showPenButton.style.display = pets.length > 0 ? 'inline-block' : 'none';
                 }
+                if (createNewPetBtn) {
+                    createNewPetBtn.style.display = pets.length === 0 ? 'inline-block' : 'none';
+                }
                 if (limitOverlay) {
                     if (pets.length >= petLimit) {
                         limitOverlay.style.display = 'flex';
@@ -443,16 +448,9 @@
         confirmDeleteBtn.addEventListener('click', () => {
             if (petIdToDelete !== null) {
                 window.electronAPI.deletePet(petIdToDelete).then(() => {
-                    window.electronAPI.listPets().then(pets => {
-                        deleteOverlay.style.display = 'none';
-                        petIdToDelete = null;
-                        if (pets.length === 0) {
-                            window.electronAPI.send('close-load-pet-window');
-                            window.electronAPI.openStartWindow();
-                        } else {
-                            reloadPetList();
-                        }
-                    });
+                    deleteOverlay.style.display = 'none';
+                    petIdToDelete = null;
+                    reloadPetList();
                 });
             }
         });
@@ -474,6 +472,11 @@
         // Voltar para a janela inicial
         document.getElementById('back-button').addEventListener('click', () => {
             window.electronAPI.send('close-load-pet-window');
+        });
+
+        createNewPetBtn?.addEventListener('click', () => {
+            window.electronAPI.send('close-load-pet-window');
+            window.electronAPI.openStartWindow();
         });
     </script>
 </body>
