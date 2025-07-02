@@ -31,6 +31,7 @@ let trainWindow = null;
 let trainMenuWindow = null;
 let trainAttributesWindow = null;
 let trainForceWindow = null;
+let trainDefenseWindow = null;
 let itemsWindow = null;
 let storeWindow = null;
 let journeyImagesCache = null;
@@ -900,6 +901,38 @@ function createTrainForceWindow() {
     return trainForceWindow;
 }
 
+function createTrainDefenseWindow() {
+    if (trainDefenseWindow) {
+        trainDefenseWindow.show();
+        trainDefenseWindow.focus();
+        return trainDefenseWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+
+    trainDefenseWindow = new BrowserWindow({
+        width: 1074,
+        height: 715,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    trainDefenseWindow.loadFile('train-defense.html');
+    windowManager.attachFadeHandlers(trainDefenseWindow);
+    trainDefenseWindow.on('closed', () => {
+        trainDefenseWindow = null;
+    });
+
+    return trainDefenseWindow;
+}
+
 function createItemsWindow() {
     if (itemsWindow) {
         itemsWindow.show();
@@ -1217,6 +1250,19 @@ ipcMain.on('open-train-force-window', () => {
         return;
     }
     const win = createTrainForceWindow();
+    if (win) {
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('pet-data', currentPet);
+        });
+    }
+});
+
+ipcMain.on('open-train-defense-window', () => {
+    if (!currentPet) {
+        console.error('Nenhum pet selecionado para treinar');
+        return;
+    }
+    const win = createTrainDefenseWindow();
     if (win) {
         win.webContents.on('did-finish-load', () => {
             win.webContents.send('pet-data', currentPet);
