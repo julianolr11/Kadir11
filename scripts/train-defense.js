@@ -6,12 +6,9 @@ let frameId = 0;
 let attempts = 0;
 const maxAttempts = 5;
 const energyCostPerAttempt = 3; // 5 tentativas = 15 de energia
-const maxTotalGain = 3; // limite de ganho de ataque por sessão
-let totalXp = 0; // acumulado de força ganha
+const tolerances = [40, 30, 20, 15, 10];
+let xpDefesa = 0; // pontos de defesa ganhos
 let initialAttributes = null;
-let pointerSpeed = 0;
-const speedIncrement = 0.05;
-const maxPointerSpeed = 1.5;
 
 function closeWindow() {
     window.close();
@@ -31,7 +28,7 @@ function startPointer() {
     const pointerWidth = pointer.offsetWidth;
     const maxLeft = containerWidth - pointerWidth;
     running = true;
-    const step = pointerSpeed;
+    const step = getPointerSpeed(pet?.level || 1);
     function animate() {
         if (!running) return;
         pointerPos += step * direction;
@@ -74,81 +71,52 @@ function updateCounters() {
 }
 
 function showResults() {
-    const overlay = document.getElementById('force-results');
-    const content = document.getElementById('force-results-content');
-    if (!overlay || !content || !pet) return;
-    const atk = pet.attributes?.attack ?? initialAttributes?.attack ?? 0;
-    const def = pet.attributes?.defense ?? initialAttributes?.defense ?? 0;
-    const spd = pet.attributes?.speed ?? initialAttributes?.speed ?? 0;
-    const mag = pet.attributes?.magic ?? initialAttributes?.magic ?? 0;
+    const overlay = document.getElementById('defense-results');
+    const content = document.getElementById('defense-results-content');
+    if (!overlay || !content) return;
     content.innerHTML =
-        `<p>Ataque: ${atk} <span class="gain">+${totalXp}</span></p>` +
-        `<p>Defesa: ${def}</p>` +
-        `<p>Velocidade: ${spd}</p>` +
-        `<p>Magia: ${mag}</p>` +
-        `<p>Força total: ${totalXp}</p>` +
-        `<button class="button small-button" id="force-results-ok">Ok</button>`;
+        `<p>Você ganhou <span class="gain">+${xpDefesa}</span> pontos de Defesa!</p>` +
+        `<button class="button small-button" id="defense-results-ok">Ok</button>`;
     overlay.style.display = 'flex';
-    const okBtn = document.getElementById('force-results-ok');
+    const okBtn = document.getElementById('defense-results-ok');
     okBtn?.addEventListener('click', closeWindow);
-    document.getElementById('close-force-results')?.addEventListener('click', closeWindow);
-}
-
-function getAttrGain(high) {
-    return 1; // ganho máximo de 1 ponto
+    document.getElementById('close-defense-results')?.addEventListener('click', closeWindow);
 }
 
 function evaluateHit() {
     stopPointer();
     showHitEffect();
-    let result = 'Errou!';
-    let success = false;
-    let attrGain = 0;
-    const logImg = document.getElementById('log');
-    if (pointerPos >= 90) {
-        if (Math.random() < 0.5) {
-            attrGain = getAttrGain(true);
-            success = true;
-        }
-        if (logImg) logImg.src = 'Assets/train/wood-3.png';
-    } else if (pointerPos >= 70) {
-        if (Math.random() < 0.3) {
-            attrGain = getAttrGain(false);
-            success = true;
-        }
-        if (logImg) logImg.src = 'Assets/train/wood-2.png';
-    } else {
-        if (logImg) logImg.src = 'Assets/train/wood-1.png';
-    }
+    const pointer = document.getElementById('pointer');
+    const container = document.getElementById('precision-container');
+    const shieldImg = document.getElementById('shield');
+    if (!pointer || !container) return;
+    const pointerLeft = parseFloat(pointer.style.left) || 0;
+    const containerWidth = container.offsetWidth;
+    const pointerWidth = pointer.offsetWidth;
+    const target = containerWidth / 2 - pointerWidth / 2;
+    const diff = Math.abs(pointerLeft - target);
+    const tolerance = tolerances[Math.min(attempts, tolerances.length - 1)];
+    const success = diff <= tolerance;
     if (success) {
-        if (totalXp < maxTotalGain) {
-            attrGain = Math.min(attrGain, maxTotalGain - totalXp);
-            if (attrGain > 0) {
-                result = `+${attrGain} Força`;
-                totalXp += attrGain;
-            } else {
-                success = false;
-            }
-        } else {
-            success = false;
-        }
+        xpDefesa += 1;
+        if (shieldImg) shieldImg.src = 'Assets/train/shield-2.png';
+        showFeedback('Defesa bem-sucedida! +1 Defesa', true);
+    } else {
+        if (shieldImg) shieldImg.src = 'Assets/train/shield-3.png';
+        showFeedback('Errou o tempo!', false);
     }
-    if (pointerPos >= 90) {
-        pointerSpeed = Math.min(pointerSpeed + speedIncrement, maxPointerSpeed);
-    }
-    showFeedback(result, success);
     attempts += 1;
     updateCounters();
     if (pet) {
         window.electronAPI.send('use-move', { cost: energyCostPerAttempt });
-        if (attrGain > 0) {
-            window.electronAPI.send('increase-attribute', { name: 'attack', amount: attrGain });
+        if (success) {
+            window.electronAPI.send('increase-attribute', { name: 'defense', amount: 1 });
         }
         window.electronAPI.send('reward-pet', { kadirPoints: -1 });
     }
     if (attempts < maxAttempts) {
         setTimeout(() => {
-            if (logImg) logImg.src = 'Assets/train/wood-1.png';
+            if (shieldImg) shieldImg.src = 'Assets/train/shield-1.png';
             pointerPos = 0;
             direction = 1;
             startPointer();
@@ -164,7 +132,7 @@ function handleInput() {
 }
 
 function checkEligibility() {
-    const alertEl = document.getElementById('force-alert');
+    const alertEl = document.getElementById('defense-alert');
     if (!pet || !alertEl) return false;
     const lifePct = (pet.currentHealth / pet.maxHealth) * 100;
     if (pet.energy < 15 || lifePct < 15) {
@@ -182,10 +150,10 @@ function checkEligibility() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('close-train-force-window')?.addEventListener('click', closeWindow);
+    document.getElementById('close-train-defense-window')?.addEventListener('click', closeWindow);
     const backFn = () => { window.electronAPI.send('open-train-attributes-window'); closeWindow(); };
-    document.getElementById('back-train-force-window')?.addEventListener('click', backFn);
-    document.getElementById('force-back')?.addEventListener('click', backFn);
+    document.getElementById('back-train-defense-window')?.addEventListener('click', backFn);
+    document.getElementById('defense-back')?.addEventListener('click', backFn);
     document.addEventListener('keydown', e => { if (e.code === 'Space') handleInput(); });
     document.addEventListener('mousedown', handleInput);
     window.electronAPI.on('pet-data', (event, data) => {
@@ -198,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 magic: pet.attributes?.magic || 0
             };
         }
-        pointerSpeed = getPointerSpeed(pet?.level || 1);
         if (checkEligibility()) {
             updateCounters();
             startPointer();

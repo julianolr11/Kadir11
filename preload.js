@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'open-train-menu-window',
             'open-train-attributes-window',
             'open-train-force-window',
+            'open-train-defense-window',
             'use-move',
             'update-health',
             'increase-attribute',
