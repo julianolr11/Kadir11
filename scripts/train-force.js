@@ -9,6 +9,9 @@ const energyCostPerAttempt = 3; // 5 tentativas = 15 de energia
 const maxTotalGain = 3; // limite de ganho de ataque por sessão
 let totalXp = 0; // acumulado de força ganha
 let initialAttributes = null;
+let pointerSpeed = 0;
+const speedIncrement = 0.05;
+const maxPointerSpeed = 1.5;
 
 function closeWindow() {
     window.close();
@@ -28,7 +31,7 @@ function startPointer() {
     const pointerWidth = pointer.offsetWidth;
     const maxLeft = containerWidth - pointerWidth;
     running = true;
-    const step = getPointerSpeed(pet?.level || 1);
+    const step = pointerSpeed;
     function animate() {
         if (!running) return;
         pointerPos += step * direction;
@@ -130,6 +133,9 @@ function evaluateHit() {
             success = false;
         }
     }
+    if (pointerPos >= 90) {
+        pointerSpeed = Math.min(pointerSpeed + speedIncrement, maxPointerSpeed);
+    }
     showFeedback(result, success);
     attempts += 1;
     updateCounters();
@@ -192,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 magic: pet.attributes?.magic || 0
             };
         }
+        pointerSpeed = getPointerSpeed(pet?.level || 1);
         if (checkEligibility()) {
             updateCounters();
             startPointer();
