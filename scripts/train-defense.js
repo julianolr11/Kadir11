@@ -23,19 +23,27 @@ function getPointerSpeed(level) {
 function startPointer() {
     const pointer = document.getElementById('pointer');
     const container = document.getElementById('precision-container');
+    const gameArea = document.getElementById('game-area');
+    const ball = document.getElementById('ball');
     if (!pointer || !container) return;
     const containerWidth = container.offsetWidth;
     const pointerWidth = pointer.offsetWidth;
     const maxLeft = containerWidth - pointerWidth;
     running = true;
-    const step = getPointerSpeed(pet?.level || 1);
+    const baseSpeed = getPointerSpeed(pet?.level || 1);
     function animate() {
         if (!running) return;
+        const proximity = 1 - Math.abs(50 - pointerPos) / 50;
+        const step = baseSpeed * (1 + proximity);
         pointerPos += step * direction;
         if (pointerPos >= 100) { pointerPos = 100; direction = -1; }
         if (pointerPos <= 0) { pointerPos = 0; direction = 1; }
         const left = (pointerPos / 100) * maxLeft;
         pointer.style.left = `${left}px`;
+        if (ball && gameArea) {
+            const target = (gameArea.offsetWidth / 2) - (ball.offsetWidth / 2);
+            ball.style.left = `${(pointerPos / 100) * target}px`;
+        }
         frameId = requestAnimationFrame(animate);
     }
     frameId = requestAnimationFrame(animate);
