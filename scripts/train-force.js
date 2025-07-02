@@ -10,7 +10,7 @@ const maxTotalGain = 3; // limite de ganho de ataque por sessão
 let totalXp = 0; // acumulado de força ganha
 let initialAttributes = null;
 let pointerSpeed = 0;
-const speedIncrement = 0.05;
+const speedIncrement = 0.1;
 const maxPointerSpeed = 1.5;
 
 function closeWindow() {
@@ -18,7 +18,7 @@ function closeWindow() {
 }
 
 function getPointerSpeed(level) {
-    const base = 0.4; // velocidade inicial mais lenta
+    const base = 0.6; // velocidade inicial mais rápida
     const tier = Math.floor(((level || 1) - 1) / 5);
     return Math.min(base + tier * 0.1, 1.2);
 }
