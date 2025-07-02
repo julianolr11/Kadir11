@@ -65,6 +65,11 @@ function startPointer() {
         }
         if (nextBallFromRight !== null) {
             ballFromRight = nextBallFromRight;
+            if (ball) {
+                ball.classList.toggle('flipped', ballFromRight);
+            }
+        } else if (ball) {
+            ball.classList.toggle('flipped', ballFromRight);
         }
         frameId = requestAnimationFrame(animate);
     }
