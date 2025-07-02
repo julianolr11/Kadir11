@@ -31,48 +31,55 @@ function startPointer() {
     const pointerWidth = pointer.offsetWidth;
     const maxLeft = containerWidth - pointerWidth;
     running = true;
+    pointerPos = ballFromRight ? 100 : 0;
+    direction = ballFromRight ? -1 : 1;
+    pointer.classList.toggle('flipped', ballFromRight);
+    if (ball) ball.classList.toggle('flipped', ballFromRight);
     const baseSpeed = getPointerSpeed(pet?.level || 1);
+
     function animate() {
         if (!running) return;
         const proximity = 1 - Math.abs(50 - pointerPos) / 50;
         const step = baseSpeed * (1 + proximity);
         pointerPos += step * direction;
-        let nextBallFromRight = null;
-        if (pointerPos >= 100) {
-            pointerPos = 100;
-            direction = -1;
-            nextBallFromRight = true;
+
+        let reachedCenter = false;
+        if (ballFromRight && pointerPos <= 50) {
+            pointerPos = 50;
+            reachedCenter = true;
+        } else if (!ballFromRight && pointerPos >= 50) {
+            pointerPos = 50;
+            reachedCenter = true;
         }
-        if (pointerPos <= 0) {
-            pointerPos = 0;
-            direction = 1;
-            nextBallFromRight = false;
-        }
+
         const left = (pointerPos / 100) * maxLeft;
         pointer.style.left = `${left}px`;
+
         if (ball && gameArea) {
             const center = (gameArea.offsetWidth - ball.offsetWidth) / 2;
             const startRight = gameArea.offsetWidth - ball.offsetWidth;
             let ballLeft;
             if (ballFromRight) {
-                const progress = (100 - pointerPos) / 100;
+                const progress = (pointerPos - 50) / 50; // 1 to 0
                 ballLeft = startRight - progress * (startRight - center);
             } else {
-                const progress = pointerPos / 100;
+                const progress = pointerPos / 50; // 0 to 1
                 ballLeft = progress * center;
             }
             ball.style.left = `${ballLeft}px`;
         }
-        if (nextBallFromRight !== null) {
-            ballFromRight = nextBallFromRight;
-            if (ball) {
-                ball.classList.toggle('flipped', ballFromRight);
-            }
-        } else if (ball) {
-            ball.classList.toggle('flipped', ballFromRight);
+
+        if (reachedCenter) {
+            ballFromRight = !ballFromRight;
+            pointer.classList.toggle('flipped', ballFromRight);
+            if (ball) ball.classList.toggle('flipped', ballFromRight);
+            pointerPos = ballFromRight ? 100 : 0;
+            direction = ballFromRight ? -1 : 1;
         }
+
         frameId = requestAnimationFrame(animate);
     }
+
     frameId = requestAnimationFrame(animate);
 }
 
@@ -152,8 +159,7 @@ function evaluateHit() {
     if (attempts < maxAttempts) {
         setTimeout(() => {
             if (shieldImg) shieldImg.src = 'Assets/train/shield-1.png';
-            pointerPos = 0;
-            direction = 1;
+            ballFromRight = !ballFromRight;
             startPointer();
         }, 500);
     } else {
