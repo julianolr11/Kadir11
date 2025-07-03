@@ -1,8 +1,10 @@
 console.log('lair-mode.js carregado');
 
 const TILE_SIZE = 32;
-const MAP_W = 40;
-const MAP_H = 30;
+// Dimensões do mapa diminuídas para reduzir o tamanho da janela
+// Cada tile possui 32px, então 32x24 resulta em 1024x768
+const MAP_W = 32;
+const MAP_H = 24;
 
 const tileMapping = {
     FLOOR: [3,6],
