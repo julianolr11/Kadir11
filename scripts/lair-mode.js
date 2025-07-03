@@ -81,16 +81,47 @@ function generateInternalWalls(){
     });
 }
 
+function hasPath(){
+    const start = {x:1, y:1};
+    const goal = {x:MAP_W-2, y:MAP_H-2};
+    const visited = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill(false));
+    const queue=[start];
+    visited[start.y][start.x]=true;
+    while(queue.length){
+        const {x,y}=queue.shift();
+        if(x===goal.x && y===goal.y) return true;
+        const neighbors=[
+            {x:x+1,y},
+            {x:x-1,y},
+            {x,y:y+1},
+            {x,y:y-1}
+        ];
+        for(const n of neighbors){
+            if(n.x<0||n.y<0||n.x>=MAP_W||n.y>=MAP_H) continue;
+            if(visited[n.y][n.x]) continue;
+            const tile=map[n.y][n.x];
+            if(tile.startsWith('WALL')||tile.startsWith('CORNER')) continue;
+            visited[n.y][n.x]=true;
+            queue.push(n);
+        }
+    }
+    return false;
+}
+
 function generateDungeon(){
-    map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
-    for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_BOTTOM'; map[MAP_H-1][x]='WALL_BOTTOM'; }
-    for(let y=0;y<MAP_H;y++){ map[y][0]='WALL_LEFT'; map[y][MAP_W-1]='WALL_RIGHT'; }
-    map[0][0]='CORNER_TOP_LEFT';
-    map[0][MAP_W-1]='CORNER_TOP_RIGHT';
-    map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
-    map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
-    generateInternalWalls();
-    map[MAP_H-2][MAP_W-2]='DOOR';
+    let attempts=0;
+    do{
+        map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
+        for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_BOTTOM'; map[MAP_H-1][x]='WALL_BOTTOM'; }
+        for(let y=0;y<MAP_H;y++){ map[y][0]='WALL_LEFT'; map[y][MAP_W-1]='WALL_RIGHT'; }
+        map[0][0]='CORNER_TOP_LEFT';
+        map[0][MAP_W-1]='CORNER_TOP_RIGHT';
+        map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
+        map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
+        generateInternalWalls();
+        map[MAP_H-2][MAP_W-2]='DOOR';
+        attempts++;
+    }while(!hasPath() && attempts<50);
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
     player.x=1; player.y=1;
