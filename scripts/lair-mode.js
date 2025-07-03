@@ -48,37 +48,54 @@ function placeRandom(type){
     if(attempts<100) map[y][x]=type;
 }
 
-function generateInternalWalls(){
-    const verticalCount = Math.floor(Math.random()*2)+1;
-    const horizontalCount = Math.floor(Math.random()*2)+1;
-    const usedX=new Set();
-    const usedY=new Set();
 
-    while(usedX.size < verticalCount){
-        let x=Math.floor(Math.random()*(MAP_W-4))+2; // avoid borders
-        if(x===1||x===MAP_W-2) continue;
-        usedX.add(x);
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
     }
-    usedX.forEach(x=>{
-        for(let y=1;y<MAP_H-1;y++){
-            if(x===MAP_W-2 && y===MAP_H-2) continue; // door
-            if(x===1 && y===1) continue; // start
-            if(map[y][x]==='FLOOR') map[y][x]='WALL_LEFT';
-        }
-    });
+    return arr;
+}
 
-    while(usedY.size < horizontalCount){
-        let y=Math.floor(Math.random()*(MAP_H-4))+2;
-        if(y===1||y===MAP_H-2) continue;
-        usedY.add(y);
-    }
-    usedY.forEach(y=>{
-        for(let x=1;x<MAP_W-1;x++){
-            if(x===MAP_W-2 && y===MAP_H-2) continue; // door
-            if(x===1 && y===1) continue; // start
-            if(map[y][x]==='FLOOR') map[y][x]='WALL_TOP';
+function carve(x,y){
+    map[y][x]='FLOOR';
+    const dirs=shuffle([[0,-2],[0,2],[-2,0],[2,0]]);
+    for(const [dx,dy] of dirs){
+        const nx=x+dx, ny=y+dy;
+        const mx=x+dx/2, my=y+dy/2;
+        if(nx<=0||ny<=0||nx>=MAP_W-1||ny>=MAP_H-1) continue;
+        if(map[ny][nx]==='WALL'){
+            map[my][mx]='FLOOR';
+            carve(nx,ny);
         }
-    });
+    }
+}
+
+function assignWallTiles(){
+    const isWall=(x,y)=>{
+        if(x<0||y<0||x>=MAP_W||y>=MAP_H) return false;
+        const t=map[y][x];
+        return t==='WALL'||t.startsWith('WALL')||t.startsWith('CORNER');
+    };
+    for(let y=0;y<MAP_H;y++){
+        for(let x=0;x<MAP_W;x++){
+            if(map[y][x]!=='WALL') continue;
+            const u=isWall(x,y-1), d=isWall(x,y+1), l=isWall(x-1,y), r=isWall(x+1,y);
+            if(r&&d&&!l&&!u) map[y][x]='CORNER_TOP_LEFT';
+            else if(l&&d&&!r&&!u) map[y][x]='CORNER_TOP_RIGHT';
+            else if(r&&u&&!l&&!d) map[y][x]='CORNER_BOTTOM_LEFT';
+            else if(l&&u&&!r&&!d) map[y][x]='CORNER_BOTTOM_RIGHT';
+            else if((l||r)&&!(u||d)) map[y][x]='WALL_TOP';
+            else map[y][x]='WALL_LEFT';
+        }
+    }
+    // bordas externas
+    for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_TOP'; map[MAP_H-1][x]='WALL_BOTTOM'; }
+    for(let y=0;y<MAP_H;y++){ map[y][0]='WALL_LEFT'; map[y][MAP_W-1]='WALL_RIGHT'; }
+    map[0][0]='CORNER_TOP_LEFT';
+    map[0][MAP_W-1]='CORNER_TOP_RIGHT';
+    map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
+    map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
 }
 
 function hasPath(){
@@ -109,19 +126,14 @@ function hasPath(){
 }
 
 function generateDungeon(){
-    let attempts=0;
-    do{
-        map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
-        for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_BOTTOM'; map[MAP_H-1][x]='WALL_BOTTOM'; }
-        for(let y=0;y<MAP_H;y++){ map[y][0]='WALL_LEFT'; map[y][MAP_W-1]='WALL_RIGHT'; }
-        map[0][0]='CORNER_TOP_LEFT';
-        map[0][MAP_W-1]='CORNER_TOP_RIGHT';
-        map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
-        map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
-        generateInternalWalls();
-        map[MAP_H-2][MAP_W-2]='DOOR';
-        attempts++;
-    }while(!hasPath() && attempts<50);
+    map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('WALL'));
+    carve(1,1);
+    // garante caminho para a porta
+    map[MAP_H-2][MAP_W-2]='FLOOR';
+    map[MAP_H-2][MAP_W-3]='FLOOR';
+    map[MAP_H-3][MAP_W-2]='FLOOR';
+    assignWallTiles();
+    map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
     player.x=1; player.y=1;
