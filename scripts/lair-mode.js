@@ -5,28 +5,24 @@ const MAP_W = 40;
 const MAP_H = 30;
 
 const tileMapping = {
-    FLOOR: [3,6],
-    WALL_TOP: [0,1],
-    WALL_BOTTOM: [4,1],
-    WALL_LEFT: [1,0],
-    WALL_RIGHT: [1,11],
-    CORNER_TOP_LEFT: [0,0],
-    CORNER_TOP_RIGHT: [0,11],
-    CORNER_BOTTOM_LEFT: [4,0],
-    CORNER_BOTTOM_RIGHT: [4,11],
-    TORCH: [1,6],
-    CHEST: [3,4],
-    MONSTER: [5,5],
-    WATER_LARGE: [0,9],
-    WATER_SMALL: [0,10],
-    DOOR: [6,5],
-    BARRIL: [3,6],
-    TABLE: [3,3],
-    CHAIR: [3,2],
-    BOX: [3,5],
-    CAGE: [6,6],
-    PILLAR: [5,0],
-    GRATE: [2,4]
+    "FLOOR": [1, 1],
+    "WALL_TOP": [1, 0],
+    "WALL_BOTTOM": [1, 2],
+    "WALL_LEFT": [0, 1],
+    "WALL_RIGHT": [2, 1],
+    "CORNER_TOP_LEFT": [0, 0],
+    "CORNER_TOP_RIGHT": [2, 0],
+    "CORNER_BOTTOM_LEFT": [0, 2],
+    "CORNER_BOTTOM_RIGHT": [2, 2],
+    "TORCH": [5, 2],
+    "CHEST": [4, 4],
+    "MONSTER": [5, 5],
+    "WATER_LARGE": [0, 9],
+    "WATER_SMALL": [0, 10],
+    "DOOR": [3, 7],
+    "BARRIL": [5, 4],
+    "BOX": [5, 3],
+    "CAGE": [4, 3]
 };
 
 let canvas, ctx, tileset, playerSprite, bravuraText, buyBtn;
