@@ -15,10 +15,17 @@
     #lair-canvas {
         display: block;
         image-rendering: pixelated;
-        transform: scale(1.2);
+        transform: scale(var(--lair-scale, 1));
         transform-origin: top left;
     }
-    #player-sprite { position:absolute; width:32px; height:32px; image-rendering:pixelated; pointer-events:none; }
+    #player-sprite {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        image-rendering: pixelated;
+        pointer-events: none;
+        transform-origin: top left;
+    }
     #ui { margin-top:5px; font-family:'PixelOperator', sans-serif; color:#fff; }
 </style>
 </head>

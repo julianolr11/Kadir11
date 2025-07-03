@@ -1,6 +1,7 @@
 console.log('lair-mode.js carregado');
 
 const TILE_SIZE = 32;
+const SCALE = 1.2; // mesma escala aplicada ao canvas
 // Dimensões do mapa ajustadas para caber na janela ao escalar o canvas
 // Cada tile possui 32px, então 26x20 resulta em 832x640 (escala 1.2 ≈ 1000x768)
 const MAP_W = 26;
@@ -73,8 +74,8 @@ function drawMap(){
 }
 
 function drawPlayer(){
-    playerSprite.style.left = (player.x*TILE_SIZE)+'px';
-    playerSprite.style.top = (player.y*TILE_SIZE)+'px';
+    playerSprite.style.left = (player.x * TILE_SIZE * SCALE) + 'px';
+    playerSprite.style.top = (player.y * TILE_SIZE * SCALE) + 'px';
 }
 
 function updateUI(){
@@ -125,8 +126,8 @@ function handleKey(e){
 
 function handleClick(e){
     const rect = canvas.getBoundingClientRect();
-    const x=Math.floor((e.clientX-rect.left)/TILE_SIZE);
-    const y=Math.floor((e.clientY-rect.top)/TILE_SIZE);
+    const x=Math.floor((e.clientX - rect.left) / (TILE_SIZE * SCALE));
+    const y=Math.floor((e.clientY - rect.top) / (TILE_SIZE * SCALE));
     if(Math.abs(x-player.x)+Math.abs(y-player.y)===1){
         attemptMove(x-player.x,y-player.y);
     }
@@ -138,6 +139,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     playerSprite=document.getElementById('player-sprite');
     bravuraText=document.getElementById('bravura-text');
     buyBtn=document.getElementById('buy-bravura');
+    canvas.style.setProperty('--lair-scale', SCALE);
+    canvas.style.transform = `scale(${SCALE})`;
+    const container=document.getElementById('lair-container');
+    container.style.width = (canvas.width * SCALE) + 'px';
+    container.style.height = (canvas.height * SCALE) + 'px';
+    if (playerSprite) playerSprite.style.transform = `scale(${SCALE})`;
+
     tileset=new Image();
     tileset.src='assets/tileset/dungeon-tileset.png';
     tileset.onload=()=>{ drawMap(); drawPlayer(); };
@@ -151,7 +159,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('close-lair-mode')?.addEventListener('click',()=>window.close());
     document.getElementById('back-lair-mode')?.addEventListener('click',()=>{window.electronAPI.send('open-battle-mode-window');window.close();});
 
-    const container=document.getElementById('lair-container');
     const titleBar=document.getElementById('title-bar');
     const rect=container.getBoundingClientRect();
     const totalWidth=Math.round(rect.width)+20;
