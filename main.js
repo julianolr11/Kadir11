@@ -319,6 +319,20 @@ ipcMain.on('open-start-window', () => {
     windowManager.createStartWindow();
 });
 
+ipcMain.on('open-tray-window', () => {
+    console.log('Recebido open-tray-window');
+    const win = windowManager.createTrayWindow();
+    if (currentPet && win) {
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('pet-data', currentPet);
+        });
+    }
+    closeBattleModeWindow();
+    closeLairModeWindow();
+    closeJourneyModeWindow();
+    closeJourneySceneWindow();
+});
+
 ipcMain.on('create-pet', async (event, petData) => {
     console.log('Recebido create-pet com dados:', petData);
     try {

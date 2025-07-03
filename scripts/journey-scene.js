@@ -275,6 +275,18 @@ function showVictoryModal(reward) {
     };
 }
 
+function showDefeatModal() {
+    const modal = document.getElementById('defeat-modal');
+    const closeBtn = document.getElementById('defeat-close');
+    if (!modal || !closeBtn) return;
+    modal.style.display = 'flex';
+    closeBtn.onclick = () => {
+        modal.style.display = 'none';
+        window.electronAPI.send('open-tray-window');
+        closeWindow();
+    };
+}
+
 function concludeBattle(playerWon) {
     currentTurn = 'ended';
     hideMenus();
@@ -285,8 +297,7 @@ function concludeBattle(playerWon) {
         window.electronAPI.send('reward-pet', reward);
         showVictoryModal(reward);
     } else {
-        showMessage('Você perdeu!');
-        setTimeout(() => { window.electronAPI.send('open-journey-mode-window'); closeWindow(); }, 2000);
+        showDefeatModal();
     }
 }
 
