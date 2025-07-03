@@ -29,7 +29,8 @@ const tileMapping = {
     BOX: [3,5],
     CAGE: [6,6],
     PILLAR: [5,0],
-    GRATE: [2,4]
+    GRATE: [2,4],
+    WALL_CENTER: [2,1]
 };
 
 let canvas, ctx, tileset, playerSprite, bravuraText, buyBtn;
@@ -81,7 +82,8 @@ function assignWallTiles(){
         for(let x=0;x<MAP_W;x++){
             if(map[y][x]!=='WALL') continue;
             const u=isWall(x,y-1), d=isWall(x,y+1), l=isWall(x-1,y), r=isWall(x+1,y);
-            if(r&&d&&!l&&!u) map[y][x]='CORNER_TOP_LEFT';
+            if(u&&d&&l&&r) map[y][x]='WALL_CENTER';
+            else if(r&&d&&!l&&!u) map[y][x]='CORNER_TOP_LEFT';
             else if(l&&d&&!r&&!u) map[y][x]='CORNER_TOP_RIGHT';
             else if(r&&u&&!l&&!d) map[y][x]='CORNER_BOTTOM_LEFT';
             else if(l&&u&&!r&&!d) map[y][x]='CORNER_BOTTOM_RIGHT';
