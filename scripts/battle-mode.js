@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Adicionar eventos pras divs de modo
     const modeJourney = document.getElementById('mode-journey');
-    const modePlaceholder1 = document.getElementById('mode-placeholder1');
+    const modeLair = document.getElementById('mode-lair');
     const modePlaceholder2 = document.getElementById('mode-placeholder2');
 
     if (modeJourney) {
@@ -26,10 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (modePlaceholder1) {
-        modePlaceholder1.addEventListener('click', () => {
-            console.log('Modo Placeholder 1 selecionado (futuro)');
-            window.close(); // Fecha a janela por enquanto
+    if (modeLair) {
+        modeLair.addEventListener('click', () => {
+            console.log('Modo Covil selecionado');
+            window.electronAPI.send('open-lair-mode-window');
+            window.close();
         });
     }
 

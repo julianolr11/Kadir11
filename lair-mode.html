@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Kadir11 - Covil</title>
+<link rel="stylesheet" href="styles/main.css">
+<style>
+    html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
+    .window { position:relative; display:flex; flex-direction:column; width:fit-content; height:fit-content; }
+    #close-lair-mode { width:20px; height:20px; background:#ff4444; border-radius:50%; cursor:pointer; -webkit-app-region:no-drag; display:flex; align-items:center; justify-content:center; color:#813a3a; font-family:cursive; font-size:12px; font-weight:bold; text-shadow:none; }
+    #back-lair-mode { width:20px; height:20px; background:#44aaff; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#2a435b; font-family:cursive; font-size:12px; font-weight:bold; text-shadow:none; }
+    #lair-container { position:relative; margin:40px 10px 10px; }
+    #lair-canvas { display:block; image-rendering:pixelated; }
+    #player-sprite { position:absolute; width:32px; height:32px; image-rendering:pixelated; pointer-events:none; }
+    #ui { margin-top:5px; font-family:'PixelOperator', sans-serif; color:#fff; }
+</style>
+</head>
+<body>
+<div class="window">
+    <div id="title-bar">
+        <div id="title-bar-content"><span>Covil</span></div>
+        <div id="title-bar-buttons">
+            <div id="back-lair-mode">↩</div>
+            <div id="close-lair-mode">X</div>
+        </div>
+    </div>
+    <div id="lair-container">
+        <canvas id="lair-canvas" width="1280" height="960"></canvas>
+        <img id="player-sprite" src="" alt="Player">
+        <div id="ui">
+            <span id="bravura-text">Bravura: 0</span>
+            <button id="buy-bravura">Comprar +1 Movimento (30 KP)</button>
+        </div>
+    </div>
+</div>
+<script src="scripts/lair-mode.js"></script>
+</body>
+</html>
