@@ -44,6 +44,39 @@ function placeRandom(type){
     if(attempts<100) map[y][x]=type;
 }
 
+function generateInternalWalls(){
+    const verticalCount = Math.floor(Math.random()*2)+1;
+    const horizontalCount = Math.floor(Math.random()*2)+1;
+    const usedX=new Set();
+    const usedY=new Set();
+
+    while(usedX.size < verticalCount){
+        let x=Math.floor(Math.random()*(MAP_W-4))+2; // avoid borders
+        if(x===1||x===MAP_W-2) continue;
+        usedX.add(x);
+    }
+    usedX.forEach(x=>{
+        for(let y=1;y<MAP_H-1;y++){
+            if(x===MAP_W-2 && y===MAP_H-2) continue; // door
+            if(x===1 && y===1) continue; // start
+            if(map[y][x]==='FLOOR') map[y][x]='WALL_LEFT';
+        }
+    });
+
+    while(usedY.size < horizontalCount){
+        let y=Math.floor(Math.random()*(MAP_H-4))+2;
+        if(y===1||y===MAP_H-2) continue;
+        usedY.add(y);
+    }
+    usedY.forEach(y=>{
+        for(let x=1;x<MAP_W-1;x++){
+            if(x===MAP_W-2 && y===MAP_H-2) continue; // door
+            if(x===1 && y===1) continue; // start
+            if(map[y][x]==='FLOOR') map[y][x]='WALL_TOP';
+        }
+    });
+}
+
 function generateDungeon(){
     map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
     for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_TOP'; map[MAP_H-1][x]='WALL_BOTTOM'; }
@@ -52,6 +85,7 @@ function generateDungeon(){
     map[0][MAP_W-1]='CORNER_TOP_RIGHT';
     map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
     map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
+    generateInternalWalls();
     map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
