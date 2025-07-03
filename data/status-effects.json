@@ -2,7 +2,7 @@
   {
     "id": "burn",
     "name": "Queimadura",
-    "icon": "Assets/icons/burning.png",
+    "icon": "Assets/Icons/burning.png",
     "duration": "2-3",
     "damage": "-2% a -3% da vida total por turno",
     "extra": "Pode impedir regeneração durante o efeito"
@@ -10,7 +10,7 @@
   {
     "id": "poison",
     "name": "Envenenamento",
-    "icon": "Assets/icons/poison.png",
+    "icon": "Assets/Icons/poison.png",
     "duration": "3-5",
     "damage": "-1% a -2% da vida total por turno",
     "extra": "Acumula com outros efeitos de dano, como sangramento"
@@ -18,7 +18,7 @@
   {
     "id": "bleed",
     "name": "Sangramento",
-    "icon": "Assets/icons/bleed.png",
+    "icon": "Assets/Icons/bleed.png",
     "duration": "2",
     "damage": "-3% da vida atual por turno",
     "extra": "Pode aumentar com ataques físicos recebidos"
@@ -26,7 +26,7 @@
   {
     "id": "sleep",
     "name": "Dormência",
-    "icon": "Assets/icons/sleep.png",
+    "icon": "Assets/Icons/sleep.png",
     "duration": "1-3",
     "damage": null,
     "extra": "Qualquer dano recebido acorda o pet no próximo turno"
@@ -34,7 +34,7 @@
   {
     "id": "freeze",
     "name": "Congelamento",
-    "icon": "Assets/icons/freeze.png",
+    "icon": "Assets/Icons/freeze.png",
     "duration": "1-3",
     "damage": null,
     "extra": "Não acorda com dano, mas pode ser removido com habilidades de cura ou calor"
@@ -42,7 +42,7 @@
   {
     "id": "paralyze",
     "name": "Paralisia",
-    "icon": "Assets/icons/paralyze.png",
+    "icon": "Assets/Icons/paralyze.png",
     "duration": "1-2",
     "damage": null,
     "extra": "50% de chance de não agir e reduz a velocidade"

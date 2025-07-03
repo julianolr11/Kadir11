@@ -41,11 +41,11 @@ backups/
 
 # Pets data stored locally
 pets/
-Assets/icons/*.png
+Assets/Icons/*.png
 Assets/Modes/mapa.png
 Assets/Modes/Journeys/village.png
-assets/tileset/tileset.png
-assets/tileset/nest.png
+Assets/tileset/tileset.png
+Assets/tileset/nest.png
 Assets/Shop/chocolate.png
 Assets/Shop/feather.png
 Assets/Shop/finger.png

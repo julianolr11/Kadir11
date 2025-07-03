@@ -77,10 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (roll < 95) {
             const coins = Math.floor(Math.random() * 5) + 1;
             window.electronAPI?.send('reward-pet', { coins });
-            showEventModal(`Você encontrou ${coins} moedas!`, 'assets/icons/kadircoin.png');
+            showEventModal(`Você encontrou ${coins} moedas!`, 'Assets/Icons/kadircoin.png');
         } else {
             window.electronAPI?.send('reward-pet', { kadirPoints: 1 });
-            showEventModal('Você encontrou 1 DNA Kadir!', 'assets/icons/dna-kadir.png');
+            showEventModal('Você encontrou 1 DNA Kadir!', 'Assets/Icons/dna-kadir.png');
         }
         return false;
     }
