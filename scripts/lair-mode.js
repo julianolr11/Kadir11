@@ -1,10 +1,10 @@
 console.log('lair-mode.js carregado');
 
 const TILE_SIZE = 32;
-// Dimensões do mapa diminuídas para reduzir o tamanho da janela
-// Cada tile possui 32px, então 32x24 resulta em 1024x768
-const MAP_W = 32;
-const MAP_H = 24;
+// Dimensões do mapa ajustadas para caber na janela ao escalar o canvas
+// Cada tile possui 32px, então 26x20 resulta em 832x640 (escala 1.2 ≈ 1000x768)
+const MAP_W = 26;
+const MAP_H = 20;
 
 const tileMapping = {
     FLOOR: [3,6],
@@ -83,7 +83,9 @@ function updateUI(){
 
 function handleTile(tile){
     if(tile==='MONSTER'){
-        window.electronAPI.send('open-journey-scene-window',{background:'assets/modes/lair.png'});
+        window.electronAPI.send('open-journey-scene-window', {
+            background: 'Assets/Modes/Journeys/cave_ruin.png'
+        });
         map[player.y][player.x]='FLOOR';
     }else if(tile==='BOX'){
         window.electronAPI.send('reward-pet',{item:'meat',qty:1});
