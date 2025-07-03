@@ -27,6 +27,7 @@ let currentPet = null;
 let lastUpdate = Date.now();
 let battleModeWindow = null;
 let journeyModeWindow = null;
+let lairModeWindow = null;
 let trainWindow = null;
 let trainMenuWindow = null;
 let trainAttributesWindow = null;
@@ -410,6 +411,7 @@ ipcMain.on('select-pet', async (event, petId) => {
 
         // Fechar janelas extras sem afetar a nova trayWindow
         closeBattleModeWindow();
+        closeLairModeWindow();
         closeJourneyModeWindow();
         closeJourneySceneWindow();
         closeTrainWindow();
@@ -723,6 +725,35 @@ function createJourneyModeWindow() {
     });
 
     return journeyModeWindow;
+}
+
+function createLairModeWindow() {
+    if (lairModeWindow) {
+        lairModeWindow.show();
+        lairModeWindow.focus();
+        return lairModeWindow;
+    }
+
+    const preloadPath = require('path').join(__dirname, 'preload.js');
+    lairModeWindow = new BrowserWindow({
+        width: 1280,
+        height: 980,
+        frame: false,
+        transparent: true,
+        resizable: false,
+        show: false,
+        webPreferences: {
+            preload: preloadPath,
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    lairModeWindow.loadFile('lair-mode.html');
+    windowManager.attachFadeHandlers(lairModeWindow);
+    lairModeWindow.on('closed', () => { lairModeWindow = null; });
+
+    return lairModeWindow;
 }
 
 function createJourneySceneWindow() {
@@ -1084,6 +1115,12 @@ function closeJourneyModeWindow() {
     }
 }
 
+function closeLairModeWindow() {
+    if (lairModeWindow) {
+        lairModeWindow.close();
+    }
+}
+
 function closeJourneySceneWindow() {
     if (journeySceneWindow) {
         journeySceneWindow.close();
@@ -1144,6 +1181,7 @@ function closeAllGameWindows() {
     windowManager.closeCreatePetWindow();
     windowManager.closeStartWindow();
     closeBattleModeWindow();
+    closeLairModeWindow();
     closeJourneyModeWindow();
     closeJourneySceneWindow();
     closeTrainMenuWindow();
@@ -1184,6 +1222,17 @@ ipcMain.on('open-battle-mode-window', () => {
 ipcMain.on('open-journey-mode-window', () => {
     console.log('Recebido open-journey-mode-window');
     const win = createJourneyModeWindow();
+    if (currentPet && win) {
+        win.webContents.on('did-finish-load', () => {
+            currentPet.items = getItems();
+            win.webContents.send('pet-data', currentPet);
+        });
+    }
+});
+
+ipcMain.on('open-lair-mode-window', () => {
+    console.log('Recebido open-lair-mode-window');
+    const win = createLairModeWindow();
     if (currentPet && win) {
         win.webContents.on('did-finish-load', () => {
             currentPet.items = getItems();
@@ -1474,6 +1523,18 @@ ipcMain.on('use-move', async (event, move) => {
     }
 });
 
+ipcMain.on('use-bravura', async (event, amount) => {
+    if (!currentPet) return;
+    const cost = amount || 1;
+    currentPet.bravura = Math.max((currentPet.bravura || 0) - cost, 0);
+    try {
+        await petManager.updatePet(currentPet.petId, { bravura: currentPet.bravura });
+        BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
+    } catch (err) {
+        console.error('Erro ao atualizar bravura:', err);
+    }
+});
+
 ipcMain.on('update-health', async (event, newHealth) => {
     if (!currentPet) return;
     currentPet.currentHealth = Math.max(0, Math.min(currentPet.maxHealth, newHealth));
@@ -1550,6 +1611,9 @@ ipcMain.on('reward-pet', async (event, reward) => {
     if (reward.kadirPoints) {
         currentPet.kadirPoints = (currentPet.kadirPoints || 0) + reward.kadirPoints;
     }
+    if (reward.bravura) {
+        currentPet.bravura = (currentPet.bravura || 0) + reward.bravura;
+    }
     if (reward.experience) {
         currentPet.experience = (currentPet.experience || 0) + reward.experience;
         let requiredXp = getRequiredXpForNextLevel(currentPet.level);
@@ -1557,6 +1621,7 @@ ipcMain.on('reward-pet', async (event, reward) => {
             currentPet.level += 1;
             currentPet.experience -= requiredXp;
             currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 1;
+            currentPet.bravura = (currentPet.bravura || 0) + 1;
             increaseAttributesOnLevelUp(currentPet);
             requiredXp = getRequiredXpForNextLevel(currentPet.level);
         }
@@ -1571,7 +1636,8 @@ ipcMain.on('reward-pet', async (event, reward) => {
             attributes: currentPet.attributes,
             maxHealth: currentPet.maxHealth,
             currentHealth: currentPet.currentHealth,
-            energy: currentPet.energy
+            energy: currentPet.energy,
+            bravura: currentPet.bravura
         });
         BrowserWindow.getAllWindows().forEach(w => {
             if (w.webContents) w.webContents.send('pet-data', currentPet);
