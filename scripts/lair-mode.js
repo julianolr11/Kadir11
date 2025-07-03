@@ -10,7 +10,7 @@ const MAP_H = 20;
 const tileMapping = {
     FLOOR: [3,6],
     WALL_TOP: [0,1],
-    WALL_BOTTOM: [4,1],
+    WALL_BOTTOM: [1,2],
     WALL_LEFT: [1,0],
     WALL_RIGHT: [1,11],
     CORNER_TOP_LEFT: [0,0],
@@ -50,7 +50,7 @@ function placeRandom(type){
 
 function generateDungeon(){
     map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
-    for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_TOP'; map[MAP_H-1][x]='WALL_BOTTOM'; }
+    for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_BOTTOM'; map[MAP_H-1][x]='WALL_BOTTOM'; }
     for(let y=0;y<MAP_H;y++){ map[y][0]='WALL_LEFT'; map[y][MAP_W-1]='WALL_RIGHT'; }
     map[0][0]='CORNER_TOP_LEFT';
     map[0][MAP_W-1]='CORNER_TOP_RIGHT';
