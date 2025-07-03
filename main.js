@@ -736,8 +736,8 @@ function createLairModeWindow() {
 
     const preloadPath = require('path').join(__dirname, 'preload.js');
     lairModeWindow = new BrowserWindow({
-        width: 1280,
-        height: 980,
+        width: 1050,
+        height: 880,
         frame: false,
         transparent: true,
         resizable: false,
@@ -1274,6 +1274,12 @@ ipcMain.on('resize-pen-window', (event, size) => {
     if (windowManager.penWindow && size && size.width && size.height) {
         windowManager.penWindow.setSize(Math.round(size.width), Math.round(size.height));
         updateNestsPosition();
+    }
+});
+
+ipcMain.on('resize-lair-window', (event, size) => {
+    if (lairModeWindow && size && size.width && size.height) {
+        lairModeWindow.setSize(Math.round(size.width), Math.round(size.height));
     }
 });
 

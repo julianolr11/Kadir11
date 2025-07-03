@@ -150,6 +150,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     document.getElementById('close-lair-mode')?.addEventListener('click',()=>window.close());
     document.getElementById('back-lair-mode')?.addEventListener('click',()=>{window.electronAPI.send('open-battle-mode-window');window.close();});
+
+    const container=document.getElementById('lair-container');
+    const titleBar=document.getElementById('title-bar');
+    const rect=container.getBoundingClientRect();
+    const totalWidth=Math.round(rect.width)+20;
+    const totalHeight=Math.round(titleBar.offsetHeight+rect.height)+20;
+    window.electronAPI?.send('resize-lair-window',{width:totalWidth,height:totalHeight});
 });
 
 window.electronAPI.on('pet-data',(e,data)=>{
