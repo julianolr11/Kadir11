@@ -53,7 +53,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'battle-result',
             'animation-finished', // Novo canal pra sinalizar o fim da animação
             'close-start-window',  // Fechar a janela de start
-            'open-start-window'   // Abrir a janela de start
+            'open-start-window',  // Abrir a janela de start
+            'open-tray-window'    // Abrir a janela da bandeja
         ];
         if (validChannels.includes(channel)) {
             console.log(`Enviando canal IPC: ${channel}`, data);
