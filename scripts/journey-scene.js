@@ -217,6 +217,14 @@ function playAttackAnimation(img, idle, attack, cb) {
     }, 1000);
 }
 
+function showHitEffect(target) {
+    const id = target === 'player' ? 'player-hit' : 'enemy-hit';
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 300);
+}
+
 function applyStatusEffects() {
     if (playerStatusEffects.includes('poison')) {
         const dmg = Math.ceil(playerMaxHealth * (Math.random() * 0.01 + 0.01));
@@ -342,6 +350,7 @@ function performPlayerMove(move) {
         const mult = getElementMultiplier(moveElement, enemyElement);
         const dmg = Math.round(base * mult);
         enemyHealth = Math.max(0, enemyHealth - dmg);
+        showHitEffect('enemy');
         updateHealthBars();
         if (enemyHealth <= 0) {
             concludeBattle(true);
@@ -360,6 +369,7 @@ function enemyAction() {
         const mult = getElementMultiplier(enemyElement, pet.element || 'puro');
         const dmg = Math.round(base * mult);
         playerHealth = Math.max(0, playerHealth - dmg);
+        showHitEffect('player');
         updateHealthBars();
         window.electronAPI.send('update-health', playerHealth);
         if (playerHealth <= 0) {
