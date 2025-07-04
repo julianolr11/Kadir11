@@ -163,6 +163,8 @@ function generateDungeon(){
     fillWallRect(Math.floor(MAP_W/2)-2, Math.floor(MAP_H/2)-2, 5, 5, true);
     // pequena parede em "L" no canto superior esquerdo
     [[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]].forEach(([x,y])=>{ if(y<MAP_H && x<MAP_W) map[y][x]='WALL'; });
+    // parede completa demonstrando todos os cantos e lados
+    fillWallRect(3, MAP_H - 6, 6, 4, true);
     // garante caminho para a porta
     map[MAP_H-2][MAP_W-2]='FLOOR';
     map[MAP_H-2][MAP_W-3]='FLOOR';
