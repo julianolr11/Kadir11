@@ -146,10 +146,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
         console.log('Enviando get-nests-data');
         return ipcRenderer.invoke('get-nests-data');
     },
-    getSpeciesData: () => {
-        console.log('Enviando get-species-data');
-        return ipcRenderer.invoke('get-species-data');
-    },
     openHatchWindow: () => {
         console.log('Enviando open-hatch-window');
         ipcRenderer.send('open-hatch-window');

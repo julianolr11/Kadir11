@@ -39,3 +39,47 @@ export const specieBioImages = {
     'Monstro': 'Monstro/monstro.png',
     'Fera': 'Fera/fera.png'
 };
+
+export const specieData = {
+    'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
+    'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
+    'Ave': { dir: 'Ave', race: 'pidgly' },
+    'Criatura Mística': { dir: 'CriaturaMistica' },
+    'Criatura Sombria': { dir: 'CriaturaSombria' },
+    'Monstro': { dir: 'Monstro' },
+    'Fera': { dir: 'Fera', race: 'Foxyl' }
+};
+
+export const eggSpecieMap = {
+    eggAve: 'Ave',
+    eggCriaturaMistica: 'Criatura Mística',
+    eggCriaturaSombria: 'Criatura Sombria',
+    eggDraconideo: 'Draconídeo',
+    eggFera: 'Fera',
+    eggMonstro: 'Monstro',
+    eggReptiloide: 'Reptilóide'
+};
+
+let specieLoaded = false;
+
+export async function loadSpeciesData(baseDir = '.') {
+    if (specieLoaded) return;
+    specieLoaded = true;
+    try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const monsDir = path.join(baseDir, 'Assets', 'Mons');
+        const entries = fs.readdirSync(monsDir, { withFileTypes: true });
+        for (const entry of entries) {
+            if (!entry.isDirectory()) continue;
+            const dir = entry.name;
+            const existing = Object.keys(specieData).find(k => specieData[k].dir === dir);
+            const name = existing || dir;
+            if (!specieData[name]) {
+                specieData[name] = { dir };
+            }
+        }
+    } catch (err) {
+        console.error('Erro ao carregar espécies:', err);
+    }
+}

@@ -9,7 +9,9 @@ let specieBioImages = {};
 
 async function loadSpeciesData() {
     try {
-        specieData = await window.electronAPI.getSpeciesData();
+        const constants = await import('./constants.js');
+        specieData = constants.specieData;
+        specieBioImages = constants.specieBioImages;
         specieImages = Object.fromEntries(
             Object.entries(specieData).map(([key, value]) => {
                 const baseName = `${value.dir.toLowerCase()}`;
@@ -18,12 +20,6 @@ async function loadSpeciesData() {
                     ? path.join(value.dir, `${baseName}.gif`)
                     : path.join(value.dir, `${baseName}.png`);
                 return [key, img.replace(/\\/g, '/')];
-            })
-        );
-        specieBioImages = Object.fromEntries(
-            Object.entries(specieData).map(([key, value]) => {
-                const fileName = `${value.dir.toLowerCase()}.png`;
-                return [key, `${value.dir}/${fileName}`];
             })
         );
     } catch (err) {
