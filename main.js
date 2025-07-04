@@ -109,46 +109,16 @@ function generateRarity() {
     if (roll < 99) return 'Epico';
     return 'Lendario';
 }
-
-const eggSpecieMap = {
-    eggAve: 'Ave',
-    eggCriaturaMistica: 'Criatura Mística',
-    eggCriaturaSombria: 'Criatura Sombria',
-    eggDraconideo: 'Draconídeo',
-    eggFera: 'Fera',
-    eggMonstro: 'Monstro',
-    eggReptiloide: 'Reptilóide'
-};
-
-const specieData = {
-    'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
-    'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
-    'Ave': { dir: 'Ave', race: 'pidgly' },
-    'Criatura Mística': { dir: 'CriaturaMistica' },
-    'Criatura Sombria': { dir: 'CriaturaSombria' },
-    'Monstro': { dir: 'Monstro' },
-    'Fera': { dir: 'Fera', race: 'Foxyl' }
-};
-
-function loadSpeciesData() {
-    try {
-        const monsDir = path.join(__dirname, 'Assets', 'Mons');
-        const entries = fs.readdirSync(monsDir, { withFileTypes: true });
-        for (const entry of entries) {
-            if (!entry.isDirectory()) continue;
-            const dir = entry.name;
-            const existing = Object.keys(specieData).find(k => specieData[k].dir === dir);
-            const name = existing || dir;
-            if (!specieData[name]) {
-                specieData[name] = { dir };
-            }
-        }
-    } catch (err) {
-        console.error('Erro ao carregar espécies:', err);
-    }
-}
-
-loadSpeciesData();
+let eggSpecieMap = {};
+let specieData = {};
+let loadSpeciesData;
+(async () => {
+    const constants = await import('./scripts/constants.js');
+    eggSpecieMap = constants.eggSpecieMap;
+    specieData = constants.specieData;
+    loadSpeciesData = constants.loadSpeciesData;
+    await loadSpeciesData(__dirname);
+})();
 
 function generatePetFromEgg(eggId, rarity) {
     const specie = eggSpecieMap[eggId] || 'Ave';
@@ -1847,10 +1817,6 @@ ipcMain.handle('get-nests-data', async () => {
 
 ipcMain.handle('get-nest-price', async () => {
     return getNestPrice();
-});
-
-ipcMain.handle('get-species-data', async () => {
-    return specieData;
 });
 
 ipcMain.on('set-mute-state', (event, isMuted) => {
