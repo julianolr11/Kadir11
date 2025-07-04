@@ -65,7 +65,9 @@ function generateSpecie(attributes) {
         "Reptilóide": defense + speed,         // Favorece defesa e velocidade
         "Ave": speed + magic,                  // Favorece velocidade e magia
         "Criatura Mística": magic + life,      // Favorece magia e vida
-        "Criatura Sombria": attack + magic,    // Favorece ataque e magia (leve variação)
+        // Anteriormente a Criatura Sombria era favorecida por ataque e magia.
+        // Ajustado para usar defesa e magia conforme solicitado.
+        "Criatura Sombria": defense + magic,   // Favorece defesa e magia
         "Monstro": defense + life,             // Favorece defesa e vida
         "Fera": attack + defense               // Favorece ataque e defesa
     };
