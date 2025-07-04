@@ -180,6 +180,9 @@ function generatePetFromEgg(eggId, rarity) {
 
 app.whenReady().then(() => {
     console.log('Aplicativo iniciado');
+    petManager.cleanupOrphanPets().catch(err => {
+        console.error('Erro ao limpar pets órfãos:', err);
+    });
     if (store.get('coins') === undefined) {
         store.set('coins', 20);
     }
@@ -442,10 +445,24 @@ ipcMain.on('select-pet', async (event, petId) => {
 
 ipcMain.handle('delete-pet', async (event, petId) => {
     console.log('Recebido delete-pet com petId:', petId);
-    const result = await petManager.deletePet(petId);
-    console.log('Pet excluído:', result);
-    broadcastPenUpdate();
-    return result;
+    try {
+        const result = await petManager.deletePet(petId);
+        console.log('Pet excluído:', result);
+        broadcastPenUpdate();
+        return result;
+    } catch (err) {
+        console.error('Erro ao deletar pet:', err);
+        try {
+            if (typeof event.reply === 'function') {
+                event.reply('delete-pet-error', err.message);
+            } else {
+                event.sender.send('delete-pet-error', err.message);
+            }
+        } catch (e) {
+            console.error('Falha ao enviar mensagem de erro para o renderer:', e);
+        }
+        throw err;
+    }
 });
 
 ipcMain.on('rename-pet', async (event, data) => {

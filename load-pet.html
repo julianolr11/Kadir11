@@ -451,6 +451,8 @@
                     deleteOverlay.style.display = 'none';
                     petIdToDelete = null;
                     reloadPetList();
+                }).catch(err => {
+                    alert('Erro ao deletar pet: ' + err);
                 });
             }
         });
