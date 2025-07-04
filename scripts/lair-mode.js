@@ -77,6 +77,19 @@ function generateInternalWalls(){
     });
 }
 
+function placeMatrixRandomly(matrix, type){
+    const width=3, height=3;
+    const startX=Math.floor(Math.random()*(MAP_W-width-2))+1;
+    const startY=Math.floor(Math.random()*(MAP_H-height-2))+1;
+    matrix.forEach(([x,y])=>{
+        const tx=startX+x;
+        const ty=startY+y;
+        if(tx>=0&&ty>=0&&tx<MAP_W&&ty<MAP_H){
+            map[ty][tx]=type;
+        }
+    });
+}
+
 function generateDungeon(){
     map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
     for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_TOP'; map[MAP_H-1][x]='WALL_BOTTOM'; }
@@ -86,6 +99,7 @@ function generateDungeon(){
     map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
     map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
     generateInternalWalls();
+    placeMatrixRandomly([[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]], 'WALL_TOP');
     map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
