@@ -14,9 +14,9 @@ const tileMapping = {
     "WALL_LEFT": [2, 1],
     "WALL_RIGHT": [0, 1],
     "CORNER_TOP_LEFT": [5, 7],
-    "CORNER_TOP_RIGHT": [6, 7],
+    "CORNER_TOP_RIGHT": [7, 7],
     "CORNER_BOTTOM_LEFT": [5, 8],
-    "CORNER_BOTTOM_RIGHT": [6, 8],
+    "CORNER_BOTTOM_RIGHT": [7, 8],
     "TORCH": [5, 2],
     "CHEST": [4, 4],
     "MONSTER": [5, 5],
@@ -27,6 +27,28 @@ const tileMapping = {
     "BOX": [5, 3],
     "CAGE": [4, 3]
 };
+
+
+const autotileMap = {
+  0: "WALL_SINGLE",
+  1: "WALL_END_BOTTOM",
+  2: "WALL_END_LEFT",
+  3: "WALL_CORNER_BOTTOM_LEFT",
+  4: "WALL_END_TOP",
+  5: "WALL_VERTICAL",
+  6: "WALL_CORNER_TOP_LEFT",
+  7: "WALL_T_LEFT",
+  8: "WALL_END_RIGHT",
+  9: "WALL_CORNER_BOTTOM_RIGHT",
+  10: "WALL_HORIZONTAL",
+  11: "WALL_T_BOTTOM",
+  12: "WALL_CORNER_TOP_RIGHT",
+  13: "WALL_T_TOP",
+  14: "WALL_T_RIGHT",
+  15: "WALL_CROSS"
+};
+
+
 
 let canvas, ctx, tileset, playerSprite, bravuraText, buyBtn;
 let map = [];
@@ -77,7 +99,8 @@ function generateDungeon(){
     map[0][MAP_W-1]='CORNER_TOP_RIGHT';
     map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
     map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
-    generateInternalWalls();
+    generateMaze();
+    applyAutoTiling();
     map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
@@ -197,3 +220,57 @@ window.electronAPI.on('pet-data',(e,data)=>{
     }
     updateUI();
 });
+
+
+
+function getAutoTileType(x, y) {
+  const isWall = (tx, ty) => {
+    return map[ty]?.[tx]?.startsWith("WALL") || map[ty]?.[tx]?.startsWith("CORNER");
+  };
+
+  let code = 0;
+  if (isWall(x, y - 1)) code += 1;
+  if (isWall(x + 1, y)) code += 2;
+  if (isWall(x, y + 1)) code += 4;
+  if (isWall(x - 1, y)) code += 8;
+
+  return autotileMap[code] || "WALL_SINGLE";
+}
+
+
+function applyAutoTiling() {
+  for (let y = 1; y < MAP_H - 1; y++) {
+    for (let x = 1; x < MAP_W - 1; x++) {
+      if (map[y][x].startsWith("WALL") || map[y][x] === "WALL_PLACEHOLDER") {
+        map[y][x] = getAutoTileType(x, y);
+      }
+    }
+  }
+}
+
+
+
+function generateMaze() {
+  // Inicializa o mapa com parede
+  map = Array.from({ length: MAP_H }, () => Array(MAP_W).fill("WALL_TOP"));
+
+  function carve(x, y) {
+    map[y][x] = "FLOOR";
+
+    const dirs = [
+      [0, -2], [2, 0], [0, 2], [-2, 0]
+    ].sort(() => Math.random() - 0.5); // embaralhar direções
+
+    for (const [dx, dy] of dirs) {
+      const nx = x + dx, ny = y + dy;
+      if (nx > 0 && ny > 0 && nx < MAP_W - 1 && ny < MAP_H - 1 && map[ny][nx] === "WALL_PLACEHOLDER") {
+        map[y + dy / 2][x + dx / 2] = "FLOOR";
+map[ny][nx] = "FLOOR";
+
+        carve(nx, ny);
+      }
+    }
+  }
+
+  carve(1, 1); // começa do canto
+}
