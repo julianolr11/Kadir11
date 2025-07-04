@@ -92,6 +92,16 @@
         }
         #player-pet { left: 100px; transform: scaleX(-1); }
         #enemy-pet { right: 100px; transform: scaleX(1); }
+        .hit-effect {
+            position: absolute;
+            bottom: 120px;
+            width: 150px;
+            display: none;
+            pointer-events: none;
+            z-index: 2;
+        }
+        #player-hit { left: 100px; }
+        #enemy-hit { right: 100px; }
 
         .hud-container {
             position: absolute;
@@ -299,7 +309,9 @@
         </div>
 
         <img id="player-pet" class="pet" src="" alt="pet">
+        <img id="player-hit" class="hit-effect" src="Assets/train/hit.gif" alt="hit">
         <img id="enemy-pet" class="pet" src="" alt="inimigo">
+        <img id="enemy-hit" class="hit-effect" src="Assets/train/hit.gif" alt="hit">
 
         <div id="action-menu">
             <button id="fight-btn" class="button small-button">Lutar</button>
