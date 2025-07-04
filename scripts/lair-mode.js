@@ -21,8 +21,8 @@ const tileMapping = {
     "WALL_CROSS": [6, 2],
     "WALL_CORNER_TOP_LEFT": [0, 3],
     "WALL_CORNER_TOP_RIGHT": [1, 3],
-    "WALL_CORNER_BOTTOM_LEFT": [2, 3],
-    "WALL_CORNER_BOTTOM_RIGHT": [3, 3],
+    "WALL_CORNER_BOTTOM_LEFT": [2, 6],
+    "WALL_CORNER_BOTTOM_RIGHT": [2, 3],
     "WALL_END_TOP": [4, 3],
     "WALL_END_BOTTOM": [5, 3],
     "WALL_END_LEFT": [6, 3],
@@ -38,7 +38,7 @@ const tileMapping = {
     "WATER_SMALL": [0, 10],
     "DOOR": [3, 7],
     "BARRIL": [5, 4],
-    "BOX": [5, 3],
+    "BOX": [4, 4],
     "CAGE": [4, 3]
 };
 
