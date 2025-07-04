@@ -1,5 +1,8 @@
 console.log('Script do create-pet.js carregado');
 
+const fs = require('fs');
+const path = require('path');
+
 let specieData = {};
 let specieImages = {};
 let specieBioImages = {};
@@ -9,8 +12,12 @@ async function loadSpeciesData() {
         specieData = await window.electronAPI.getSpeciesData();
         specieImages = Object.fromEntries(
             Object.entries(specieData).map(([key, value]) => {
-                const fileName = `${value.dir.toLowerCase()}.png`;
-                return [key, `${value.dir}/${fileName}`];
+                const baseName = `${value.dir.toLowerCase()}`;
+                const gifPath = path.join('Assets', 'Mons', value.dir, `${baseName}.gif`);
+                const img = fs.existsSync(gifPath)
+                    ? path.join(value.dir, `${baseName}.gif`)
+                    : path.join(value.dir, `${baseName}.png`);
+                return [key, img.replace(/\\/g, '/')];
             })
         );
         specieBioImages = Object.fromEntries(
