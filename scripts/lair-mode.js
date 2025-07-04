@@ -44,40 +44,68 @@ function placeRandom(type){
     if(attempts<100) map[y][x]=type;
 }
 
-function generateInternalWalls(){
-    const patterns = [
-        // bloco completo 3x3
-        [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1],[0,2],[1,2],[2,2]],
-        // duas colunas nas extremidades
-        [[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]]
-    ];
-
-    const chosen = patterns[Math.floor(Math.random()*patterns.length)];
-    placeMatrixRandomly(chosen, 'WALL_TOP');
+function shuffle(array){
+    for(let i=array.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [array[i],array[j]]=[array[j],array[i]];
+    }
+    return array;
 }
 
-function placeMatrixRandomly(matrix, type){
-    const width=3, height=3;
-    const startX=Math.floor(Math.random()*(MAP_W-width-2))+1;
-    const startY=Math.floor(Math.random()*(MAP_H-height-2))+1;
-    matrix.forEach(([x,y])=>{
-        const tx=startX+x;
-        const ty=startY+y;
-        if(tx>=0&&ty>=0&&tx<MAP_W&&ty<MAP_H){
-            map[ty][tx]=type;
+function generateMazePaths(){
+    map = Array.from({length:MAP_H},()=>Array(MAP_W).fill('WALL'));
+
+    function carve(x,y){
+        map[y][x]='FLOOR';
+        const dirs=shuffle([[0,-1],[1,0],[0,1],[-1,0]]);
+        for(const [dx,dy] of dirs){
+            const nx=x+dx*2, ny=y+dy*2;
+            if(nx>0 && ny>0 && nx<MAP_W-1 && ny<MAP_H-1 && map[ny][nx]==='WALL'){
+                map[y+dy][x+dx]='FLOOR';
+                carve(nx,ny);
+            }
         }
-    });
+    }
+
+    carve(1,1);
 }
 
-function generateDungeon(){
-    map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('FLOOR'));
+function orientWalls(){
+    // bordas externas
     for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_TOP'; map[MAP_H-1][x]='WALL_BOTTOM'; }
     for(let y=0;y<MAP_H;y++){ map[y][0]='WALL_LEFT'; map[y][MAP_W-1]='WALL_RIGHT'; }
     map[0][0]='CORNER_TOP_LEFT';
     map[0][MAP_W-1]='CORNER_TOP_RIGHT';
     map[MAP_H-1][0]='CORNER_BOTTOM_LEFT';
     map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
-    generateInternalWalls();
+
+    // paredes internas
+    for(let y=1;y<MAP_H-1;y++){
+        for(let x=1;x<MAP_W-1;x++){
+            if(map[y][x]!=='WALL') continue;
+            const up=map[y-1][x]==='FLOOR';
+            const down=map[y+1][x]==='FLOOR';
+            const left=map[y][x-1]==='FLOOR';
+            const right=map[y][x+1]==='FLOOR';
+
+            if(up && left && !down && !right) map[y][x]='CORNER_BOTTOM_RIGHT';
+            else if(up && right && !down && !left) map[y][x]='CORNER_BOTTOM_LEFT';
+            else if(down && left && !up && !right) map[y][x]='CORNER_TOP_RIGHT';
+            else if(down && right && !up && !left) map[y][x]='CORNER_TOP_LEFT';
+            else if((left||right)&&!(up||down)) map[y][x]='WALL_TOP';
+            else if((up||down)&&!(left||right)) map[y][x]='WALL_LEFT';
+            else if(left && !up && !down && !right) map[y][x]='WALL_RIGHT';
+            else if(right && !up && !down && !left) map[y][x]='WALL_LEFT';
+            else if(up && !left && !right && !down) map[y][x]='WALL_BOTTOM';
+            else if(down && !left && !right && !up) map[y][x]='WALL_TOP';
+            else map[y][x]='WALL_TOP';
+        }
+    }
+}
+
+function generateDungeon(){
+    generateMazePaths();
+    orientWalls();
     map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
