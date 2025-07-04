@@ -130,6 +130,26 @@ const specieData = {
     'Fera': { dir: 'Fera', race: 'Foxyl' }
 };
 
+function loadSpeciesData() {
+    try {
+        const monsDir = path.join(__dirname, 'Assets', 'Mons');
+        const entries = fs.readdirSync(monsDir, { withFileTypes: true });
+        for (const entry of entries) {
+            if (!entry.isDirectory()) continue;
+            const dir = entry.name;
+            const existing = Object.keys(specieData).find(k => specieData[k].dir === dir);
+            const name = existing || dir;
+            if (!specieData[name]) {
+                specieData[name] = { dir };
+            }
+        }
+    } catch (err) {
+        console.error('Erro ao carregar espécies:', err);
+    }
+}
+
+loadSpeciesData();
+
 function generatePetFromEgg(eggId, rarity) {
     const specie = eggSpecieMap[eggId] || 'Ave';
     const info = specieData[specie] || {};
@@ -1816,6 +1836,10 @@ ipcMain.handle('get-nests-data', async () => {
 
 ipcMain.handle('get-nest-price', async () => {
     return getNestPrice();
+});
+
+ipcMain.handle('get-species-data', async () => {
+    return specieData;
 });
 
 ipcMain.on('set-mute-state', (event, isMuted) => {
