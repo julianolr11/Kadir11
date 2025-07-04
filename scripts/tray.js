@@ -94,7 +94,7 @@ function setImageWithFallback(imgElement, relativePath) {
     const penCanvas = document.getElementById('pen-canvas');
     const penCtx = penCanvas ? penCanvas.getContext('2d') : null;
     const tileset = new Image();
-    tileset.src = 'assets/tileset/tileset.png';
+    tileset.src = 'Assets/tileset/tileset.png';
     let penInfo = { size: 'small', maxPets: 3 };
     const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
 

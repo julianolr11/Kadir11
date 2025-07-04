@@ -1,12 +1,12 @@
 const nestsContainer = document.getElementById('nests-container');
 const eggIcons = {
-    eggAve: 'assets/tileset/ave_egg.png',
-    eggCriaturaMistica: 'assets/tileset/criaturamistica_egg.png',
-    eggCriaturaSombria: 'assets/tileset/criaturasombria_egg.png',
-    eggDraconideo: 'assets/tileset/draconideo_egg.png',
-    eggFera: 'assets/tileset/fera_egg.png',
-    eggMonstro: 'assets/tileset/monster_egg.png',
-    eggReptiloide: 'assets/tileset/reptiloide_egg.png'
+    eggAve: 'Assets/tileset/ave_egg.png',
+    eggCriaturaMistica: 'Assets/tileset/criaturamistica_egg.png',
+    eggCriaturaSombria: 'Assets/tileset/criaturasombria_egg.png',
+    eggDraconideo: 'Assets/tileset/draconideo_egg.png',
+    eggFera: 'Assets/tileset/fera_egg.png',
+    eggMonstro: 'Assets/tileset/monster_egg.png',
+    eggReptiloide: 'Assets/tileset/reptiloide_egg.png'
 };
 
 const eggIds = Object.keys(eggIcons);

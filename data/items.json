@@ -62,14 +62,14 @@
   {
     "id": "terrainMedium",
     "name": "Terreno Médio",
-    "icon": "assets/tileset/tileset.png",
+    "icon": "Assets/tileset/tileset.png",
     "description": "Comporta até 6 pets.",
     "effect": "Expande o cercado para 5x4 tiles internos"
   },
   {
     "id": "terrainLarge",
     "name": "Terreno Grande",
-    "icon": "assets/tileset/tileset.png",
+    "icon": "Assets/tileset/tileset.png",
     "description": "Comporta até 10 pets.",
     "effect": "Expande o cercado para 7x5 tiles internos"
   },
@@ -81,11 +81,11 @@
     "effect": "Permite chocar ovos"
   }
 ,
-  {"id":"eggAve","name":"Ovo de Ave","icon":"assets/tileset/ave_egg.png","description":"Um ovo de Ave","effect":"Chocar para obter um pet Ave"},
-  {"id":"eggCriaturaMistica","name":"Ovo de Criatura Mística","icon":"assets/tileset/criaturamistica_egg.png","description":"Um ovo de Criatura Mística","effect":"Chocar para obter um pet da espécie"},
-  {"id":"eggCriaturaSombria","name":"Ovo de Criatura Sombria","icon":"assets/tileset/criaturasombria_egg.png","description":"Um ovo de Criatura Sombria","effect":"Chocar para obter um pet da espécie"},
-  {"id":"eggDraconideo","name":"Ovo Draconídeo","icon":"assets/tileset/draconideo_egg.png","description":"Um ovo Draconídeo","effect":"Chocar para obter um pet da espécie"},
-  {"id":"eggFera","name":"Ovo de Fera","icon":"assets/tileset/fera_egg.png","description":"Um ovo de Fera","effect":"Chocar para obter um pet da espécie"},
-  {"id":"eggMonstro","name":"Ovo de Monstro","icon":"assets/tileset/monster_egg.png","description":"Um ovo de Monstro","effect":"Chocar para obter um pet da espécie"},
-  {"id":"eggReptiloide","name":"Ovo Reptilóide","icon":"assets/tileset/reptiloide_egg.png","description":"Um ovo Reptilóide","effect":"Chocar para obter um pet da espécie"}
+  {"id":"eggAve","name":"Ovo de Ave","icon":"Assets/tileset/ave_egg.png","description":"Um ovo de Ave","effect":"Chocar para obter um pet Ave"},
+  {"id":"eggCriaturaMistica","name":"Ovo de Criatura Mística","icon":"Assets/tileset/criaturamistica_egg.png","description":"Um ovo de Criatura Mística","effect":"Chocar para obter um pet da espécie"},
+  {"id":"eggCriaturaSombria","name":"Ovo de Criatura Sombria","icon":"Assets/tileset/criaturasombria_egg.png","description":"Um ovo de Criatura Sombria","effect":"Chocar para obter um pet da espécie"},
+  {"id":"eggDraconideo","name":"Ovo Draconídeo","icon":"Assets/tileset/draconideo_egg.png","description":"Um ovo Draconídeo","effect":"Chocar para obter um pet da espécie"},
+  {"id":"eggFera","name":"Ovo de Fera","icon":"Assets/tileset/fera_egg.png","description":"Um ovo de Fera","effect":"Chocar para obter um pet da espécie"},
+  {"id":"eggMonstro","name":"Ovo de Monstro","icon":"Assets/tileset/monster_egg.png","description":"Um ovo de Monstro","effect":"Chocar para obter um pet da espécie"},
+  {"id":"eggReptiloide","name":"Ovo Reptilóide","icon":"Assets/tileset/reptiloide_egg.png","description":"Um ovo Reptilóide","effect":"Chocar para obter um pet da espécie"}
 ]

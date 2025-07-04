@@ -310,7 +310,7 @@
         const penCanvas = document.getElementById('pen-canvas');
         const penCtx = penCanvas ? penCanvas.getContext('2d') : null;
         const tileset = new Image();
-        tileset.src = 'assets/tileset/tileset.png';
+        tileset.src = 'Assets/tileset/tileset.png';
         let penInfo = { size: 'small', maxPets: 3 };
         const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
 
@@ -410,7 +410,7 @@
                             <p><strong>Nível:</strong> ${pet.level}</p>
                             <p><strong>Raridade:</strong> ${formatRarity(pet.rarity)}</p>
                             <p><strong>Último Acesso:</strong> ${pet.lastAccessed ? formatDate(pet.lastAccessed) : 'Nunca'}</p>
-                            <p><img class="currency-icon" src="assets/icons/dna-kadir.png" alt="KP"> ${pet.kadirPoints ?? 0}</p>
+                            <p><img class="currency-icon" src="Assets/Icons/dna-kadir.png" alt="KP"> ${pet.kadirPoints ?? 0}</p>
                         </div>
                         <button class="delete-button" data-pet-id="${pet.petId}">
                             <img src="Assets/Icons/trash-can.svg" alt="Delete Icon" style="image-rendering: pixelated;" />
