@@ -82,13 +82,31 @@ function assignWallTiles(){
         for(let x=0;x<MAP_W;x++){
             if(map[y][x]!=='WALL') continue;
             const u=isWall(x,y-1), d=isWall(x,y+1), l=isWall(x-1,y), r=isWall(x+1,y);
-            if(u&&d&&l&&r) map[y][x]='WALL_CENTER';
-            else if(r&&d&&!l&&!u) map[y][x]='CORNER_TOP_LEFT';
-            else if(l&&d&&!r&&!u) map[y][x]='CORNER_TOP_RIGHT';
-            else if(r&&u&&!l&&!d) map[y][x]='CORNER_BOTTOM_LEFT';
-            else if(l&&u&&!r&&!d) map[y][x]='CORNER_BOTTOM_RIGHT';
-            else if((l||r)&&!(u||d)) map[y][x]='WALL_TOP';
-            else map[y][x]='WALL_LEFT';
+            if(u && d && l && r){
+                map[y][x] = 'WALL_CENTER';
+            }else if(!u && !l && r && d){
+                map[y][x] = 'CORNER_TOP_LEFT';
+            }else if(!u && !r && l && d){
+                map[y][x] = 'CORNER_TOP_RIGHT';
+            }else if(!d && !l && r && u){
+                map[y][x] = 'CORNER_BOTTOM_LEFT';
+            }else if(!d && !r && l && u){
+                map[y][x] = 'CORNER_BOTTOM_RIGHT';
+            }else if(!u && d && l && r){
+                map[y][x] = 'WALL_TOP';
+            }else if(!d && u && l && r){
+                map[y][x] = 'WALL_BOTTOM';
+            }else if(!l && u && d && r){
+                map[y][x] = 'WALL_LEFT';
+            }else if(!r && u && d && l){
+                map[y][x] = 'WALL_RIGHT';
+            }else if(l && r && !u && !d){
+                map[y][x] = 'WALL_TOP';
+            }else if(u && d && !l && !r){
+                map[y][x] = 'WALL_LEFT';
+            }else{
+                map[y][x] = 'WALL_CENTER';
+            }
         }
     }
     // bordas externas
