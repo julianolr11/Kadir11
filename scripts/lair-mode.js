@@ -98,6 +98,17 @@ function assignWallTiles(){
     map[MAP_H-1][MAP_W-1]='CORNER_BOTTOM_RIGHT';
 }
 
+function fillWallRect(x,y,w,h,hollow=false){
+    for(let j=y;j<y+h;j++){
+        if(j<0||j>=MAP_H) continue;
+        for(let i=x;i<x+w;i++){
+            if(i<0||i>=MAP_W) continue;
+            if(hollow && j>y && j<y+h-1 && i>x && i<x+w-1) continue;
+            map[j][i]='WALL';
+        }
+    }
+}
+
 function hasPath(){
     const start = {x:1, y:1};
     const goal = {x:MAP_W-2, y:MAP_H-2};
@@ -128,6 +139,8 @@ function hasPath(){
 function generateDungeon(){
     map = Array.from({length:MAP_H}, ()=>Array(MAP_W).fill('WALL'));
     carve(1,1);
+    // estruturas internas
+    fillWallRect(Math.floor(MAP_W/2)-2, Math.floor(MAP_H/2)-2, 5, 5, true);
     // garante caminho para a porta
     map[MAP_H-2][MAP_W-2]='FLOOR';
     map[MAP_H-2][MAP_W-3]='FLOOR';
