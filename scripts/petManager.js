@@ -265,8 +265,29 @@ async function deletePet(petId) {
         return { success: true };
     } catch (err) {
         console.error(`Erro ao deletar pet ${petId}:`, err);
-        throw err;
+        throw new Error(err.message);
     }
+}
+
+// Função opcional para limpar arquivos de pets órfãos ou corrompidos
+async function cleanupOrphanPets() {
+    await ensurePetsDir();
+    const validPets = await listPets();
+    const validFiles = new Set(validPets.map(p => p.fileName));
+    const files = await fs.readdir(petsDir);
+    const petFiles = files.filter(f => f.startsWith('pet_') && f.endsWith('.json'));
+    const removals = [];
+    for (const file of petFiles) {
+        if (!validFiles.has(file)) {
+            try {
+                await fs.unlink(path.join(petsDir, file));
+                removals.push(file);
+            } catch (err) {
+                console.error(`Erro ao remover arquivo órfão ${file}:`, err);
+            }
+        }
+    }
+    return removals;
 }
 
 module.exports = {
@@ -275,4 +296,5 @@ module.exports = {
     loadPet,
     updatePet,
     deletePet,
+    cleanupOrphanPets,
 };
