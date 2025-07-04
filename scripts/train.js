@@ -2,12 +2,12 @@ import { rarityGradients } from './constants.js';
 import { calculateMovePower } from './moveEffectiveness.js';
 
 const statusIcons = {
-    'queimado': 'Assets/icons/burning.png',
-    'envenenamento': 'Assets/icons/poison.png',
-    'sangramento': 'Assets/icons/bleed.png',
-    'dormencia': 'Assets/icons/sleep.png',
-    'congelamento': 'Assets/icons/freeze.png',
-    'paralisia': 'Assets/icons/paralyze.png',
+    'queimado': 'Assets/Icons/burning.png',
+    'envenenamento': 'Assets/Icons/poison.png',
+    'sangramento': 'Assets/Icons/bleed.png',
+    'dormencia': 'Assets/Icons/sleep.png',
+    'congelamento': 'Assets/Icons/freeze.png',
+    'paralisia': 'Assets/Icons/paralyze.png',
     'cura': 'Assets/Shop/health-potion.png'
 };
 console.log('train.js carregado');
@@ -146,7 +146,7 @@ function renderMoves(moves) {
             <td>${elementIcons}</td>
             <td>${calculateMovePower(move.power, pet.level, pet.maxHealth)}</td>
             <td>${effectHtml}</td>
-            <td><img src="assets/icons/dna-kadir.png" alt="KP" style="height:16px; vertical-align:middle; image-rendering:pixelated;"> ${displayCost}</td>
+            <td><img src="Assets/Icons/dna-kadir.png" alt="KP" style="height:16px; vertical-align:middle; image-rendering:pixelated;"> ${displayCost}</td>
             <td>${move.level}</td>
             <td><button class="button small-button action-button ${actionClass}">${action}</button></td>
         `;

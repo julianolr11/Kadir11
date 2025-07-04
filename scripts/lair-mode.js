@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if (playerSprite) playerSprite.style.transform = `scale(${SCALE})`;
 
     tileset=new Image();
-    tileset.src='assets/tileset/dungeon-tileset.png';
+    tileset.src='Assets/tileset/dungeon-tileset.png';
     tileset.onload=()=>{ drawMap(); drawPlayer(); };
     generateDungeon();
     document.addEventListener('keydown',handleKey);

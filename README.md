@@ -49,4 +49,4 @@ Alguns golpes podem aplicar condições especiais durante as batalhas. Os efeito
 - **Congelamento**: paralisa o pet por 1 a 3 turnos e só é removido por cura ou calor.
 - **Paralisia**: 50% de chance de não agir por 1 a 2 turnos, reduzindo um pouco a velocidade.
 
-Os ícones desses efeitos estão em `Assets/icons`.
+Os ícones desses efeitos estão em `Assets/Icons`.

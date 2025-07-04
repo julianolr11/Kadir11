@@ -3,7 +3,7 @@ const petsLayer = document.getElementById('pets-layer');
 const nestsContainer = document.getElementById('nests-container');
 const penCtx = penCanvas ? penCanvas.getContext('2d') : null;
 const tileset = new Image();
-tileset.src = 'assets/tileset/tileset.png';
+tileset.src = 'Assets/tileset/tileset.png';
 let penInfo = { size: 'small', maxPets: 3 };
 const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
 
