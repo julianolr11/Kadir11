@@ -80,9 +80,14 @@ function updateSprites(dt) {
         if (!sp.moving) {
             const col = Math.floor(Math.random() * dims.w);
             const row = Math.floor(Math.random() * dims.h);
-            sp.targetX = (col + 1) * 32;
-            sp.targetY = (row + 1) * 32;
+            const newX = (col + 1) * 32;
+            const newY = (row + 1) * 32;
+            sp.targetX = newX;
+            sp.targetY = newY;
             sp.moving = true;
+            if (sp.img) {
+                sp.img.classList.toggle('flipped', newX > sp.x);
+            }
         }
 
         const dx = sp.targetX - sp.x;
