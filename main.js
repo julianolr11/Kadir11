@@ -109,26 +109,16 @@ function generateRarity() {
     if (roll < 99) return 'Epico';
     return 'Lendario';
 }
-
-const eggSpecieMap = {
-    eggAve: 'Ave',
-    eggCriaturaMistica: 'Criatura Mística',
-    eggCriaturaSombria: 'Criatura Sombria',
-    eggDraconideo: 'Draconídeo',
-    eggFera: 'Fera',
-    eggMonstro: 'Monstro',
-    eggReptiloide: 'Reptilóide'
-};
-
-const specieData = {
-    'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
-    'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
-    'Ave': { dir: 'Ave', race: 'pidgly' },
-    'Criatura Mística': { dir: 'CriaturaMistica' },
-    'Criatura Sombria': { dir: 'CriaturaSombria' },
-    'Monstro': { dir: 'Monstro' },
-    'Fera': { dir: 'Fera', race: 'Foxyl' }
-};
+let eggSpecieMap = {};
+let specieData = {};
+let loadSpeciesData;
+(async () => {
+    const constants = await import('./scripts/constants.js');
+    eggSpecieMap = constants.eggSpecieMap;
+    specieData = constants.specieData;
+    loadSpeciesData = constants.loadSpeciesData;
+    await loadSpeciesData(__dirname);
+})();
 
 function generatePetFromEgg(eggId, rarity) {
     const specie = eggSpecieMap[eggId] || 'Ave';
@@ -144,9 +134,20 @@ function generatePetFromEgg(eggId, rarity) {
     let statusImage = '';
     let bioImage = '';
     if (info.race) {
-        const base = info.element ? `${info.dir}/${info.element}/${info.race}` : `${info.dir}/${info.race}`;
-        statusImage = `${base}/front.gif`;
-        bioImage = `${base}/${info.race}.png`;
+        const base = info.element
+            ? path.posix.join(info.dir, info.element, info.race)
+            : path.posix.join(info.dir, info.race);
+        const monsBase = path.join(__dirname, 'Assets', 'Mons');
+        const frontGif = path.join(monsBase, base, 'front.gif');
+        const raceGif = path.join(monsBase, base, `${info.race}.gif`);
+        if (fs.existsSync(frontGif)) {
+            statusImage = path.posix.join(base, 'front.gif');
+        } else if (fs.existsSync(raceGif)) {
+            statusImage = path.posix.join(base, `${info.race}.gif`);
+        } else {
+            statusImage = path.posix.join(base, `${info.race}.png`);
+        }
+        bioImage = path.posix.join(base, `${info.race}.png`);
     } else if (info.dir) {
         statusImage = `${info.dir}/${info.dir.toLowerCase()}.png`;
         bioImage = `${info.dir}/${info.dir.toLowerCase()}.png`;

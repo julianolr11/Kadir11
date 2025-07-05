@@ -1,32 +1,31 @@
 console.log('Script do create-pet.js carregado');
 
-// Informações de pasta e raça para cada espécie
-const specieData = {
-    'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
-    'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
-    'Ave': { dir: 'Ave', race: 'pidgly' },
-    'Criatura Mística': { dir: 'CriaturaMistica' },
-    'Criatura Sombria': { dir: 'CriaturaSombria' },
-    'Monstro': { dir: 'Monstro' },
-    'Fera': { dir: 'Fera', race: 'Foxyl' }
-};
+const fs = require('fs');
+const path = require('path');
 
-// Gera o caminho da imagem base para cada espécie
-const specieImages = Object.fromEntries(
-    Object.entries(specieData).map(([key, value]) => {
-        const fileName = `${value.dir.toLowerCase()}.png`;
-        const path = `${value.dir}/${fileName}`;
-        return [key, path];
-    })
-);
+let specieData = {};
+let specieImages = {};
+let specieBioImages = {};
 
-// Imagem em alta resolução de cada espécie para exibir na seção de biografia
-const specieBioImages = Object.fromEntries(
-    Object.entries(specieData).map(([key, value]) => {
-        const fileName = `${value.dir.toLowerCase()}.png`;
-        return [key, `${value.dir}/${fileName}`];
-    })
-);
+async function loadSpeciesData() {
+    try {
+        const constants = await import('./constants.js');
+        specieData = constants.specieData;
+        specieBioImages = constants.specieBioImages;
+        specieImages = Object.fromEntries(
+            Object.entries(specieData).map(([key, value]) => {
+                const baseName = `${value.dir.toLowerCase()}`;
+                const gifPath = path.join('Assets', 'Mons', value.dir, `${baseName}.gif`);
+                const img = fs.existsSync(gifPath)
+                    ? path.join(value.dir, `${baseName}.gif`)
+                    : path.join(value.dir, `${baseName}.png`);
+                return [key, img.replace(/\\/g, '/')];
+            })
+        );
+    } catch (err) {
+        console.error('Erro ao obter species data:', err);
+    }
+}
 
 // Perguntas carregadas de data/questions.json
 
@@ -57,7 +56,7 @@ function generateSpecie(attributes) {
     const { attack, defense, speed, magic, life } = attributes;
 
     // Lista de todas as espécies
-    const species = ["Draconídeo", "Reptilóide", "Ave", "Criatura Mística", "Criatura Sombria", "Monstro", "Fera"];
+    const species = Object.keys(specieData);
 
     // Calcular um "peso" baseado nos atributos pra influenciar levemente a escolha
     const weights = {
@@ -323,7 +322,8 @@ function initQuiz() {
     showQuestion();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSpeciesData();
     const startButton = document.getElementById('start-quiz-button');
     const introContainer = document.getElementById('intro-container');
     const quizContainer = document.getElementById('create-pet-container');
