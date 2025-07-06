@@ -1,27 +1,15 @@
 console.log('Script do create-pet.js carregado');
 
-const fs = require('fs');
-const path = require('path');
-
 let specieData = {};
 let specieImages = {};
 let specieBioImages = {};
 
 async function loadSpeciesData() {
     try {
-        const constants = await import('./constants.js');
-        specieData = constants.specieData;
-        specieBioImages = constants.specieBioImages;
-        specieImages = Object.fromEntries(
-            Object.entries(specieData).map(([key, value]) => {
-                const baseName = `${value.dir.toLowerCase()}`;
-                const gifPath = path.join('Assets', 'Mons', value.dir, `${baseName}.gif`);
-                const img = fs.existsSync(gifPath)
-                    ? path.join(value.dir, `${baseName}.gif`)
-                    : path.join(value.dir, `${baseName}.png`);
-                return [key, img.replace(/\\/g, '/')];
-            })
-        );
+        const info = await window.electronAPI.getSpeciesInfo();
+        specieData = info.specieData;
+        specieBioImages = info.specieBioImages;
+        specieImages = info.specieImages;
     } catch (err) {
         console.error('Erro ao obter species data:', err);
     }
