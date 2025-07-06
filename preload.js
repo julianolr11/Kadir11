@@ -1,6 +1,25 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
+const path = require('path');
 
 console.log('preload.js sendo executado');
+
+async function getSpeciesInfo() {
+    const constants = await import('./scripts/constants.js');
+    await constants.loadSpeciesData(__dirname);
+    const { specieData, specieBioImages } = constants;
+    const specieImages = Object.fromEntries(
+        Object.entries(specieData).map(([key, value]) => {
+            const baseName = `${value.dir.toLowerCase()}`;
+            const gifPath = path.join(__dirname, 'Assets', 'Mons', value.dir, `${baseName}.gif`);
+            const img = fs.existsSync(gifPath)
+                ? path.posix.join(value.dir, `${baseName}.gif`)
+                : path.posix.join(value.dir, `${baseName}.png`);
+            return [key, img.replace(/\\/g, '/')];
+        })
+    );
+    return { specieData, specieBioImages, specieImages };
+}
 
 // Expor o electronAPI com os canais IPC
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -153,7 +172,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     closeHatchWindow: () => {
         console.log('Enviando close-hatch-window');
         ipcRenderer.send('close-hatch-window');
-    }
+    },
+    getSpeciesInfo
 });
 
 console.log('electronAPI exposto com sucesso');
