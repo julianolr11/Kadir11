@@ -18,7 +18,7 @@ const tileMapping = {
     "CORNER_BOTTOM_LEFT": [5, 8],
     "CORNER_BOTTOM_RIGHT": [6, 8],
     "TORCH": [5, 2],
-    "CHEST": [4, 4],
+    "CHEST": [8, 6],
     "MONSTER": [5, 5],
     "WATER_LARGE": [0, 9],
     "WATER_SMALL": [0, 10],
@@ -33,6 +33,13 @@ let map = [];
 let player = {x:1,y:1};
 let moves = 0;
 let level = 1;
+
+const CONSUMABLES = ['healthPotion','meat','staminaPotion','chocolate'];
+const ACCESSORIES = ['finger','turtleShell','feather','orbe'];
+const EGGS = [
+    'eggAve','eggCriaturaMistica','eggCriaturaSombria',
+    'eggDraconideo','eggFera','eggMonstro','eggReptiloide'
+];
 
 function placeRandom(type){
     let x,y; let attempts=0;
@@ -109,6 +116,8 @@ function generateDungeon(){
     map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
+    placeRandom('CHEST');
+    for(let i=0;i<2;i++) placeRandom('TORCH');
     player.x=1; player.y=1;
 }
 
@@ -132,6 +141,29 @@ function updateUI(){
     if(bravuraText) bravuraText.textContent = `Bravura: ${moves}`;
 }
 
+function openChest(){
+    if(Math.random()<0.5){
+        const coins=Math.floor(Math.random()*4)+1;
+        window.electronAPI.send('reward-pet',{coins});
+    }
+    if(Math.random()<0.25){
+        const id=CONSUMABLES[Math.floor(Math.random()*CONSUMABLES.length)];
+        window.electronAPI.send('reward-pet',{item:id,qty:1});
+    }
+    if(Math.random()<0.2){
+        const coins=Math.floor(Math.random()*6)+5;
+        window.electronAPI.send('reward-pet',{coins});
+    }
+    if(Math.random()<0.04){
+        const id=ACCESSORIES[Math.floor(Math.random()*ACCESSORIES.length)];
+        window.electronAPI.send('reward-pet',{item:id,qty:1});
+    }
+    if(Math.random()<0.01){
+        const id=EGGS[Math.floor(Math.random()*EGGS.length)];
+        window.electronAPI.send('reward-pet',{item:id,qty:1});
+    }
+}
+
 function handleTile(tile){
     if(tile==='MONSTER'){
         window.electronAPI.send('open-journey-scene-window', {
@@ -141,6 +173,14 @@ function handleTile(tile){
     }else if(tile==='BOX'){
         window.electronAPI.send('reward-pet',{item:'meat',qty:1});
         map[player.y][player.x]='FLOOR';
+    }else if(tile==='CHEST'){
+        openChest();
+        map[player.y][player.x]='FLOOR';
+    }else if(tile==='TORCH'){
+        window.electronAPI.send('reward-pet',{bravura:10});
+        moves += 10;
+        map[player.y][player.x]='FLOOR';
+        updateUI();
     }else if(tile==='DOOR'){
         if(level<10){
             level++;
@@ -155,7 +195,11 @@ function handleTile(tile){
 }
 
 function attemptMove(dx,dy){
-    if(moves<=0) return;
+    if(moves<=0){
+        alert('Lhe falta bravura para prosseguir');
+        window.close();
+        return;
+    }
     const nx=player.x+dx, ny=player.y+dy;
     if(nx<0||ny<0||nx>=MAP_W||ny>=MAP_H) return;
     const tile=map[ny][nx];
@@ -224,4 +268,8 @@ window.electronAPI.on('pet-data',(e,data)=>{
         playerSprite.src=`Assets/Mons/${img}`;
     }
     updateUI();
+    if(moves<=0){
+        alert('Lhe falta bravura para prosseguir');
+        window.close();
+    }
 });
