@@ -2,7 +2,7 @@
   {
     "id": "burn",
     "name": "Queimadura",
-    "icon": "Assets/Icons/burning.png",
+    "icon": "Assets/Icons/burn.png",
     "duration": "2-3",
     "damage": "-2% a -3% da vida total por turno",
     "extra": "Pode impedir regeneração durante o efeito"
