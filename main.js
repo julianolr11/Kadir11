@@ -111,11 +111,15 @@ function generateRarity() {
 }
 let eggSpecieMap = {};
 let specieData = {};
+let specieImages = {};
+let specieBioImages = {};
 let loadSpeciesData;
 (async () => {
     const constants = await import('./scripts/constants.js');
     eggSpecieMap = constants.eggSpecieMap;
     specieData = constants.specieData;
+    specieImages = constants.specieImages;
+    specieBioImages = constants.specieBioImages;
     loadSpeciesData = constants.loadSpeciesData;
     await loadSpeciesData(__dirname);
 })();
@@ -1817,6 +1821,11 @@ ipcMain.handle('get-nests-data', async () => {
 
 ipcMain.handle('get-nest-price', async () => {
     return getNestPrice();
+});
+
+ipcMain.handle('get-species-info', async () => {
+    await loadSpeciesData(__dirname);
+    return { specieData, specieBioImages, specieImages };
 });
 
 ipcMain.on('set-mute-state', (event, isMuted) => {
