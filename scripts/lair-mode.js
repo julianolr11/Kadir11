@@ -8,24 +8,24 @@ const MAP_W = 26;
 const MAP_H = 20;
 
 const tileMapping = {
-    "FLOOR": [1, 1],
-    "WALL_TOP": [1, 2],
-    "WALL_BOTTOM": [5, 0],
-    "WALL_LEFT": [2, 1],
-    "WALL_RIGHT": [0, 1],
-    "CORNER_TOP_LEFT": [5, 7],
-    "CORNER_TOP_RIGHT": [6, 7],
-    "CORNER_BOTTOM_LEFT": [5, 8],
-    "CORNER_BOTTOM_RIGHT": [6, 8],
-    "TORCH": [5, 2],
-    "CHEST": [8, 6],
+    "FLOOR": [3, 6],
+    "WALL_TOP": [0, 1],
+    "WALL_BOTTOM": [4, 1],
+    "WALL_LEFT": [1, 0],
+    "WALL_RIGHT": [1, 11],
+    "CORNER_TOP_LEFT": [0, 0],
+    "CORNER_TOP_RIGHT": [0, 11],
+    "CORNER_BOTTOM_LEFT": [4, 0],
+    "CORNER_BOTTOM_RIGHT": [4, 11],
+    "TORCH": [1, 6],
+    "CHEST": [3, 4],
     "MONSTER": [5, 5],
     "WATER_LARGE": [0, 9],
     "WATER_SMALL": [0, 10],
-    "DOOR": [3, 7],
-    "BARRIL": [5, 4],
-    "BOX": [5, 3],
-    "CAGE": [4, 3]
+    "DOOR": [6, 5],
+    "BARRIL": [3, 6],
+    "BOX": [3, 5],
+    "CAGE": [6, 6]
 };
 
 let canvas, ctx, tileset, playerSprite, bravuraText, buyBtn;
