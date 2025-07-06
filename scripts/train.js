@@ -2,7 +2,7 @@ import { rarityGradients } from './constants.js';
 import { calculateMovePower } from './moveEffectiveness.js';
 
 const statusIcons = {
-    'queimado': 'Assets/Icons/burning.png',
+    'queimado': 'Assets/Icons/burn.png',
     'envenenamento': 'Assets/Icons/poison.png',
     'sangramento': 'Assets/Icons/bleed.png',
     'dormencia': 'Assets/Icons/sleep.png',
