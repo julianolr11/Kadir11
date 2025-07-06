@@ -116,8 +116,10 @@ function generateDungeon(){
     map[MAP_H-2][MAP_W-2]='DOOR';
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
-    placeRandom('CHEST');
-    for(let i=0;i<2;i++) placeRandom('TORCH');
+    const chestCount=Math.floor(Math.random()*2)+1; // 1 a 2 baús
+    for(let i=0;i<chestCount;i++) placeRandom('CHEST');
+    const torchCount=Math.floor(Math.random()*3)+1; // 1 a 3 tochas
+    for(let i=0;i<torchCount;i++) placeRandom('TORCH');
     player.x=1; player.y=1;
 }
 
