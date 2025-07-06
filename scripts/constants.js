@@ -40,6 +40,11 @@ export const specieBioImages = {
     'Fera': 'Fera/fera.png'
 };
 
+// Caminho da imagem de destaque de cada espécie para ser exibida na seleção
+// de pets. É preenchido pela função loadSpeciesData usando o sistema de
+// arquivos do processo principal.
+export let specieImages = {};
+
 export const specieData = {
     'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
     'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
@@ -78,6 +83,12 @@ export async function loadSpeciesData(baseDir = '.') {
             if (!specieData[name]) {
                 specieData[name] = { dir };
             }
+            const baseName = dir.toLowerCase();
+            const gifPath = path.join(monsDir, dir, `${baseName}.gif`);
+            const img = fs.existsSync(gifPath)
+                ? path.posix.join(dir, `${baseName}.gif`)
+                : path.posix.join(dir, `${baseName}.png`);
+            specieImages[name] = img.replace(/\\/g, '/');
         }
     } catch (err) {
         console.error('Erro ao carregar espécies:', err);

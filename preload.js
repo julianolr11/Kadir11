@@ -1,24 +1,13 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const fs = require('fs');
-const path = require('path');
+// Evite importar módulos nativos quando o preload for empacotado em um sandbox
+// pois alguns ambientes podem não disponibilizar o módulo `fs`. As operações
+// de leitura de arquivos serão tratadas no processo principal via IPC.
 
 console.log('preload.js sendo executado');
 
+// Recupera as informações de espécie através do processo principal
 async function getSpeciesInfo() {
-    const constants = await import('./scripts/constants.js');
-    await constants.loadSpeciesData(__dirname);
-    const { specieData, specieBioImages } = constants;
-    const specieImages = Object.fromEntries(
-        Object.entries(specieData).map(([key, value]) => {
-            const baseName = `${value.dir.toLowerCase()}`;
-            const gifPath = path.join(__dirname, 'Assets', 'Mons', value.dir, `${baseName}.gif`);
-            const img = fs.existsSync(gifPath)
-                ? path.posix.join(value.dir, `${baseName}.gif`)
-                : path.posix.join(value.dir, `${baseName}.png`);
-            return [key, img.replace(/\\/g, '/')];
-        })
-    );
-    return { specieData, specieBioImages, specieImages };
+    return ipcRenderer.invoke('get-species-info');
 }
 
 // Expor o electronAPI com os canais IPC
