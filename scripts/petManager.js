@@ -50,16 +50,14 @@ function ensureStatusImage(pet) {
     const relativeDir = basePath ? path.posix.dirname(basePath) : null;
 
     if (relativeDir && relativeDir !== '.') {
-        if (!pet.statusImage) {
-            const baseDir = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir);
-            const gifPath = path.join(baseDir, 'front.gif');
-            const pngPath = path.join(baseDir, 'front.png');
+        const baseDir = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir);
+        const gifPath = path.join(baseDir, 'front.gif');
+        const pngPath = path.join(baseDir, 'front.png');
 
-            if (fsSync.existsSync(gifPath)) {
-                pet.statusImage = path.posix.join(relativeDir, 'front.gif');
-            } else if (fsSync.existsSync(pngPath)) {
-                pet.statusImage = path.posix.join(relativeDir, 'front.png');
-            }
+        if (fsSync.existsSync(gifPath)) {
+            pet.statusImage = path.posix.join(relativeDir, 'front.gif');
+        } else if (fsSync.existsSync(pngPath)) {
+            pet.statusImage = path.posix.join(relativeDir, 'front.png');
         }
     }
 
