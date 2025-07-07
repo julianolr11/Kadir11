@@ -454,6 +454,14 @@ ipcMain.handle('delete-pet', async (event, petId) => {
         const result = await petManager.deletePet(petId);
         console.log('Pet excluído:', result);
         broadcastPenUpdate();
+
+        // Verificar se ainda existem pets após a exclusão
+        const remaining = await petManager.listPets();
+        if (remaining.length === 0) {
+            currentPet = null;
+            windowManager.closeTrayWindow();
+        }
+
         return result;
     } catch (err) {
         console.error('Erro ao deletar pet:', err);
