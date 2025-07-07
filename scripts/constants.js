@@ -52,7 +52,11 @@ export const specieData = {
     'Criatura Mística': { dir: 'CriaturaMistica' },
     'Criatura Sombria': { dir: 'CriaturaSombria' },
     'Monstro': { dir: 'Monstro' },
-    'Fera': { dir: 'Fera', race: 'Foxyl' }
+    'Fera': { dir: 'Fera', race: 'Foxyl' },
+    'Pidgly': { dir: 'Ave', race: 'Pidgly', element: 'terra' },
+    'Ashfang': { dir: 'Fera', race: 'Ashfang', element: 'fogo' },
+    'Ignis': { dir: 'Ave', race: 'ignis', element: 'fogo' },
+    'Mawthorn': { dir: 'Monstro', race: 'Mawthorn', element: 'agua' }
 };
 
 export const eggSpecieMap = {
