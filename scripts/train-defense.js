@@ -159,7 +159,6 @@ function evaluateHit() {
     if (attempts < maxAttempts) {
         setTimeout(() => {
             if (shieldImg) shieldImg.src = 'Assets/train/shield-1.png';
-            ballFromRight = !ballFromRight;
             startPointer();
         }, 500);
     } else {
