@@ -106,22 +106,27 @@ function orientWalls(){
     for(let y=1;y<MAP_H-1;y++){
         for(let x=1;x<MAP_W-1;x++){
             if(map[y][x]!=='WALL') continue;
-            const up=map[y-1][x]==='FLOOR';
-            const down=map[y+1][x]==='FLOOR';
-            const left=map[y][x-1]==='FLOOR';
-            const right=map[y][x+1]==='FLOOR';
+            const up   = map[y-1][x] !== 'FLOOR';
+            const down = map[y+1][x] !== 'FLOOR';
+            const left = map[y][x-1] !== 'FLOOR';
+            const right= map[y][x+1] !== 'FLOOR';
 
-            if(up && left && !down && !right) map[y][x]='CORNER_BOTTOM_RIGHT';
-            else if(up && right && !down && !left) map[y][x]='CORNER_BOTTOM_LEFT';
-            else if(down && left && !up && !right) map[y][x]='CORNER_TOP_RIGHT';
-            else if(down && right && !up && !left) map[y][x]='CORNER_TOP_LEFT';
-            else if((left||right)&&!(up||down)) map[y][x]='WALL_TOP';
-            else if((up||down)&&!(left||right)) map[y][x]='WALL_LEFT';
-            else if(left && !up && !down && !right) map[y][x]='WALL_RIGHT';
-            else if(right && !up && !down && !left) map[y][x]='WALL_LEFT';
-            else if(up && !left && !right && !down) map[y][x]='WALL_BOTTOM';
-            else if(down && !left && !right && !up) map[y][x]='WALL_TOP';
-            else map[y][x]='WALL_TOP';
+            if(up && down && left && right) map[y][x]='WALL_CROSS';
+            else if(up && left && right && !down) map[y][x]='WALL_T_BOTTOM';
+            else if(down && left && right && !up) map[y][x]='WALL_T_TOP';
+            else if(left && up && down && !right) map[y][x]='WALL_T_RIGHT';
+            else if(right && up && down && !left) map[y][x]='WALL_T_LEFT';
+            else if(up && left && !down && !right) map[y][x]='WALL_CORNER_BOTTOM_RIGHT';
+            else if(up && right && !down && !left) map[y][x]='WALL_CORNER_BOTTOM_LEFT';
+            else if(down && left && !up && !right) map[y][x]='WALL_CORNER_TOP_RIGHT';
+            else if(down && right && !up && !left) map[y][x]='WALL_CORNER_TOP_LEFT';
+            else if(left && right && !up && !down) map[y][x]='WALL_HORIZONTAL';
+            else if(up && down && !left && !right) map[y][x]='WALL_VERTICAL';
+            else if(up && !down && !left && !right) map[y][x]='WALL_END_TOP';
+            else if(down && !up && !left && !right) map[y][x]='WALL_END_BOTTOM';
+            else if(left && !right && !up && !down) map[y][x]='WALL_END_LEFT';
+            else if(right && !left && !up && !down) map[y][x]='WALL_END_RIGHT';
+            else map[y][x]='WALL_SINGLE';
         }
     }
 }
