@@ -49,6 +49,7 @@ let map = [];
 let player = {x:1,y:1};
 let moves = 0;
 let level = 1;
+let exitPos = null;
 
 const CONSUMABLES = ['healthPotion','meat','staminaPotion','chocolate'];
 const ACCESSORIES = ['finger','turtleShell','feather','orbe'];
@@ -91,6 +92,24 @@ function generateMazePaths(){
     }
 
     carve(1,1);
+}
+
+// Break long straight corridors by opening additional random passages
+// between existing paths to create loops in the dungeon.
+function addRandomLoops(){
+    const attempts=Math.floor((MAP_W+MAP_H)/2);
+    for(let i=0;i<attempts;i++){
+        const x=Math.floor(Math.random()*(MAP_W-2))+1;
+        const y=Math.floor(Math.random()*(MAP_H-2))+1;
+        if(map[y][x]==='WALL'){
+            let open=0;
+            if(map[y-1][x]==='FLOOR') open++;
+            if(map[y+1][x]==='FLOOR') open++;
+            if(map[y][x-1]==='FLOOR') open++;
+            if(map[y][x+1]==='FLOOR') open++;
+            if(open>=2) map[y][x]='FLOOR';
+        }
+    }
 }
 
 // Remove the extra interior walls generated along the last column/row
@@ -152,8 +171,26 @@ function placeRandomExit(){
         options.push({x,y:MAP_H-1,insideY:MAP_H-2});
     }
     const choice=options[Math.floor(Math.random()*options.length)];
+    exitPos = choice;
     map[choice.y][choice.x]='DOOR';
     map[choice.insideY][choice.x]='FLOOR';
+}
+
+// Use the empty border corridor for obstacles or treasures so the maze feels
+// less vacant after trimming the duplicated walls.
+function populateBorder(){
+    for(let x=1;x<MAP_W-1;x++){
+        if(exitPos && exitPos.insideY===MAP_H-2 && exitPos.x===x) continue;
+        if(map[MAP_H-2][x]==='FLOOR' && Math.random()<0.4){
+            map[MAP_H-2][x]=Math.random()<0.5?'BARRIL':'BOX';
+        }
+    }
+    for(let y=1;y<MAP_H-1;y++){
+        if(exitPos && exitPos.insideY===y && exitPos.x===MAP_W-2) continue;
+        if(map[y][MAP_W-2]==='FLOOR' && Math.random()<0.4){
+            map[y][MAP_W-2]=Math.random()<0.5?'BARRIL':'BOX';
+        }
+    }
 }
 
 // Generate a new maze level and populate it with items and enemies.
@@ -161,9 +198,11 @@ function placeRandomExit(){
 // place an exit on a random outer wall.
 function generateDungeon(){
     generateMazePaths();
+    addRandomLoops();
     trimExtraWalls();
     orientWalls();
     placeRandomExit();
+    populateBorder();
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
     const chestCount=Math.floor(Math.random()*2)+1; // 1 a 2 baús
