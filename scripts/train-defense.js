@@ -34,7 +34,13 @@ function startPointer() {
     pointerPos = ballFromRight ? 100 : 0;
     direction = ballFromRight ? -1 : 1;
     pointer.classList.toggle('flipped', ballFromRight);
-    if (ball) ball.classList.toggle('flipped', ballFromRight);
+    if (ball) {
+        ball.classList.toggle('flipped', ballFromRight);
+    }
+    if (ball && gameArea) {
+        const startRight = gameArea.offsetWidth - ball.offsetWidth;
+        ball.style.left = ballFromRight ? `${startRight}px` : '0px';
+    }
     const baseSpeed = getPointerSpeed(pet?.level || 1);
 
     function animate() {
@@ -60,7 +66,7 @@ function startPointer() {
             const startRight = gameArea.offsetWidth - ball.offsetWidth;
             let ballLeft;
             if (ballFromRight) {
-                const progress = (pointerPos - 50) / 50; // 1 to 0
+                const progress = (100 - pointerPos) / 50; // 0 to 1
                 ballLeft = startRight - progress * (startRight - center);
             } else {
                 const progress = pointerPos / 50; // 0 to 1
