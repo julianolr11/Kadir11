@@ -93,6 +93,18 @@ function generateMazePaths(){
     carve(1,1);
 }
 
+// Remove the extra interior walls generated along the last column/row
+// before applying orientation so the map doesn't end up with doubled
+// borders.
+function trimExtraWalls(){
+    for(let x=0;x<MAP_W;x++){
+        if(map[MAP_H-2][x]==='WALL') map[MAP_H-2][x]='FLOOR';
+    }
+    for(let y=0;y<MAP_H;y++){
+        if(map[y][MAP_W-2]==='WALL') map[y][MAP_W-2]='FLOOR';
+    }
+}
+
 function orientWalls(){
     // bordas externas
     for(let x=0;x<MAP_W;x++){ map[0][x]='WALL_TOP'; map[MAP_H-1][x]='WALL_BOTTOM'; }
@@ -131,10 +143,27 @@ function orientWalls(){
     }
 }
 
+// Choose a random position on the outer horizontal walls to place the exit
+// and clear the tile inside the maze so the player can reach it.
+function placeRandomExit(){
+    const options=[];
+    for(let x=1;x<MAP_W-1;x++){
+        options.push({x,y:0,insideY:1});
+        options.push({x,y:MAP_H-1,insideY:MAP_H-2});
+    }
+    const choice=options[Math.floor(Math.random()*options.length)];
+    map[choice.y][choice.x]='DOOR';
+    map[choice.insideY][choice.x]='FLOOR';
+}
+
+// Generate a new maze level and populate it with items and enemies.
+// After carving the maze we remove duplicated borders, orient the walls and
+// place an exit on a random outer wall.
 function generateDungeon(){
     generateMazePaths();
+    trimExtraWalls();
     orientWalls();
-    map[MAP_H-2][MAP_W-2]='DOOR';
+    placeRandomExit();
     for(let i=0;i<5;i++) placeRandom('MONSTER');
     for(let i=0;i<3;i++) placeRandom('BOX');
     const chestCount=Math.floor(Math.random()*2)+1; // 1 a 2 baús
