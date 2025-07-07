@@ -40,11 +40,15 @@ function generateRarity() {
 }
 
 // Função ajustada para definir a espécie de forma mais aleatória
-function generateSpecie(attributes) {
+function generateSpecie(attributes, element) {
     const { attack, defense, speed, magic, life } = attributes;
 
-    // Lista de todas as espécies
-    const species = Object.keys(specieData);
+    // Filtra as espécies pelo elemento selecionado
+    let species = Object.keys(specieData).filter(s => specieData[s].element === element);
+    if (species.length === 0) {
+        // Caso nenhuma espécie possua o elemento, usar apenas as sem elemento definido
+        species = Object.keys(specieData).filter(s => !specieData[s].element);
+    }
 
     // Calcular um "peso" baseado nos atributos pra influenciar levemente a escolha
     const weights = {
@@ -236,7 +240,7 @@ function showNameSelection(element) {
         stats.life *= 10;
 
         // Gerar espécie e raridade
-        const specie = generateSpecie(stats);
+        const specie = generateSpecie(stats, element);
         const rarity = generateRarity();
 
         // Definir a imagem e demais caminhos de acordo com a espécie
@@ -322,3 +326,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadQuestions();
     });
 });
+
+// Permite utilizar a função em testes Node.js
+if (typeof module !== 'undefined') {
+    module.exports = {
+        generateSpecie,
+        _setSpecieData: data => { specieData = data; }
+    };
+}
