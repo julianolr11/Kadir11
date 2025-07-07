@@ -1862,8 +1862,11 @@ async function loadIdleGifs() {
             const full = path.join(folder, entry.name);
             if (entry.isDirectory()) {
                 await walk(full);
-            } else if (entry.isFile() && entry.name.toLowerCase() === 'idle.gif') {
-                result.push(full.replace(/\\/g, '/'));
+            } else if (entry.isFile()) {
+                const name = entry.name.toLowerCase();
+                if (name === 'idle.gif' || name === 'idle.png') {
+                    result.push(full.replace(/\\/g, '/'));
+                }
             }
         }
     }
@@ -1878,13 +1881,21 @@ function resolveIdleGif(relativePath) {
         .replace(/^[Aa]ssets[\\/][Mm]ons[\\/]/, '')
         .replace(/\\/g, '/');
     const baseDir = path.join(__dirname, 'Assets', 'Mons');
-    const direct = cleaned.replace(/front\.(gif|png)$/i, 'idle.gif');
-    if (fs.existsSync(path.join(baseDir, direct))) {
-        return direct;
+    const directGif = cleaned.replace(/front\.(gif|png)$/i, 'idle.gif');
+    if (fs.existsSync(path.join(baseDir, directGif))) {
+        return directGif;
     }
-    const alt = path.posix.join(path.posix.dirname(cleaned), 'idle.gif');
-    if (fs.existsSync(path.join(baseDir, alt))) {
-        return alt;
+    const altGif = path.posix.join(path.posix.dirname(cleaned), 'idle.gif');
+    if (fs.existsSync(path.join(baseDir, altGif))) {
+        return altGif;
+    }
+    const directPng = cleaned.replace(/front\.(gif|png)$/i, 'idle.png');
+    if (fs.existsSync(path.join(baseDir, directPng))) {
+        return directPng;
+    }
+    const altPng = path.posix.join(path.posix.dirname(cleaned), 'idle.png');
+    if (fs.existsSync(path.join(baseDir, altPng))) {
+        return altPng;
     }
     return cleaned;
 }
