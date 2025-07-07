@@ -50,6 +50,8 @@ let player = {x:1,y:1};
 let moves = 0;
 let level = 1;
 let exitPos = null;
+let playerHealth = 0;
+let playerMaxHealth = 0;
 
 const CONSUMABLES = ['healthPotion','meat','staminaPotion','chocolate'];
 const ACCESSORIES = ['finger','turtleShell','feather','orbe'];
@@ -232,6 +234,14 @@ function updateUI(){
     if(bravuraText) bravuraText.textContent = `Bravura: ${moves}`;
 }
 
+function applyDamage(amount){
+    if(!playerMaxHealth) return;
+    const dmg = Math.max(0, amount||0);
+    if(dmg<=0) return;
+    playerHealth = Math.max(0, playerHealth - dmg);
+    window.electronAPI.send('update-health', playerHealth);
+}
+
 function openChest(){
     if(Math.random()<0.5){
         const coins=Math.floor(Math.random()*4)+1;
@@ -253,6 +263,9 @@ function openChest(){
         const id=EGGS[Math.floor(Math.random()*EGGS.length)];
         window.electronAPI.send('reward-pet',{item:id,qty:1});
     }
+    if(Math.random()<0.1){
+        applyDamage(Math.floor(playerMaxHealth * 0.05) || 1);
+    }
 }
 
 function handleTile(tile){
@@ -260,6 +273,9 @@ function handleTile(tile){
         window.electronAPI.send('open-journey-scene-window', {
             background: 'Assets/Modes/Journeys/cave_ruin.png'
         });
+        map[player.y][player.x]='FLOOR';
+    }else if(tile==='BARRIL'){
+        applyDamage(5);
         map[player.y][player.x]='FLOOR';
     }else if(tile==='BOX'){
         window.electronAPI.send('reward-pet',{item:'meat',qty:1});
@@ -354,6 +370,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 window.electronAPI.on('pet-data',(e,data)=>{
     if(!data) return;
     moves=data.bravura||10;
+    playerHealth = data.currentHealth ?? playerHealth;
+    playerMaxHealth = data.maxHealth ?? playerMaxHealth;
     if(playerSprite){
         const img=data.statusImage||data.image||'eggsy.png';
         playerSprite.src=`Assets/Mons/${img}`;
