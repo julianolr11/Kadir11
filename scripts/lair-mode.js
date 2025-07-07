@@ -112,15 +112,15 @@ function addRandomLoops(){
     }
 }
 
-// Remove the extra interior walls generated along the last column/row
-// before applying orientation so the map doesn't end up with doubled
-// borders.
+// Close any openings created along the edges so side corridors never end up
+// two tiles wide. This keeps the dungeon surrounded by a single layer of
+// walls.
 function trimExtraWalls(){
     for(let x=0;x<MAP_W;x++){
-        if(map[MAP_H-2][x]==='WALL') map[MAP_H-2][x]='FLOOR';
+        if(map[MAP_H-2][x]==='FLOOR') map[MAP_H-2][x]='WALL';
     }
     for(let y=0;y<MAP_H;y++){
-        if(map[y][MAP_W-2]==='WALL') map[y][MAP_W-2]='FLOOR';
+        if(map[y][MAP_W-2]==='FLOOR') map[y][MAP_W-2]='WALL';
     }
 }
 
