@@ -10,6 +10,11 @@ const energyCostPerAttempt = 3; // 5 tentativas = 15 de energia
 const tolerances = [40, 30, 20, 15, 10];
 let xpDefesa = 0; // pontos de defesa ganhos
 let initialAttributes = null;
+let pointerSpeed = 0;
+let basePointerSpeed = 0;
+const speedFactor = 1.5;
+const maxPointerSpeed = 1.5;
+const maxDefenseGain = 5;
 
 function closeWindow() {
     window.close();
@@ -41,7 +46,7 @@ function startPointer() {
         const startRight = gameArea.offsetWidth - ball.offsetWidth;
         ball.style.left = ballFromRight ? `${startRight}px` : '0px';
     }
-    const baseSpeed = getPointerSpeed(pet?.level || 1);
+    const baseSpeed = pointerSpeed;
 
     function animate() {
         if (!running) return;
@@ -146,10 +151,22 @@ function evaluateHit() {
     const tolerance = tolerances[Math.min(attempts, tolerances.length - 1)];
     const success = diff <= tolerance;
     if (success) {
-        xpDefesa += 1;
+        if (xpDefesa < maxDefenseGain) {
+            xpDefesa += 1;
+            if (pet) {
+                window.electronAPI.send('increase-attribute', {
+                    name: 'defense',
+                    amount: 1
+                });
+            }
+            showFeedback('Defesa bem-sucedida! +1 Defesa', true);
+        } else {
+            showFeedback('Defesa bem-sucedida!', true);
+        }
+        pointerSpeed = Math.min(pointerSpeed * speedFactor, maxPointerSpeed);
         if (shieldImg) shieldImg.src = 'Assets/train/shield-2.png';
-        showFeedback('Defesa bem-sucedida! +1 Defesa', true);
     } else {
+        pointerSpeed = Math.max(pointerSpeed / speedFactor, basePointerSpeed);
         if (shieldImg) shieldImg.src = 'Assets/train/shield-3.png';
         showFeedback('Errou o tempo!', false);
     }
@@ -157,9 +174,6 @@ function evaluateHit() {
     updateCounters();
     if (pet) {
         window.electronAPI.send('use-move', { cost: energyCostPerAttempt });
-        if (success) {
-            window.electronAPI.send('increase-attribute', { name: 'defense', amount: 1 });
-        }
         window.electronAPI.send('reward-pet', { kadirPoints: -1 });
     }
     if (attempts < maxAttempts) {
@@ -212,6 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 magic: pet.attributes?.magic || 0
             };
         }
+        pointerSpeed = getPointerSpeed(pet?.level || 1);
+        basePointerSpeed = pointerSpeed;
         if (checkEligibility()) {
             updateCounters();
             startPointer();
