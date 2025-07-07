@@ -9,7 +9,7 @@ const MAP_H = 20;
 
 const tileMapping = {
     "FLOOR": [1, 1],
-    "WALL_TOP": [1, 2],
+    "WALL_TOP": [3, 0],
     "WALL_BOTTOM": [5, 0],
     "WALL_LEFT": [2, 1],
     "WALL_RIGHT": [0, 1],
