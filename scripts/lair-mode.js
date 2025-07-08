@@ -52,6 +52,13 @@ let level = 1;
 let exitPos = null;
 let playerHealth = 0;
 let playerMaxHealth = 0;
+let difficulty = 1;
+
+if (window.electronAPI?.getDifficulty) {
+    window.electronAPI.getDifficulty().then(val => {
+        difficulty = typeof val === 'number' ? val : 1;
+    }).catch(() => { difficulty = 1; });
+}
 
 const CONSUMABLES = ['healthPotion','meat','staminaPotion','chocolate'];
 const ACCESSORIES = ['finger','turtleShell','feather','orbe'];
@@ -236,7 +243,7 @@ function updateUI(){
 
 function applyDamage(amount){
     if(!playerMaxHealth) return;
-    const dmg = Math.max(0, amount||0);
+    const dmg = Math.max(0, Math.round((amount||0) * difficulty));
     if(dmg<=0) return;
     playerHealth = Math.max(0, playerHealth - dmg);
     window.electronAPI.send('update-health', playerHealth);
