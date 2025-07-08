@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const petMarker = document.getElementById('pet-thumbnail');
     let currentPet = null;
 
+    function getJourneyKey(base) {
+        return currentPet && currentPet.petId ? `${base}_${currentPet.petId}` : base;
+    }
+
     function setImageWithFallback(imgElement, relativePath) {
         if (!imgElement) return;
         if (!relativePath) {
@@ -65,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleRandomEvent(img) {
         const roll = Math.random() * 100;
         if (roll < 70) {
-            localStorage.setItem('journeyPendingAdvance', '1');
+            localStorage.setItem(getJourneyKey('journeyPendingAdvance'), '1');
             window.electronAPI?.send('open-journey-scene-window', { background: img });
             return true;
         } else if (roll < 85) {
@@ -123,23 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
         pathPoints[9], pathPoints[10], pathPoints[11]
     ];
 
-    let currentIndex = parseInt(localStorage.getItem('journeyStep') || '0', 10);
-    if (currentIndex >= route.length) currentIndex = route.length - 1;
+    let currentIndex = 0;
 
-    const pending = localStorage.getItem('journeyPendingAdvance');
-    const won = localStorage.getItem('journeyBattleWin');
-    if (pending && won === '1') {
-        currentIndex = Math.min(currentIndex + 1, route.length - 1);
-        localStorage.setItem('journeyStep', String(currentIndex));
-        if (currentIndex === route.length - 1) {
-            window.electronAPI?.send('journey-complete');
+    function loadProgress() {
+        const stepKey = getJourneyKey('journeyStep');
+        const stored = localStorage.getItem(stepKey);
+        currentIndex = parseInt(stored || '0', 10);
+        if (currentIndex >= route.length) currentIndex = route.length - 1;
+
+        const pending = localStorage.getItem(getJourneyKey('journeyPendingAdvance'));
+        const won = localStorage.getItem(getJourneyKey('journeyBattleWin'));
+        if (pending && won === '1') {
+            currentIndex = Math.min(currentIndex + 1, route.length - 1);
+            localStorage.setItem(stepKey, String(currentIndex));
+            if (currentIndex === route.length - 1) {
+                window.electronAPI?.send('journey-complete');
+            }
         }
+        if (pending) localStorage.removeItem(getJourneyKey('journeyPendingAdvance'));
+        if (won) localStorage.removeItem(getJourneyKey('journeyBattleWin'));
     }
-    if (pending) localStorage.removeItem('journeyPendingAdvance');
-    if (won) localStorage.removeItem('journeyBattleWin');
 
     let currentPoint = route[currentIndex];
-    if (currentPoint) currentPoint.classList.add('current');
 
     function positionPetMarker() {
         if (!petMarker || !currentPoint) return;
@@ -148,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
         petMarker.style.left = `${x + 18}px`;
         petMarker.style.top = `${y - 18}px`;
     }
-    positionPetMarker();
 
     function setCurrent(point) {
         if (currentPoint) currentPoint.classList.remove('current');
@@ -160,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function advancePoint() {
         if (currentIndex < route.length - 1) {
             currentIndex++;
-            localStorage.setItem('journeyStep', String(currentIndex));
+            localStorage.setItem(getJourneyKey('journeyStep'), String(currentIndex));
             setCurrent(route[currentIndex]);
         }
     }
@@ -201,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (point.classList.contains('path-point')) {
                 const img = point.dataset.image;
                 if (img) {
-                    localStorage.setItem('journeyPendingAdvance', '1');
+                    localStorage.setItem(getJourneyKey('journeyPendingAdvance'), '1');
                     handleBossFight(img);
                 }
             } else {
@@ -219,7 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (petMarker) {
             setImageWithFallback(petMarker, currentPet.statusImage || currentPet.image);
             petMarker.style.display = 'block';
-            positionPetMarker();
         }
+        loadProgress();
+        setCurrent(route[currentIndex]);
     });
 });
