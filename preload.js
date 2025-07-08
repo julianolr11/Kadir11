@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'resize-pen-window',
             'resize-lair-window',
             'set-mute-state',
+            'set-difficulty',
             'get-journey-images',
             'reward-pet',
             'journey-complete',
@@ -153,6 +154,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getNestsData: () => {
         console.log('Enviando get-nests-data');
         return ipcRenderer.invoke('get-nests-data');
+    },
+    getDifficulty: () => {
+        console.log('Enviando get-difficulty');
+        return ipcRenderer.invoke('get-difficulty');
+    },
+    setDifficulty: (value) => {
+        console.log('Enviando set-difficulty', value);
+        ipcRenderer.send('set-difficulty', value);
     },
     openHatchWindow: () => {
         console.log('Enviando open-hatch-window');
