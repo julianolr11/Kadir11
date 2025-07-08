@@ -63,6 +63,14 @@ function setItems(value) {
     store.set('items', value);
 }
 
+function getDifficulty() {
+    return store.get('difficulty', 1);
+}
+
+function setDifficulty(value) {
+    store.set('difficulty', value);
+}
+
 const penLimits = { small: 3, medium: 6, large: 10 };
 
 function getPenInfo() {
@@ -1829,6 +1837,14 @@ ipcMain.handle('get-nests-data', async () => {
 
 ipcMain.handle('get-nest-price', async () => {
     return getNestPrice();
+});
+
+ipcMain.handle('get-difficulty', async () => {
+    return getDifficulty();
+});
+
+ipcMain.on('set-difficulty', (event, value) => {
+    setDifficulty(value);
 });
 
 ipcMain.handle('get-species-info', async () => {

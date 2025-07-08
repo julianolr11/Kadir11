@@ -45,6 +45,17 @@ let enemyIdleSrc = '';
 let enemyAttackSrc = '';
 let enemyElement = 'puro';
 const enemyAttackCost = 10;
+let difficulty = 1;
+
+if (window.electronAPI?.getDifficulty) {
+    window.electronAPI.getDifficulty().then(val => {
+        difficulty = typeof val === 'number' ? val : 1;
+        if (difficulty === 1 && window.electronAPI?.setDifficulty) {
+            difficulty = 0.8;
+            window.electronAPI.setDifficulty(difficulty);
+        }
+    }).catch(() => { difficulty = 1; });
+}
 
 async function loadItemsInfo() {
     try {
@@ -371,7 +382,7 @@ function enemyAction() {
         updateHealthBars();
         const base = 8;
         const mult = getElementMultiplier(enemyElement, pet.element || 'puro');
-        const dmg = Math.round(base * mult);
+        const dmg = Math.round(base * mult * difficulty);
         playerHealth = Math.max(0, playerHealth - dmg);
         showHitEffect('player');
         updateHealthBars();
