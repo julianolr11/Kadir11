@@ -27,6 +27,10 @@ async function computeAttackSrc(idleRelative) {
 }
 
 let pet = null;
+
+function getJourneyKey(base) {
+    return pet && pet.petId ? `${base}_${pet.petId}` : base;
+}
 let itemsInfo = {};
 let statusEffectsInfo = {};
 let playerStatusEffects = [];
@@ -299,7 +303,7 @@ function concludeBattle(playerWon) {
     currentTurn = 'ended';
     hideMenus();
     window.electronAPI.send('battle-result', { win: playerWon });
-    localStorage.setItem('journeyBattleWin', playerWon ? '1' : '0');
+    localStorage.setItem(getJourneyKey('journeyBattleWin'), playerWon ? '1' : '0');
     if (playerWon) {
         const reward = generateReward();
         window.electronAPI.send('reward-pet', reward);
