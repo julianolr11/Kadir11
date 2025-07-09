@@ -171,6 +171,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
         console.log('Enviando close-hatch-window');
         ipcRenderer.send('close-hatch-window');
     },
+    useItem: (id) => ipcRenderer.invoke('use-item', id),
     getSpeciesInfo
-});
-console.log('electronAPI exposto com sucesso');
+});console.log('electronAPI exposto com sucesso');
