@@ -1,5 +1,6 @@
 console.log('journey-scene.js carregado');
 import { getElementMultiplier } from './elements.js';
+import { calculateXpGain } from './petExperience.js';
 
 function closeWindow() {
     window.close();
@@ -313,20 +314,21 @@ function generateReward() {
     return { item: id, qty: 1 };
 }
 
-function showVictoryModal(reward) {
+function showVictoryModal(reward, xp) {
     const modal = document.getElementById('victory-modal');
     const rewardBox = document.getElementById('victory-reward');
+    const xpBox = document.getElementById('victory-xp');
     const closeBtn = document.getElementById('victory-close');
-    if (!modal || !rewardBox || !closeBtn) return;
+    if (!modal || !rewardBox || !closeBtn || !xpBox) return;
 
     let text = '';
-    if (reward.experience) text = `Você recebeu ${reward.experience} XP!`;
-    else if (reward.kadirPoints) text = `Você recebeu ${reward.kadirPoints} DNA Kadir!`;
-    else if (reward.coins) text = `Você recebeu ${reward.coins} moedas!`;
-    else if (reward.item) {
+    if (reward && reward.kadirPoints) text = `Você recebeu ${reward.kadirPoints} DNA Kadir!`;
+    else if (reward && reward.coins) text = `Você recebeu ${reward.coins} moedas!`;
+    else if (reward && reward.item) {
         const info = itemsInfo[reward.item] || { name: reward.item };
         text = `Você recebeu 1 ${info.name}!`;
     }
+    xpBox.textContent = `XP ganho: ${xp}`;
     rewardBox.textContent = text;
     modal.style.display = 'flex';
     closeBtn.onclick = () => {
@@ -354,9 +356,14 @@ function concludeBattle(playerWon) {
     window.electronAPI.send('battle-result', { win: playerWon });
     localStorage.setItem(getJourneyKey('journeyBattleWin'), playerWon ? '1' : '0');
     if (playerWon) {
+        const baseXp = 10;
+        const xpGained = calculateXpGain(baseXp, pet?.rarity);
         const reward = generateReward();
-        window.electronAPI.send('reward-pet', reward);
-        showVictoryModal(reward);
+        const additionalReward = reward.experience ? null : reward;
+        const totalXp = xpGained + (reward.experience || 0);
+        window.electronAPI.send('reward-pet', { experience: totalXp });
+        if (additionalReward) window.electronAPI.send('reward-pet', additionalReward);
+        showVictoryModal(additionalReward, totalXp);
     } else {
         showDefeatModal();
     }
