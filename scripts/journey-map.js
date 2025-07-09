@@ -66,18 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
         eventModal.style.display = 'flex';
     }
 
-    function computeDifficulty(index) {
-        const base = 0.8;
-        const step = 0.03;
-        return base + index * step;
-    }
 
-    function handleRandomEvent(img, index) {
+    async function handleRandomEvent(img) {
         const roll = Math.random() * 100;
         if (roll < 70) {
             localStorage.setItem(getJourneyKey('journeyPendingAdvance'), '1');
-            const diff = computeDifficulty(index);
-            window.electronAPI?.setDifficulty(diff);
+            const diff = 1;
+            if (window.electronAPI?.setDifficulty) {
+                try {
+                    await window.electronAPI.setDifficulty(diff);
+                } catch (err) {
+                    console.error('Erro ao definir dificuldade:', err);
+                }
+            }
+
             window.electronAPI?.send('open-journey-scene-window', { background: img });
             return true;
         } else if (roll < 85) {
@@ -181,9 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function handleBossFight(img, index) {
-        const diff = computeDifficulty(index);
-        window.electronAPI?.setDifficulty(diff);
+
+    async function handleBossFight(img) {
+        const diff = 1;
+        if (window.electronAPI?.setDifficulty) {
+            try {
+                await window.electronAPI.setDifficulty(diff);
+            } catch (err) {
+                console.error('Erro ao definir dificuldade:', err);
+            }
+        }
+
         window.electronAPI?.send('open-journey-scene-window', { background: img });
     }
 
@@ -214,16 +224,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        point.addEventListener('click', () => {
+        point.addEventListener('click', async () => {
             if (idx !== currentIndex) return;
             if (point.classList.contains('path-point')) {
                 const img = point.dataset.image;
                 if (img) {
                     localStorage.setItem(getJourneyKey('journeyPendingAdvance'), '1');
-                    handleBossFight(img, idx);
+
+                    await handleBossFight(img);
                 }
             } else {
-                const startedBattle = handleRandomEvent(nextBackground, idx);
+                const startedBattle = await handleRandomEvent(nextBackground);
+
                 if (!startedBattle) {
                     advancePoint();
                 }
