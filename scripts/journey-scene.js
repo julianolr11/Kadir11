@@ -55,11 +55,15 @@ const enemyAttackCost = 10;
 let difficulty = 1;
 
 if (window.electronAPI?.getDifficulty) {
-    window.electronAPI.getDifficulty().then(val => {
+    window.electronAPI.getDifficulty().then(async val => {
         difficulty = typeof val === 'number' ? val : 1;
         if (difficulty === 1 && window.electronAPI?.setDifficulty) {
             difficulty = 0.8;
-            window.electronAPI.setDifficulty(difficulty);
+            try {
+                await window.electronAPI.setDifficulty(difficulty);
+            } catch (err) {
+                console.error('Erro ao definir dificuldade:', err);
+            }
         }
     }).catch(() => { difficulty = 1; });
 }

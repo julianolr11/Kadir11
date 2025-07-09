@@ -1843,8 +1843,9 @@ ipcMain.handle('get-difficulty', async () => {
     return getDifficulty();
 });
 
-ipcMain.on('set-difficulty', (event, value) => {
+ipcMain.handle('set-difficulty', async (event, value) => {
     setDifficulty(value);
+    return true;
 });
 
 ipcMain.handle('get-species-info', async () => {
