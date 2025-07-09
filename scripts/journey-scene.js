@@ -22,8 +22,15 @@ function imageExists(src) {
 
 async function computeAttackSrc(idleRelative) {
     if (!idleRelative) return '';
-    const candidate = assetPath(idleRelative.replace(/idle\.gif$/i, 'attack.gif'));
+    const candidate = assetPath(idleRelative.replace(/idle\.(gif|png)$/i, 'attack.gif'));
     return (await imageExists(candidate)) ? candidate : assetPath(idleRelative);
+}
+
+async function computeFrontSrc(idleRelative) {
+    if (!idleRelative) return '';
+    const gif = assetPath(idleRelative.replace(/idle\.(gif|png)$/i, 'front.gif'));
+    if (await imageExists(gif)) return gif;
+    return assetPath(idleRelative.replace(/idle\.(gif|png)$/i, 'front.png'));
 }
 
 let pet = null;
@@ -470,13 +477,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (data.playerPet && playerFront) {
-            const frontPath = data.playerPet.replace(/idle\.gif$/i, 'front.gif');
-            playerFront.src = assetPath(frontPath);
+            playerFront.src = await computeFrontSrc(data.playerPet);
         }
 
         if (data.enemyPet && enemyFront) {
-            const frontPath = data.enemyPet.replace(/idle\.gif$/i, 'front.gif');
-            enemyFront.src = assetPath(frontPath);
+            enemyFront.src = await computeFrontSrc(data.enemyPet);
         }
 
         if (data.enemyElement) {
