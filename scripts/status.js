@@ -10,7 +10,8 @@ const raceNames = {
     Leoracal: 'Leoracal',
     Owlberoth: 'Owlberoth',
     Digitama: 'Digitama',
-    Kael: 'Kael'
+    Kael: 'Kael',
+    drazraq: 'Drazraq'
 };
 
 function getRequiredXpForNextLevel(level) {
