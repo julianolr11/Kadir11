@@ -45,6 +45,7 @@ let playerHealth = 100;
 let playerMaxHealth = 100;
 let enemyHealth = 100;
 let enemyEnergy = 100;
+let enemyAttributes = { attack: 5, defense: 5, magic: 5, speed: 5 };
 let currentTurn = 'player';
 let playerIdleSrc = '';
 let playerAttackSrc = '';
@@ -251,6 +252,23 @@ function showHitEffect(target) {
     setTimeout(() => { el.style.display = 'none'; }, 300);
 }
 
+function initializeBattle() {
+    if (!pet) return;
+    const lvl = pet.level || 1;
+    enemyAttributes = {
+        attack: lvl * 2,
+        defense: lvl,
+        magic: lvl * 2,
+        speed: lvl * 1.5,
+    };
+    if ((pet.attributes?.speed || 0) < enemyAttributes.speed) {
+        currentTurn = 'enemy';
+        setTimeout(enemyAction, 800);
+    } else {
+        currentTurn = 'player';
+    }
+}
+
 function applyStatusEffects() {
     if (playerStatusEffects.includes('poison')) {
         const dmg = Math.ceil(playerMaxHealth * (Math.random() * 0.01 + 0.01));
@@ -374,7 +392,21 @@ function performPlayerMove(move) {
             ? (move.elements.includes(pet.element) ? pet.element : move.elements[0])
             : (move.element || pet.element || 'puro');
         const mult = getElementMultiplier(moveElement, enemyElement);
-        const dmg = Math.round(base * mult);
+
+        const accuracy = typeof move.accuracy === 'number' ? move.accuracy : 1;
+        const speedDiff = (enemyAttributes.speed || 0) - (pet.attributes?.speed || 0);
+        const dodge = Math.max(0, Math.min(0.3, speedDiff / 100));
+        if (Math.random() > accuracy * (1 - dodge)) {
+            showMessage('Ataque errou!');
+            endPlayerTurn();
+            return;
+        }
+
+        const isSpecial = (move.type || 'physical') === 'special';
+        const atkStat = isSpecial ? (pet.attributes?.magic || 0) : (pet.attributes?.attack || 0);
+        const defStat = enemyAttributes.defense || 0;
+        const scaled = (base + atkStat * 0.5) * mult * (100 / (100 + defStat));
+        const dmg = Math.max(1, Math.round(scaled));
         enemyHealth = Math.max(0, enemyHealth - dmg);
         showHitEffect('enemy');
         updateHealthBars();
@@ -391,9 +423,22 @@ function enemyAction() {
     playAttackAnimation(enemyImg, enemyIdleSrc, enemyAttackSrc, () => {
         enemyEnergy = Math.max(0, enemyEnergy - enemyAttackCost);
         updateHealthBars();
-        const base = 8;
+
+        const accuracy = 0.9;
+        const speedDiff = (pet.attributes?.speed || 0) - (enemyAttributes.speed || 0);
+        const dodge = Math.max(0, Math.min(0.3, speedDiff / 100));
+        if (Math.random() > accuracy * (1 - dodge)) {
+            showMessage('Inimigo errou!');
+            currentTurn = 'player';
+            applyStatusEffects();
+            return;
+        }
+
+        const base = 8 + enemyAttributes.attack;
         const mult = getElementMultiplier(enemyElement, pet.element || 'puro');
-        const dmg = Math.round(base * mult * difficulty);
+        const defStat = pet.attributes?.defense || 0;
+        const scaled = base * mult * difficulty * (100 / (100 + defStat));
+        const dmg = Math.max(1, Math.round(scaled));
         playerHealth = Math.max(0, playerHealth - dmg);
         showHitEffect('player');
         updateHealthBars();
@@ -533,5 +578,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateMoves();
         updateItems();
+        initializeBattle();
     });
 });

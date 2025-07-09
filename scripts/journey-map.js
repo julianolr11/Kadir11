@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         eventModal.style.display = 'flex';
     }
 
+
     async function handleRandomEvent(img) {
         const roll = Math.random() * 100;
         if (roll < 70) {
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Erro ao definir dificuldade:', err);
                 }
             }
+
             window.electronAPI?.send('open-journey-scene-window', { background: img });
             return true;
         } else if (roll < 85) {
@@ -181,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     async function handleBossFight(img) {
         const diff = 1;
         if (window.electronAPI?.setDifficulty) {
@@ -190,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Erro ao definir dificuldade:', err);
             }
         }
+
         window.electronAPI?.send('open-journey-scene-window', { background: img });
     }
 
@@ -226,10 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = point.dataset.image;
                 if (img) {
                     localStorage.setItem(getJourneyKey('journeyPendingAdvance'), '1');
+
                     await handleBossFight(img);
                 }
             } else {
                 const startedBattle = await handleRandomEvent(nextBackground);
+
                 if (!startedBattle) {
                     advancePoint();
                 }
