@@ -136,7 +136,7 @@ function openEquipModal() {
         btn.appendChild(textWrap);
 
         btn.addEventListener('click', () => {
-            window.electronAPI.send('use-item', id);
+            window.electronAPI.useItem(id);
             closeEquipModal();
         });
 

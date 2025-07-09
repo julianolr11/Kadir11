@@ -1441,7 +1441,7 @@ ipcMain.on('buy-item', async (event, item) => {
     });
 });
 
-ipcMain.on('use-item', async (event, item) => {
+ipcMain.handle('use-item', async (event, item) => {
     if (!currentPet) return;
     const items = getItems();
     if (!items[item]) return;
@@ -1498,6 +1498,7 @@ ipcMain.on('use-item', async (event, item) => {
     BrowserWindow.getAllWindows().forEach(w => {
         if (w.webContents) w.webContents.send('pet-data', currentPet);
     });
+    return currentPet.currentHealth;
 });
 
 ipcMain.on('unequip-item', async () => {
