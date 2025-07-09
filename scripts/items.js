@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     swapCancelBtn = document.getElementById('swap-cancel');
     swapConfirmBtn?.addEventListener('click', () => {
         if (pendingEquipId) {
-            window.electronAPI.send('use-item', pendingEquipId);
+            window.electronAPI.useItem(pendingEquipId);
         }
         pendingEquipId = null;
         if (swapModal) swapModal.style.display = 'none';
@@ -147,7 +147,7 @@ function updateItems() {
                         return;
                     }
                 }
-                window.electronAPI.send('use-item', id);
+                window.electronAPI.useItem(id);
             });
         }
 

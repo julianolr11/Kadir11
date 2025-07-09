@@ -169,11 +169,12 @@ function updateItems() {
         btn.appendChild(img);
         btn.appendChild(label);
 
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             if (currentTurn !== 'player' || actionInProgress) return;
             actionInProgress = true;
             hideMenus();
-            window.electronAPI.send('use-item', id);
+            const newHealth = await window.electronAPI.useItem(id);
+            if (typeof newHealth === 'number') playerHealth = newHealth;
             endPlayerTurn();
         });
 
