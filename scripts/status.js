@@ -2,7 +2,15 @@ import { rarityGradients, rarityColors, specieBioImages, specieDirs } from './co
 
 const raceNames = {
     viborom: 'Viborom',
-    draak: 'Draak Olhos de Esmeralda'
+    draak: 'Draak Olhos de Esmeralda',
+    Pidgly: 'Pidgly',
+    Ashfang: 'Ashfang',
+    ignis: 'Ignis',
+    Mawthorn: 'Mawthorn',
+    Leoracal: 'Leoracal',
+    Owlberoth: 'Owlberoth',
+    Digitama: 'Digitama',
+    Kael: 'Kael'
 };
 
 function getRequiredXpForNextLevel(level) {
