@@ -161,7 +161,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     setDifficulty: (value) => {
         console.log('Enviando set-difficulty', value);
-        ipcRenderer.send('set-difficulty', value);
+        return ipcRenderer.invoke('set-difficulty', value);
     },
     openHatchWindow: () => {
         console.log('Enviando open-hatch-window');
@@ -173,5 +173,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     getSpeciesInfo
 });
-
 console.log('electronAPI exposto com sucesso');
