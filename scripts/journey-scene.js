@@ -34,6 +34,7 @@ async function computeFrontSrc(idleRelative) {
 }
 
 let pet = null;
+let battleInitialized = false;
 
 function getJourneyKey(base) {
     return pet && pet.petId ? `${base}_${pet.petId}` : base;
@@ -259,7 +260,8 @@ function showHitEffect(target) {
 }
 
 function initializeBattle() {
-    if (!pet) return;
+    if (battleInitialized || !pet) return;
+    battleInitialized = true;
     const lvl = pet.level || 1;
     enemyAttributes = {
         attack: lvl * 2,
