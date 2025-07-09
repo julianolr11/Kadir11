@@ -47,6 +47,7 @@ let enemyHealth = 100;
 let enemyEnergy = 100;
 let enemyAttributes = { attack: 5, defense: 5, magic: 5, speed: 5 };
 let currentTurn = 'player';
+let actionInProgress = false;
 let playerIdleSrc = '';
 let playerAttackSrc = '';
 let enemyIdleSrc = '';
@@ -168,7 +169,8 @@ function updateItems() {
         btn.appendChild(label);
 
         btn.addEventListener('click', () => {
-            if (currentTurn !== 'player') return;
+            if (currentTurn !== 'player' || actionInProgress) return;
+            actionInProgress = true;
             hideMenus();
             window.electronAPI.send('use-item', id);
             endPlayerTurn();
@@ -199,14 +201,18 @@ function updateStatusIcons() {
 }
 
 function attemptFlee() {
-    if (currentTurn !== 'player') return;
+    if (currentTurn !== 'player' || actionInProgress) return;
+    actionInProgress = true;
     hideMenus();
     let chance = 0.5;
     if (playerHealth >= enemyHealth) chance += 0.25; else chance -= 0.25;
     chance = Math.max(0.1, Math.min(0.9, chance));
     if (Math.random() < chance) {
         showMessage('Fuga bem-sucedida!');
-        setTimeout(closeWindow, 1500);
+        setTimeout(() => {
+            actionInProgress = false;
+            closeWindow();
+        }, 1500);
     } else {
         showMessage('Fuga falhou!');
         endPlayerTurn();
@@ -354,6 +360,7 @@ function concludeBattle(playerWon) {
 }
 
 function endPlayerTurn() {
+    actionInProgress = false;
     applyStatusEffects();
     if (playerHealth <= 0) {
         concludeBattle(false);
@@ -364,7 +371,8 @@ function endPlayerTurn() {
 }
 
 function performPlayerMove(move) {
-    if (currentTurn !== 'player') return;
+    if (currentTurn !== 'player' || actionInProgress) return;
+    actionInProgress = true;
     if (playerStatusEffects.includes('paralyze') && Math.random() < 0.5) {
         showMessage('Paralisado!');
         endPlayerTurn();
@@ -419,6 +427,7 @@ function performPlayerMove(move) {
 }
 
 function enemyAction() {
+    actionInProgress = true;
     const enemyImg = document.getElementById('enemy-pet');
     playAttackAnimation(enemyImg, enemyIdleSrc, enemyAttackSrc, () => {
         enemyEnergy = Math.max(0, enemyEnergy - enemyAttackCost);
@@ -430,6 +439,7 @@ function enemyAction() {
         if (Math.random() > accuracy * (1 - dodge)) {
             showMessage('Inimigo errou!');
             currentTurn = 'player';
+            actionInProgress = false;
             applyStatusEffects();
             return;
         }
@@ -447,6 +457,7 @@ function enemyAction() {
             concludeBattle(false);
         } else {
             currentTurn = 'player';
+            actionInProgress = false;
             applyStatusEffects();
         }
     });
