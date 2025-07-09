@@ -56,7 +56,11 @@ export const specieData = {
     'Pidgly': { dir: 'Ave', race: 'Pidgly', element: 'terra' },
     'Ashfang': { dir: 'Fera', race: 'Ashfang', element: 'fogo' },
     'Ignis': { dir: 'Ave', race: 'ignis', element: 'fogo' },
-    'Mawthorn': { dir: 'Monstro', race: 'Mawthorn', element: 'agua' }
+    'Mawthorn': { dir: 'Monstro', race: 'Mawthorn', element: 'agua' },
+    'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' },
+    'Owlberoth': { dir: 'CriaturaMistica', race: 'Owlberoth', element: 'terra' },
+    'Digitama': { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo' },
+    'Kael': { dir: 'Fera', race: 'Kael', element: 'agua' }
 };
 
 export const eggSpecieMap = {
