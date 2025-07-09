@@ -299,7 +299,7 @@ function generateReward() {
         return { experience: Math.floor(Math.random() * 10) + 5 };
     }
     if (choice === 'kadirPoints') {
-        return { kadirPoints: 1 };
+        return { kadirPoints: Math.floor(Math.random() * 5) + 1 };
     }
     if (choice === 'coins') {
         return { coins: Math.floor(Math.random() * 5) + 1 };

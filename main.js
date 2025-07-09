@@ -675,7 +675,7 @@ ipcMain.on('battle-pet', async () => {
         while (currentPet.experience >= requiredXp && currentPet.level < 100) {
             currentPet.level += 1;
             currentPet.experience -= requiredXp;
-            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 1;
+            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 5;
             increaseAttributesOnLevelUp(currentPet);
             console.log(`Pet subiu para o nível ${currentPet.level}! XP restante: ${currentPet.experience}`);
             requiredXp = getRequiredXpForNextLevel(currentPet.level);
@@ -1679,7 +1679,7 @@ ipcMain.on('reward-pet', async (event, reward) => {
         while (currentPet.experience >= requiredXp && currentPet.level < 100) {
             currentPet.level += 1;
             currentPet.experience -= requiredXp;
-            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 1;
+            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 5;
             currentPet.bravura = (currentPet.bravura || 0) + 1;
             increaseAttributesOnLevelUp(currentPet);
             requiredXp = getRequiredXpForNextLevel(currentPet.level);
