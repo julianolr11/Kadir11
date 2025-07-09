@@ -20,11 +20,14 @@ export const rarityColors = {
 export const specieDirs = {
     'Draconídeo': 'Draconideo',
     'Reptilóide': 'Reptiloide',
-    'Ave': 'Ave',
-    'Criatura Mística': 'CriaturaMistica',
-    'Criatura Sombria': 'CriaturaSombria',
-    'Monstro': 'Monstro',
-    'Fera': 'Fera'
+    'Pidgly': 'Ave',
+    'Ashfang': 'Fera',
+    'Ignis': 'Ave',
+    'Mawthorn': 'Monstro',
+    'Owlberoth': 'CriaturaMistica',
+    'Digitama': 'CriaturaMistica',
+    'Kael': 'Fera',
+    'Leoracal': 'Fera'
 };
 
 // Caminho da imagem em alta resolução de cada espécie para ser exibida na aba
@@ -48,19 +51,14 @@ export let specieImages = {};
 export const specieData = {
     'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
     'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
-    'Ave': { dir: 'Ave', race: 'pidgly' },
-    'Criatura Mística': { dir: 'CriaturaMistica' },
-    'Criatura Sombria': { dir: 'CriaturaSombria' },
-    'Monstro': { dir: 'Monstro' },
-    'Fera': { dir: 'Fera', race: 'Foxyl' },
     'Pidgly': { dir: 'Ave', race: 'Pidgly', element: 'terra' },
     'Ashfang': { dir: 'Fera', race: 'Ashfang', element: 'fogo' },
     'Ignis': { dir: 'Ave', race: 'ignis', element: 'fogo' },
     'Mawthorn': { dir: 'Monstro', race: 'Mawthorn', element: 'agua' },
-    'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' },
     'Owlberoth': { dir: 'CriaturaMistica', race: 'Owlberoth', element: 'terra' },
     'Digitama': { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo' },
-    'Kael': { dir: 'Fera', race: 'Kael', element: 'agua' }
+    'Kael': { dir: 'Fera', race: 'Kael', element: 'agua' },
+    'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' }
 };
 
 export const eggSpecieMap = {
@@ -82,20 +80,14 @@ export async function loadSpeciesData(baseDir = '.') {
         const fs = await import('fs');
         const path = await import('path');
         const monsDir = path.join(baseDir, 'Assets', 'Mons');
-        const entries = fs.readdirSync(monsDir, { withFileTypes: true });
-        for (const entry of entries) {
-            if (!entry.isDirectory()) continue;
-            const dir = entry.name;
-            const existing = Object.keys(specieData).find(k => specieData[k].dir === dir);
-            const name = existing || dir;
-            if (!specieData[name]) {
-                specieData[name] = { dir };
-            }
-            const baseName = dir.toLowerCase();
-            const gifPath = path.join(monsDir, dir, `${baseName}.gif`);
+        for (const [name, info] of Object.entries(specieData)) {
+            const dirPath = path.join(monsDir, info.dir);
+            if (!fs.existsSync(dirPath)) continue;
+            const baseName = info.dir.toLowerCase();
+            const gifPath = path.join(dirPath, `${baseName}.gif`);
             const img = fs.existsSync(gifPath)
-                ? path.posix.join(dir, `${baseName}.gif`)
-                : path.posix.join(dir, `${baseName}.png`);
+                ? path.posix.join(info.dir, `${baseName}.gif`)
+                : path.posix.join(info.dir, `${baseName}.png`);
             specieImages[name] = img.replace(/\\/g, '/');
         }
     } catch (err) {
