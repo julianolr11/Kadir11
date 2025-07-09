@@ -133,7 +133,8 @@ let loadSpeciesData;
 })();
 
 function generatePetFromEgg(eggId, rarity) {
-    const specie = eggSpecieMap[eggId] || 'Ave';
+    const list = eggSpecieMap[eggId] || ['Ave'];
+    const specie = Array.isArray(list) ? list[Math.floor(Math.random() * list.length)] : list;
     const info = specieData[specie] || {};
     const attributes = {
         attack: Math.floor(Math.random() * 5) + 1,
@@ -1712,6 +1713,7 @@ ipcMain.on('journey-complete', async () => {
         'Criatura Mística': 'eggCriaturaMistica',
         'Criatura Sombria': 'eggCriaturaSombria',
         'Draconídeo': 'eggDraconideo',
+        'Drazraq': 'eggDraconideo',
         'Fera': 'eggFera',
         'Monstro': 'eggMonstro',
         'Reptilóide': 'eggReptiloide'

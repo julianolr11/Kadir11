@@ -27,7 +27,8 @@ export const specieDirs = {
     'Owlberoth': 'CriaturaMistica',
     'Digitama': 'CriaturaMistica',
     'Kael': 'Fera',
-    'Leoracal': 'Fera'
+    'Leoracal': 'Fera',
+    'Drazraq': 'Draconideo'
 };
 
 // Caminho da imagem em alta resolução de cada espécie para ser exibida na aba
@@ -40,7 +41,9 @@ export const specieBioImages = {
     'Criatura Mística': 'CriaturaMistica/CriaturaMistica.png',
     'Criatura Sombria': 'CriaturaSombria/criaturasombria.png',
     'Monstro': 'Monstro/monstro.png',
-    'Fera': 'Fera/fera.png'
+    'Fera': 'Fera/fera.png',
+    // Usa a imagem padrão de Draconídeo como imagem do Drazraq
+    'Drazraq': 'Draconideo/draconideo.png'
 };
 
 // Caminho da imagem de destaque de cada espécie para ser exibida na seleção
@@ -58,17 +61,18 @@ export const specieData = {
     'Owlberoth': { dir: 'CriaturaMistica', race: 'Owlberoth', element: 'terra' },
     'Digitama': { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo' },
     'Kael': { dir: 'Fera', race: 'Kael', element: 'agua' },
-    'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' }
+    'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' },
+    'Drazraq': { dir: 'Draconideo', race: 'drazraq', element: 'puro' }
 };
 
 export const eggSpecieMap = {
-    eggAve: 'Ave',
-    eggCriaturaMistica: 'Criatura Mística',
-    eggCriaturaSombria: 'Criatura Sombria',
-    eggDraconideo: 'Draconídeo',
-    eggFera: 'Fera',
-    eggMonstro: 'Monstro',
-    eggReptiloide: 'Reptilóide'
+    eggAve: ['Pidgly', 'Ignis'],
+    eggCriaturaMistica: ['Owlberoth', 'Digitama'],
+    eggCriaturaSombria: ['Criatura Sombria'],
+    eggDraconideo: ['Draconídeo', 'Drazraq'],
+    eggFera: ['Ashfang', 'Kael', 'Leoracal'],
+    eggMonstro: ['Mawthorn'],
+    eggReptiloide: ['Reptilóide']
 };
 
 let specieLoaded = false;
