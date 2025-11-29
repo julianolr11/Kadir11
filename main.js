@@ -4,6 +4,7 @@ const { registerWindowHandlers } = require('./scripts/handlers/windowHandlers');
 const { registerPetHandlers } = require('./scripts/handlers/petHandlers');
 const { registerStoreHandlers } = require('./scripts/handlers/storeHandlers');
 const { registerGameHandlers } = require('./scripts/handlers/gameHandlers');
+const { registerMovesHandlers } = require('./scripts/handlers/movesHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
@@ -429,6 +430,8 @@ app.whenReady().then(() => {
         xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp },
         storeFns: { getItems, setItems, getCoins, setCoins }
     });
+
+    registerMovesHandlers({ getCurrentPet: () => currentPet, petManager });
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
@@ -1403,47 +1406,7 @@ ipcMain.on('reward-pet', async (event, reward) => {
 
 // (movido para gameHandlers) ipcMain.on('battle-result' ... )
 
-ipcMain.on('learn-move', async (event, move) => {
-    if (!currentPet) return;
-    if (!currentPet.moves) currentPet.moves = [];
-    if (!currentPet.knownMoves) currentPet.knownMoves = currentPet.moves.slice();
-
-    const learnedBefore = currentPet.knownMoves.some(m => m.name === move.name);
-    const cost = learnedBefore ? Math.ceil(move.cost / 2) : move.cost;
-
-    if ((currentPet.kadirPoints || 0) < cost) {
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('show-train-error', 'Pontos Kadir insuficientes!');
-        });
-        return;
-    }
-
-    currentPet.kadirPoints = (currentPet.kadirPoints || 0) - cost;
-
-    const knownIdx = currentPet.knownMoves.findIndex(m => m.name === move.name);
-    if (knownIdx < 0) {
-        currentPet.knownMoves.push(move);
-    } else {
-        currentPet.knownMoves[knownIdx] = move;
-    }
-
-    const idx = currentPet.moves.findIndex(m => m.name === move.name);
-    if (idx >= 0) {
-        currentPet.moves[idx] = move;
-    } else if (currentPet.moves.length >= 4) {
-        currentPet.moves[0] = move;
-    } else {
-        currentPet.moves.push(move);
-    }
-    try {
-        await petManager.updatePet(currentPet.petId, { moves: currentPet.moves, knownMoves: currentPet.knownMoves, kadirPoints: currentPet.kadirPoints });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aprender golpe:', err);
-    }
-});
+// (movido para movesHandlers) ipcMain.on('learn-move' ... )
 
 // Novos handlers IPC para o electron-store
 
