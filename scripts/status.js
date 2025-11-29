@@ -306,13 +306,13 @@ function updateStatus() {
 
     // Atualizar a imagem do elemento na barra de título
     const elementImages = {
-        'ar': './Assets/Elements/ar.png',
-        'fogo': './Assets/Elements/fogo.png',
-        'agua': './Assets/Elements/agua.png',
-        'terra': './Assets/Elements/terra.png',
-        'puro': './Assets/Elements/puro.png'
+        'ar': 'Assets/Elements/ar.png',
+        'fogo': 'Assets/Elements/fogo.png',
+        'agua': 'Assets/Elements/agua.png',
+        'terra': 'Assets/Elements/terra.png',
+        'puro': 'Assets/Elements/puro.png'
     };
-    const elementImageSrc = elementImages[pet.element.toLowerCase()] || './Assets/Elements/default.png';
+    const elementImageSrc = elementImages[pet.element.toLowerCase()] || 'Assets/Elements/default.png';
     console.log('Atualizando elemento na barra de título:', elementImageSrc);
     titleBarElement.src = elementImageSrc;
     titleBarElement.alt = `Elemento: ${pet.element}`;
@@ -372,7 +372,7 @@ function updateStatus() {
         raceText.textContent = raceName ? `Raça: ${raceName}` : '';
     }
     if (elementText) {
-        const imgSrc = elementImages[pet.element?.toLowerCase()] || './Assets/Elements/default.png';
+        const imgSrc = elementImages[pet.element?.toLowerCase()] || 'Assets/Elements/default.png';
         const elementName = pet.element || 'Desconhecido';
         elementText.innerHTML = `Elemento: <img src="${imgSrc}" alt="${elementName}" style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> ${elementName}`;
     }
