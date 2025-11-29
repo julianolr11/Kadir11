@@ -43,6 +43,8 @@ function registerGameHandlers(deps) {
         BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', pet); });
     }
 
+    const { applyBattleProgress, applyJourneyRewards } = require('../logic/progression');
+
     // Batalha (ação que consome energia e dá XP)
     ipcMain.on('battle-pet', async () => {
         const pet = getCurrentPet();
@@ -62,17 +64,7 @@ function registerGameHandlers(deps) {
         pet.energy = Math.max(pet.energy - 5, 0);
         const damageTaken = Math.floor(Math.random() * 11) + 5;
         pet.currentHealth = Math.max(pet.currentHealth - damageTaken, 0);
-        const baseXp = 10;
-        const xpGained = calculateXpGain(baseXp, pet.rarity);
-        pet.experience = (pet.experience || 0) + xpGained;
-        let requiredXp = getRequiredXpForNextLevel(pet.level);
-        while (pet.experience >= requiredXp && pet.level < 100) {
-            pet.level += 1;
-            pet.experience -= requiredXp;
-            pet.kadirPoints = (pet.kadirPoints || 0) + 5;
-            increaseAttributesOnLevelUp(pet);
-            requiredXp = getRequiredXpForNextLevel(pet.level);
-        }
+        const { xpGain, levelsGained, kadirGained } = applyBattleProgress(pet, { baseXp: 10 }, { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp });
         try {
             await petManager.updatePet(pet.petId, {
                 level: pet.level,
@@ -147,13 +139,7 @@ function registerGameHandlers(deps) {
             'Reptiloide': 'eggReptiloide'
         };
         const eggId = specieEggMap[pet.specie] || 'eggAve';
-        const items = getItems();
-        items[eggId] = (items[eggId] || 0) + 1;
-        setItems(items);
-        pet.items = items;
-        setCoins(getCoins() + 50);
-        pet.coins = getCoins();
-        pet.kadirPoints = (pet.kadirPoints || 0) + 100;
+        applyJourneyRewards(pet, { eggId, coins: 50, kadirPoints: 100 }, { getItems, setItems, getCoins, setCoins });
         try {
             await petManager.updatePet(pet.petId, { kadirPoints: pet.kadirPoints });
         } catch (err) {
