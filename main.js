@@ -414,7 +414,23 @@ app.whenReady().then(() => {
 
     function getGiftHistory() { return store.get('giftHistory', []); }
 
-    registerStoreHandlers(getCoins, setCoins, getItems, setItems, handleBuyItem, handleUseItem, handleRedeemGift, getGiftHistory);
+    async function handleUnequipItem() {
+        if (!currentPet || !currentPet.equippedItem) return;
+        const items = getItems();
+        const eq = currentPet.equippedItem;
+        items[eq] = (items[eq] || 0) + 1;
+        currentPet.equippedItem = null;
+        setItems(items);
+        currentPet.items = items;
+        try {
+            await petManager.updatePet(currentPet.petId, { equippedItem: null });
+        } catch (err) {
+            console.error('Erro ao remover item (modularizado):', err);
+        }
+        BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
+    }
+
+    registerStoreHandlers(getCoins, setCoins, getItems, setItems, handleBuyItem, handleUseItem, handleRedeemGift, getGiftHistory, handleUnequipItem);
 
     // Registro dos handlers de jogo (batalha/jornada/treino/lair)
     registerGameHandlers({
@@ -1207,23 +1223,7 @@ ipcMain.on('buy-item', async (event, item) => {
 });
 
 
-ipcMain.on('unequip-item', async () => {
-    if (!currentPet || !currentPet.equippedItem) return;
-    const items = getItems();
-    const eq = currentPet.equippedItem;
-    items[eq] = (items[eq] || 0) + 1;
-    currentPet.equippedItem = null;
-    setItems(items);
-    currentPet.items = items;
-    try {
-        await petManager.updatePet(currentPet.petId, { equippedItem: null });
-    } catch (err) {
-        console.error('Erro ao remover item:', err);
-    }
-    BrowserWindow.getAllWindows().forEach(w => {
-        if (w.webContents) w.webContents.send('pet-data', currentPet);
-    });
-});
+// (movido para storeHandlers) ipcMain.on('unequip-item' ... )
 
 ipcMain.on('place-egg-in-nest', async (event, eggId) => {
     if (!currentPet) return;

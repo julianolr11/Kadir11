@@ -20,7 +20,8 @@ function registerStoreHandlers(
     handleBuyItem,
     handleUseItem,
     handleRedeemGift,
-    getGiftHistory
+    getGiftHistory,
+    handleUnequipItem
 ) {
     logger.info('Registrando Store Handlers');
     
@@ -78,6 +79,11 @@ function registerStoreHandlers(
         storeInstance.set('isMuted', isMuted);
         logger.debug(`Mute atualizado para: ${isMuted}`);
     });
+    
+    // Handler para desequipar item
+    if (handleUnequipItem) {
+        ipcMain.on('unequip-item', handleUnequipItem);
+    }
     
     logger.info('Store Handlers registrados com sucesso');
 }
