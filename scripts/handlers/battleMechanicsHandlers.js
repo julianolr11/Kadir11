@@ -36,6 +36,40 @@ function setupBattleMechanicsHandlers(options = {}) {
                 energy: currentPet.energy
             });
 
+    // Handler: update-health
+    ipcMain.on('update-health', async (event, newHealth) => {
+        const currentPet = getCurrentPet();
+        
+        if (!currentPet) {
+            logger.error('No pet selected for updating health');
+            return;
+        }
+
+        const previousHealth = currentPet.currentHealth;
+        currentPet.currentHealth = Math.max(0, Math.min(currentPet.maxHealth, newHealth));
+
+        logger.debug(`Health updated: ${previousHealth} → ${currentPet.currentHealth} (max: ${currentPet.maxHealth})`);
+
+        try {
+            await petManager.updatePet(currentPet.petId, {
+                currentHealth: currentPet.currentHealth
+            });
+
+            // Broadcast updated pet data to all windows
+            BrowserWindow.getAllWindows().forEach(w => {
+                if (w.webContents) {
+                    w.webContents.send('pet-data', currentPet);
+                }
+            });
+
+            logger.info(`Health updated successfully for pet ${currentPet.name}`);
+        } catch (err) {
+            logger.error('Error updating health:', err);
+            // Rollback on error
+            currentPet.currentHealth = previousHealth;
+        }
+    });
+
             // Broadcast updated pet data to all windows
             BrowserWindow.getAllWindows().forEach(w => {
                 if (w.webContents) {

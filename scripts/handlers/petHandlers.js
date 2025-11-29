@@ -262,6 +262,35 @@ function registerPetHandlers(windowManager, getItems, getCoins, broadcastPenUpda
     setupDeletePetHandler(windowManager, broadcastPenUpdate);
     setupRenamePetHandler();
     setupAnimationFinishedHandler(windowManager);
+    // Handler: kadirfull (cheat para restaurar estado do pet)
+    ipcMain.on('kadirfull', async () => {
+        const pet = state.currentPet;
+        if (!pet) {
+            logger.error('Nenhum pet selecionado para kadirfull');
+            return;
+        }
+        const prev = { currentHealth: pet.currentHealth, hunger: pet.hunger, happiness: pet.happiness, energy: pet.energy };
+        pet.currentHealth = pet.maxHealth;
+        pet.hunger = 100;
+        pet.happiness = 100;
+        pet.energy = 100;
+        try {
+            await petManager.updatePet(pet.petId, {
+                currentHealth: pet.currentHealth,
+                hunger: pet.hunger,
+                happiness: pet.happiness,
+                energy: pet.energy
+            });
+            BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', pet); });
+            logger.info('kadirfull aplicado com sucesso');
+        } catch (err) {
+            logger.error('Erro ao aplicar kadirfull:', err);
+            pet.currentHealth = prev.currentHealth;
+            pet.hunger = prev.hunger;
+            pet.happiness = prev.happiness;
+            pet.energy = prev.energy;
+        }
+    });
     
     logger.info('Pet Handlers registrados com sucesso');
 }

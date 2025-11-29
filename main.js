@@ -438,12 +438,16 @@ app.whenReady().then(() => {
         windowManager,
         createBattleModeWindow,
         createJourneyModeWindow,
+        createJourneySceneWindow,
         createLairModeWindow,
         createTrainWindow,
         createTrainMenuWindow,
         createTrainAttributesWindow,
         createTrainForceWindow,
         createTrainDefenseWindow,
+        getRandomEnemyIdle,
+        resolveIdleGif,
+        extractElementFromPath,
         xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp },
         storeFns: { getItems, setItems, getCoins, setCoins }
     });
@@ -1082,28 +1086,7 @@ function closeAllGameWindows() {
 
 // (movido para gameHandlers) ipcMain.on('open-lair-mode-window' ... )
 
-ipcMain.on('open-journey-scene-window', async (event, data) => {
-    console.log('Recebido open-journey-scene-window');
-    const win = createJourneySceneWindow();
-    if (!win) return;
-    const enemy = await getRandomEnemyIdle(currentPet ? currentPet.statusImage : null);
-    const enemyName = enemy ? path.basename(path.dirname(enemy)) : '';
-    const enemyElement = extractElementFromPath(enemy);
-    win.webContents.on('did-finish-load', () => {
-        win.webContents.send('scene-data', {
-            background: data.background,
-            playerPet: currentPet ? resolveIdleGif(currentPet.statusImage || currentPet.image) : null,
-            enemyPet: enemy,
-            enemyName,
-            enemyElement,
-            statusEffects: currentPet ? currentPet.statusEffects || [] : []
-        });
-        if (currentPet) {
-            currentPet.items = getItems();
-            win.webContents.send('pet-data', currentPet);
-        }
-    });
-});
+// (movido para gameHandlers) ipcMain.on('open-journey-scene-window' ... )
 
 // (movido para windowPositioningHandlers) ipcMain.on('resize-journey-window' ... )
 
@@ -1119,68 +1102,7 @@ ipcMain.on('open-journey-scene-window', async (event, data) => {
 
 // (movido para gameHandlers) ipcMain.on('open-train-defense-window' ... )
 
-ipcMain.on('buy-item', async (event, item) => {
-    if (!currentPet) return;
-    const prices = {
-        healthPotion: 10,
-        meat: 5,
-        staminaPotion: 8,
-        chocolate: 2,
-        finger: 35,
-        turtleShell: 35,
-        feather: 35,
-        orbe: 35,
-        terrainMedium: 100,
-        terrainLarge: 200
-    };
-    let price = prices[item];
-    if (item === 'nest') {
-        price = getNestPrice();
-    }
-    if (price === undefined) return;
-    if (getCoins() < price) {
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('show-store-error', 'Moedas insuficientes!');
-        });
-        return;
-    }
-
-    if (item === 'nest') {
-        const count = getNestCount();
-        if (count >= 3) {
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) w.webContents.send('show-store-error', 'Limite de ninhos atingido!');
-            });
-            return;
-        }
-    }
-
-    setCoins(getCoins() - price);
-    currentPet.coins = getCoins();
-
-    if (item === 'terrainMedium' || item === 'terrainLarge') {
-        const current = store.get('penSize', 'small');
-        if (item === 'terrainMedium' && current === 'small') {
-            store.set('penSize', 'medium');
-            broadcastPenUpdate();
-        } else if (item === 'terrainLarge' && current !== 'large') {
-            store.set('penSize', 'large');
-            broadcastPenUpdate();
-        }
-    } else if (item === 'nest') {
-        store.set('nestCount', getNestCount() + 1);
-        broadcastNestUpdate();
-    } else {
-        const items = getItems();
-        items[item] = (items[item] || 0) + 1;
-        setItems(items);
-        currentPet.items = items;
-    }
-
-    BrowserWindow.getAllWindows().forEach(w => {
-        if (w.webContents) w.webContents.send('pet-data', currentPet);
-    });
-});
+// (duplicado / movido para storeHandlers) ipcMain.on('buy-item' ... )
 
 
 // (movido para storeHandlers) ipcMain.on('unequip-item' ... )
@@ -1193,117 +1115,13 @@ ipcMain.on('buy-item', async (event, item) => {
 
 // (movido para battleMechanicsHandlers) ipcMain.on('use-bravura' ... )
 
-ipcMain.on('update-health', async (event, newHealth) => {
-    if (!currentPet) return;
-    currentPet.currentHealth = Math.max(0, Math.min(currentPet.maxHealth, newHealth));
-    try {
-        await petManager.updatePet(currentPet.petId, { currentHealth: currentPet.currentHealth });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao atualizar vida do pet:', err);
-    }
-});
+// (movido para battleMechanicsHandlers) ipcMain.on('update-health' ... )
 
-ipcMain.on('increase-attribute', async (event, payload) => {
-    if (!currentPet || !payload) return;
-    const { name, amount } = payload;
-    if (!name) return;
-    const inc = amount || 1;
-    if (!currentPet.attributes) currentPet.attributes = {};
-    currentPet.attributes[name] = (currentPet.attributes[name] || 0) + inc;
-    if (name === 'life') {
-        const ratio = currentPet.currentHealth / currentPet.maxHealth;
-        currentPet.maxHealth = currentPet.attributes.life;
-        currentPet.currentHealth = Math.round(currentPet.maxHealth * ratio);
-    }
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            attributes: currentPet.attributes,
-            maxHealth: currentPet.maxHealth,
-            currentHealth: currentPet.currentHealth
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aumentar atributo:', err);
-    }
-});
+// (movido para gameHandlers) ipcMain.on('increase-attribute' ... )
 
-ipcMain.on('kadirfull', async () => {
-    if (!currentPet) return;
-    currentPet.currentHealth = currentPet.maxHealth;
-    currentPet.hunger = 100;
-    currentPet.happiness = 100;
-    currentPet.energy = 100;
+// (movido para petHandlers) ipcMain.on('kadirfull' ... )
 
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            currentHealth: currentPet.currentHealth,
-            hunger: currentPet.hunger,
-            happiness: currentPet.happiness,
-            energy: currentPet.energy
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aplicar kadirfull:', err);
-    }
-});
-
-ipcMain.on('reward-pet', async (event, reward) => {
-    if (!currentPet || !reward) return;
-    if (reward.item) {
-        const items = getItems();
-        const qty = reward.qty || 1;
-        items[reward.item] = (items[reward.item] || 0) + qty;
-        setItems(items);
-        currentPet.items = items;
-    }
-    if (reward.coins) {
-        setCoins(getCoins() + reward.coins);
-    }
-    if (reward.kadirPoints) {
-        currentPet.kadirPoints = (currentPet.kadirPoints || 0) + reward.kadirPoints;
-    }
-    if (reward.bravura) {
-        currentPet.bravura = (currentPet.bravura || 0) + reward.bravura;
-    }
-    if (reward.experience) {
-        currentPet.experience = (currentPet.experience || 0) + reward.experience;
-        let requiredXp = getRequiredXpForNextLevel(currentPet.level);
-        while (currentPet.experience >= requiredXp && currentPet.level < 100) {
-            currentPet.level += 1;
-            currentPet.experience -= requiredXp;
-            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 5;
-            currentPet.bravura = (currentPet.bravura || 0) + 1;
-            increaseAttributesOnLevelUp(currentPet);
-            requiredXp = getRequiredXpForNextLevel(currentPet.level);
-        }
-    }
-
-    try {
-        currentPet.coins = getCoins();
-        await petManager.updatePet(currentPet.petId, {
-            kadirPoints: currentPet.kadirPoints,
-            level: currentPet.level,
-            experience: currentPet.experience,
-            attributes: currentPet.attributes,
-            maxHealth: currentPet.maxHealth,
-            currentHealth: currentPet.currentHealth,
-            energy: currentPet.energy,
-            bravura: currentPet.bravura
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aplicar recompensa:', err);
-    }
-});
+// (movido para gameHandlers) ipcMain.on('reward-pet' ... )
 
 
 // (movido para gameHandlers) ipcMain.on('journey-complete' ... )

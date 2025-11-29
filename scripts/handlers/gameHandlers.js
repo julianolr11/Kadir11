@@ -33,6 +33,10 @@ function registerGameHandlers(deps) {
         createTrainAttributesWindow,
         createTrainForceWindow,
         createTrainDefenseWindow,
+            createJourneySceneWindow,
+            getRandomEnemyIdle,
+            resolveIdleGif,
+            extractElementFromPath,
         xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp },
         storeFns: { getItems, setItems, getCoins, setCoins }
     } = deps;
@@ -203,6 +207,159 @@ function registerGameHandlers(deps) {
     ipcMain.on('open-train-attributes-window', () => { if (getCurrentPet()) createTrainAttributesWindow(); });
     ipcMain.on('open-train-force-window', () => { const pet = getCurrentPet(); if (!pet) return; const win = createTrainForceWindow(); if (win) win.webContents.on('did-finish-load', () => win.webContents.send('pet-data', pet)); });
     ipcMain.on('open-train-defense-window', () => { const pet = getCurrentPet(); if (!pet) return; const win = createTrainDefenseWindow(); if (win) win.webContents.on('did-finish-load', () => win.webContents.send('pet-data', pet)); });
+
+    // Handler: open-journey-scene-window (abre janela de cena de jornada)
+    ipcMain.on('open-journey-scene-window', async (event, data) => {
+        logger.debug('Opening journey scene window');
+        const pet = getCurrentPet();
+        const win = createJourneySceneWindow();
+        if (!win) {
+            logger.error('Failed to create journey scene window');
+            return;
+        }
+
+        const enemy = await getRandomEnemyIdle(pet ? pet.statusImage : null);
+        const enemyName = enemy ? require('path').basename(require('path').dirname(enemy)) : '';
+        const enemyElement = extractElementFromPath(enemy);
+
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.send('scene-data', {
+                background: data.background,
+                playerPet: pet ? resolveIdleGif(pet.statusImage || pet.image) : null,
+                enemyPet: enemy,
+                enemyName,
+                enemyElement,
+                statusEffects: pet ? pet.statusEffects || [] : []
+            });
+            
+            if (pet) {
+                pet.items = getItems();
+                win.webContents.send('pet-data', pet);
+            }
+        });
+
+        logger.info(`Journey scene created with enemy: ${enemyName} (${enemyElement})`);
+    });
+
+    // Handler: increase-attribute (usado em treino para aumentar atributos)
+    ipcMain.on('increase-attribute', async (event, payload) => {
+        const pet = getCurrentPet();
+        if (!pet || !payload) {
+            logger.error('Invalid pet or payload for increase-attribute');
+            return;
+        }
+
+        const { name, amount } = payload;
+        if (!name) {
+            logger.error('Attribute name not provided');
+            return;
+        }
+
+        const inc = amount || 1;
+        if (!pet.attributes) pet.attributes = {};
+        const previousValue = pet.attributes[name] || 0;
+        pet.attributes[name] = previousValue + inc;
+
+        // Se aumentou vida, ajustar maxHealth proporcionalmente
+        if (name === 'life') {
+            const ratio = pet.currentHealth / pet.maxHealth;
+            pet.maxHealth = pet.attributes.life;
+            pet.currentHealth = Math.round(pet.maxHealth * ratio);
+        }
+
+        logger.debug(`Attribute ${name} increased: ${previousValue} → ${pet.attributes[name]}`);
+
+        try {
+            await petManager.updatePet(pet.petId, {
+                attributes: pet.attributes,
+                maxHealth: pet.maxHealth,
+                currentHealth: pet.currentHealth
+            });
+
+            broadcastPet(pet);
+            logger.info(`Attribute ${name} updated successfully for pet ${pet.name}`);
+        } catch (err) {
+            logger.error('Error increasing attribute:', err);
+            // Rollback
+            pet.attributes[name] = previousValue;
+        }
+    });
+
+    // Handler: reward-pet (aplicar recompensas de jornada/batalha com itens/coins/xp/kadir/bravura)
+    ipcMain.on('reward-pet', async (event, reward) => {
+        const pet = getCurrentPet();
+        if (!pet || !reward) {
+            logger.error('Invalid pet or reward for reward-pet');
+            return;
+        }
+
+        logger.debug('Applying rewards:', reward);
+
+        // Add item to inventory
+        if (reward.item) {
+            const items = getItems();
+            const qty = reward.qty || 1;
+            items[reward.item] = (items[reward.item] || 0) + qty;
+            setItems(items);
+            pet.items = items;
+            logger.debug(`Item ${reward.item} x${qty} added to inventory`);
+        }
+
+        // Add coins
+        if (reward.coins) {
+            setCoins(getCoins() + reward.coins);
+            logger.debug(`Coins added: +${reward.coins}`);
+        }
+
+        // Add kadir points
+        if (reward.kadirPoints) {
+            pet.kadirPoints = (pet.kadirPoints || 0) + reward.kadirPoints;
+            logger.debug(`Kadir points added: +${reward.kadirPoints}`);
+        }
+
+        // Add bravura
+        if (reward.bravura) {
+            pet.bravura = (pet.bravura || 0) + reward.bravura;
+            logger.debug(`Bravura added: +${reward.bravura}`);
+        }
+
+        // Add experience and level up if needed
+        if (reward.experience) {
+            pet.experience = (pet.experience || 0) + reward.experience;
+            let requiredXp = getRequiredXpForNextLevel(pet.level);
+            
+            let leveledUp = false;
+            while (pet.experience >= requiredXp && pet.level < 100) {
+                pet.level += 1;
+                pet.experience -= requiredXp;
+                const attributesGained = increaseAttributesOnLevelUp(pet);
+                requiredXp = getRequiredXpForNextLevel(pet.level);
+                leveledUp = true;
+                logger.info(`Pet ${pet.name} leveled up to ${pet.level}! Attributes gained: ${JSON.stringify(attributesGained)}`);
+            }
+
+            if (leveledUp) {
+                pet.kadirPoints = (pet.kadirPoints || 0) + 5;
+            }
+        }
+
+        try {
+            await petManager.updatePet(pet.petId, {
+                level: pet.level,
+                experience: pet.experience,
+                attributes: pet.attributes,
+                maxHealth: pet.maxHealth,
+                currentHealth: pet.currentHealth,
+                kadirPoints: pet.kadirPoints,
+                bravura: pet.bravura
+            });
+
+            broadcastPet(pet);
+            logger.info(`Rewards applied successfully for pet ${pet.name}`);
+        } catch (err) {
+            logger.error('Error applying rewards:', err);
+        }
+    });
 
     logger.info('Game Handlers registrados com sucesso');
 }
