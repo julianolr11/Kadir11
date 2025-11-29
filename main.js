@@ -7,10 +7,9 @@ const { registerGameHandlers } = require('./scripts/handlers/gameHandlers');
 const { registerMovesHandlers } = require('./scripts/handlers/movesHandlers');
 const { registerSettingsHandlers } = require('./scripts/handlers/settingsHandlers');
 const { registerAssetsHandlers } = require('./scripts/handlers/assetsHandlers');
+const { registerLifecycleHandlers } = require('./scripts/handlers/lifecycleHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
-const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
-const { setupBattleHandler } = require('./scripts/battleHandler');
 const fs = require('fs');
 const path = require('path');
 
@@ -219,9 +218,6 @@ app.whenReady().then(() => {
             console.log('Nenhuma janela ativa encontrada para abrir o DevTools');
         }
     });
-
-    startPetUpdater(() => currentPet);
-    setupBattleHandler(ipcMain, () => currentPet, petManager, BrowserWindow);
 
     // Registrar handlers modulares da Fase 1
     registerWindowHandlers(
@@ -460,6 +456,17 @@ app.whenReady().then(() => {
         setJourneyImagesCache: (cache) => { journeyImagesCache = cache; },
         baseDir: __dirname
     });
+
+    // Registrar lifecycle (timers e battle handler)
+    const { resetTimers } = registerLifecycleHandlers({
+        ipcMain,
+        getCurrentPet: () => currentPet,
+        petManager,
+        BrowserWindow
+    });
+
+    // Expor resetTimers globalmente para uso ao selecionar pet
+    global.resetTimers = resetTimers;
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {

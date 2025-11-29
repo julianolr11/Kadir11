@@ -7,7 +7,6 @@ const { ipcMain, BrowserWindow } = require('electron');
 const petManager = require('../petManager');
 const state = require('../managers/stateManager');
 const { createLogger } = require('../utils/logger');
-const { resetTimers } = require('../petUpdater');
 
 const logger = createLogger('PetHandlers');
 
@@ -106,7 +105,9 @@ function setupSelectPetHandler(windowManager, getItems, getCoins, closeAllGameWi
             // Atualizar estado global
             state.currentPet = pet;
             state.updateTimestamp();
-            resetTimers();
+            if (global.resetTimers) {
+                global.resetTimers();
+            }
 
             // Criar tray window ANTES de fechar outras janelas
             const trayWindow = windowManager.createTrayWindow();
