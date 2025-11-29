@@ -38,6 +38,7 @@ export const specieBioImages = {
     'Draconídeo': 'Draconideo/draconideo.png',
     'Reptiloide': 'Reptiloide/puro/viborom/reptiloide.png',
     'Ave': 'Ave/ave.png',
+    'Besta': 'Besta/besta.png',
     'Criatura Mística': 'CriaturaMistica/CriaturaMistica.png',
     'Criatura Sombria': 'CriaturaSombria/criaturasombria.png',
     'Monstro': 'Monstro/monstro.png',
@@ -54,6 +55,7 @@ export let specieImages = {};
 export const specieData = {
     'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
     'Reptiloide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
+    'Besta': { dir: 'Besta', race: 'besta', element: 'puro' },
     'Pidgly': { dir: 'Ave', race: 'Pidgly', element: 'terra' },
     'Ashfang': { dir: 'Fera', race: 'Ashfang', element: 'fogo' },
     'Ignis': { dir: 'Ave', race: 'ignis', element: 'fogo' },
