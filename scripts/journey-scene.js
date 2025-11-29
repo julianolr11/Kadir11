@@ -10,7 +10,7 @@ function assetPath(relative) {
     if (!relative) return '';
     // Remove Assets/Mons/ do início se já existir para evitar duplicação
     const cleaned = relative.replace(/^[Aa]ssets[\/][Mm]ons[\/]/, '').replace(/\\/g, '/');
-    return `Assets/Mons/${cleaned}`;
+    return `../../Assets/Mons/${cleaned}`;
 }
 
 function imageExists(src) {
@@ -90,7 +90,7 @@ if (window.electronAPI?.getDifficulty) {
 
 async function loadItemsInfo() {
     try {
-        const resp = await fetch('data/items.json');
+        const resp = await fetch('../../data/items.json');
         const data = await resp.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });
@@ -102,7 +102,7 @@ async function loadItemsInfo() {
 
 async function loadStatusEffectsInfo() {
     try {
-        const resp = await fetch('data/status-effects.json');
+        const resp = await fetch('../../data/status-effects.json');
         const data = await resp.json();
         statusEffectsInfo = {};
         data.forEach(se => { statusEffectsInfo[se.id] = se; });
@@ -201,7 +201,7 @@ function updateItems() {
     itemKeys.forEach((id, index) => {
         const qty = pet.items[id];
         if (qty <= 0) return;
-        const info = itemsInfo[id] || { name: id, icon: 'Assets/Shop/health-potion.png' };
+        const info = itemsInfo[id] || { name: id, icon: '../../Assets/Shop/health-potion.png' };
         
         // Container do item com accordion
         const itemContainer = document.createElement('div');
@@ -212,10 +212,10 @@ function updateItems() {
         itemHeader.className = 'item-header';
         
         const img = document.createElement('img');
-        img.src = info.icon || 'Assets/Shop/health-potion.png';
+        img.src = info.icon || '../../Assets/Shop/health-potion.png';
         img.alt = info.name;
         img.className = 'item-icon';
-        img.onerror = () => { img.src = 'Assets/Shop/health-potion.png'; };
+        img.onerror = () => { img.src = '../../Assets/Shop/health-potion.png'; };
         
         const itemInfo = document.createElement('div');
         itemInfo.className = 'item-info';
@@ -745,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.enemyElement) {
             enemyElement = data.enemyElement;
             if (enemyElementImg) {
-                enemyElementImg.src = `Assets/Elements/${enemyElement}.png`;
+                enemyElementImg.src = `../../Assets/Elements/${enemyElement}.png`;
                 enemyElementImg.alt = enemyElement;
             }
             updateMoves();
@@ -763,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (playerName) playerName.textContent = data.name || '';
         if (playerElementImg) {
             const el = (data.element || 'default').toLowerCase();
-            playerElementImg.src = `Assets/Elements/${el}.png`;
+            playerElementImg.src = `../../Assets/Elements/${el}.png`;
             playerElementImg.alt = el;
         }
         if (playerLevelTxt) playerLevelTxt.textContent = `Lvl ${data.level || 1}`;

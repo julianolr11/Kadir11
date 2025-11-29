@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const icon = document.createElement('img');
                 icon.className = 'history-icon';
-                icon.src = item.icon || 'Assets/Shop/health-potion.png';
-                icon.onerror = () => { icon.src = 'Assets/Shop/health-potion.png'; };
+                icon.src = item.icon || '../../Assets/Shop/health-potion.png';
+                icon.onerror = () => { icon.src = '../../Assets/Shop/health-potion.png'; };
 
                 const info = document.createElement('div');
                 info.className = 'history-info';

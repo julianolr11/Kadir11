@@ -3,7 +3,7 @@ const petsLayer = document.getElementById('pets-layer');
 const nestsContainer = document.getElementById('nests-container');
 const penCtx = penCanvas ? penCanvas.getContext('2d') : null;
 const tileset = new Image();
-tileset.src = 'Assets/tileset/tileset.png';
+tileset.src = '../../Assets/tileset/tileset.png';
 let penInfo = { size: 'small', maxPets: 3 };
 const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
 
@@ -64,7 +64,7 @@ function drawNests(count) {
     const n = Math.min(3, count || 0);
     for (let i = 0; i < n; i++) {
         const img = document.createElement('img');
-        img.src = hasEggInInventory() ? 'Assets/tileset/nest-plus.png' : 'Assets/tileset/nest.png';
+        img.src = hasEggInInventory() ? '../../Assets/tileset/nest-plus.png' : '../../Assets/tileset/nest.png';
         img.className = 'nest-image';
         nestsContainer.appendChild(img);
     }
@@ -131,9 +131,9 @@ function drawPets(pets) {
     if (animationId) cancelAnimationFrame(animationId);
     pets.forEach((pet) => {
         const img = document.createElement('img');
-        const src = pet.idleImage ? `Assets/Mons/${pet.idleImage}` :
-            (pet.statusImage ? `Assets/Mons/${pet.statusImage}` :
-                (pet.image ? `Assets/Mons/${pet.image}` : 'Assets/Mons/eggsy.png'));
+        const src = pet.idleImage ? `../../Assets/Mons/${pet.idleImage}` :
+            (pet.statusImage ? `../../Assets/Mons/${pet.statusImage}` :
+                (pet.image ? `../../Assets/Mons/${pet.image}` : '../../Assets/Mons/eggsy.png'));
         img.src = src;
         img.className = 'pet-sprite';
         petsLayer.appendChild(img);

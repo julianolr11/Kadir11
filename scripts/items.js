@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadItemsInfo() {
     try {
-        const response = await fetch('data/items.json');
+        const response = await fetch('../../data/items.json');
         const data = await response.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });

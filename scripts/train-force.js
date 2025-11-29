@@ -108,15 +108,15 @@ function evaluateHit() {
             attrGain = getAttrGain(true);
             success = true;
         }
-        if (logImg) logImg.src = 'Assets/train/wood-3.png';
+        if (logImg) logImg.src = '../../Assets/train/wood-3.png';
     } else if (pointerPos >= 70) {
         if (Math.random() < 0.3) {
             attrGain = getAttrGain(false);
             success = true;
         }
-        if (logImg) logImg.src = 'Assets/train/wood-2.png';
+        if (logImg) logImg.src = '../../Assets/train/wood-2.png';
     } else {
-        if (logImg) logImg.src = 'Assets/train/wood-1.png';
+        if (logImg) logImg.src = '../../Assets/train/wood-1.png';
     }
     if (success) {
         if (totalXp < maxTotalGain) {
@@ -146,7 +146,7 @@ function evaluateHit() {
     }
     if (attempts < maxAttempts) {
         setTimeout(() => {
-            if (logImg) logImg.src = 'Assets/train/wood-1.png';
+            if (logImg) logImg.src = '../../Assets/train/wood-1.png';
             pointerPos = 0;
             direction = 1;
             startPointer();
