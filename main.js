@@ -6,6 +6,7 @@ const { registerStoreHandlers } = require('./scripts/handlers/storeHandlers');
 const { registerGameHandlers } = require('./scripts/handlers/gameHandlers');
 const { registerMovesHandlers } = require('./scripts/handlers/movesHandlers');
 const { registerSettingsHandlers } = require('./scripts/handlers/settingsHandlers');
+const { registerAssetsHandlers } = require('./scripts/handlers/assetsHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
@@ -435,6 +436,14 @@ app.whenReady().then(() => {
     registerMovesHandlers({ getCurrentPet: () => currentPet, petManager });
 
     registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty });
+
+    registerAssetsHandlers({
+        loadSpeciesData,
+        getSpeciesData: () => ({ specieData, specieBioImages, specieImages }),
+        getJourneyImagesCache: () => journeyImagesCache,
+        setJourneyImagesCache: (cache) => { journeyImagesCache = cache; },
+        baseDir: __dirname
+    });
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
@@ -1413,28 +1422,7 @@ ipcMain.on('reward-pet', async (event, reward) => {
 
 // (movido para settingsHandlers) ipcMain.handle('get-pen-info', 'get-nest-count', 'get-nests-data', 'get-nest-price', 'get-difficulty', 'set-difficulty' ... )
 
-
-ipcMain.handle('get-species-info', async () => {
-    await loadSpeciesData(__dirname);
-    return { specieData, specieBioImages, specieImages };
-});
-
-
-ipcMain.handle('get-journey-images', async () => {
-    if (journeyImagesCache) {
-        return journeyImagesCache;
-    }
-    try {
-        const dir = path.join(__dirname, 'Assets', 'Modes', 'Journeys');
-        const files = await fs.promises.readdir(dir);
-        journeyImagesCache = files.filter(f => /\.(png|jpg|jpeg|gif)$/i.test(f))
-            .map(f => path.join('Assets', 'Modes', 'Journeys', f).replace(/\\/g, '/'));
-        return journeyImagesCache;
-    } catch (err) {
-        console.error('Erro ao listar imagens de jornada:', err);
-        return [];
-    }
-});
+// (movido para assetsHandlers) ipcMain.handle('get-species-info', 'get-journey-images' ... )
 
 let idleGifsCache = null;
 
