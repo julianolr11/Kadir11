@@ -1,4 +1,4 @@
-import { rarityGradients } from './constants.js';
+import { rarityGradients } from './constants.mjs';
 import { calculateMovePower } from './moveEffectiveness.js';
 
 const statusIcons = {

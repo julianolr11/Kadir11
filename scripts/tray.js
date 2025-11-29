@@ -1,4 +1,4 @@
-import { rarityGradients } from './constants.js';
+import { rarityGradients } from './constants.mjs';
 
 const exitOverlay = document.getElementById('exit-confirm-overlay');
 const exitYesBtn = document.getElementById('exit-confirm-yes');

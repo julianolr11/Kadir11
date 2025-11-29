@@ -1,4 +1,4 @@
-import { rarityGradients, rarityColors, specieBioImages, specieDirs } from './constants.js';
+import { rarityGradients, rarityColors, specieBioImages, specieDirs } from './constants.mjs';
 
 const raceNames = {
     viborom: 'Viborom',
@@ -31,6 +31,44 @@ console.log('status.js carregado com sucesso');
 
 let pet = {};
 let itemsInfo = {};
+
+// Mapeia diretórios para categorias de espécie para exibição na aba Sobre
+const specieDirToCategory = {
+    'Draconideo': 'Draconídeo',
+    'Reptiloide': 'Reptiloide',
+    'Ave': 'Ave',
+    'Fera': 'Fera',
+    'CriaturaMistica': 'Criatura Mística',
+    'CriaturaSombria': 'Criatura Sombria',
+    'Monstro': 'Monstro'
+};
+
+// Normaliza nomes específicos para suas categorias principais
+function getSpecieCategory(p) {
+    if (!p) return 'Desconhecida';
+    // Se já for uma categoria conhecida, normaliza acentuação desejada
+    const direct = {
+        'Reptilóide': 'Reptiloide',
+        'Reptiloide': 'Reptiloide',
+        'Draconídeo': 'Draconídeo',
+        'Ave': 'Ave',
+        'Besta': 'Besta',
+        'Criatura Mística': 'Criatura Mística',
+        'Criatura Sombria': 'Criatura Sombria',
+        'Monstro': 'Monstro',
+        'Fera': 'Fera'
+    };
+    if (p.specie && direct[p.specie]) return direct[p.specie];
+
+    // Caso specie seja um nome de espécie específica, deduzir pela pasta/dir
+    const dir = specieDirs[p.specie];
+    if (dir && specieDirToCategory[dir]) return specieDirToCategory[dir];
+
+    // Como fallback, tentar pelo próprio dir do pet se existir
+    if (p.dir && specieDirToCategory[p.dir]) return specieDirToCategory[p.dir];
+
+    return p.specie || 'Desconhecida';
+}
 
 let descriptionEl = null;
 
@@ -366,7 +404,8 @@ function updateStatus() {
         xpText.textContent = `${pet.experience || 0}/${requiredXp}`;
     }
     if (specieText) {
-        specieText.textContent = `Espécie: ${pet.specie || 'Desconhecida'}`;
+        const specieCategory = getSpecieCategory(pet);
+        specieText.textContent = `Espécie: ${specieCategory}`;
     }
     if (raceText) {
         const raceName = raceNames[pet.race] || pet.race || '';
