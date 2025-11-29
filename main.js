@@ -5,6 +5,7 @@ const { registerPetHandlers } = require('./scripts/handlers/petHandlers');
 const { registerStoreHandlers } = require('./scripts/handlers/storeHandlers');
 const { registerGameHandlers } = require('./scripts/handlers/gameHandlers');
 const { registerMovesHandlers } = require('./scripts/handlers/movesHandlers');
+const { registerSettingsHandlers } = require('./scripts/handlers/settingsHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
@@ -432,6 +433,8 @@ app.whenReady().then(() => {
     });
 
     registerMovesHandlers({ getCurrentPet: () => currentPet, petManager });
+
+    registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty });
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
@@ -1408,32 +1411,7 @@ ipcMain.on('reward-pet', async (event, reward) => {
 
 // (movido para movesHandlers) ipcMain.on('learn-move' ... )
 
-// Novos handlers IPC para o electron-store
-
-ipcMain.handle('get-pen-info', async () => {
-    return getPenInfo();
-});
-
-ipcMain.handle('get-nest-count', async () => {
-    return getNestCount();
-});
-
-ipcMain.handle('get-nests-data', async () => {
-    return getNestsData();
-});
-
-ipcMain.handle('get-nest-price', async () => {
-    return getNestPrice();
-});
-
-ipcMain.handle('get-difficulty', async () => {
-    return getDifficulty();
-});
-
-ipcMain.handle('set-difficulty', async (event, value) => {
-    setDifficulty(value);
-    return true;
-});
+// (movido para settingsHandlers) ipcMain.handle('get-pen-info', 'get-nest-count', 'get-nests-data', 'get-nest-price', 'get-difficulty', 'set-difficulty' ... )
 
 
 ipcMain.handle('get-species-info', async () => {
