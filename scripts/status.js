@@ -14,6 +14,14 @@ const raceNames = {
     drazraq: 'Drazraq'
 };
 
+const elementImages = {
+    'ar': '../../Assets/Elements/ar.png',
+    'fogo': '../../Assets/Elements/fogo.png',
+    'agua': '../../Assets/Elements/agua.png',
+    'terra': '../../Assets/Elements/terra.png',
+    'puro': '../../Assets/Elements/puro.png'
+};
+
 function getRequiredXpForNextLevel(level) {
     const baseXp = 100;
     const scale = 1.2;
@@ -50,7 +58,7 @@ let closeEquipButton = null;
 
 async function loadItemsInfo() {
     try {
-        const resp = await fetch('data/items.json');
+        const resp = await fetch('../../data/items.json');
         const data = await resp.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });
@@ -157,18 +165,18 @@ function closeEquipModal() {
 function setImageWithFallback(imgElement, relativePath) {
     if (!imgElement) return;
     if (!relativePath) {
-        imgElement.src = 'Assets/Mons/eggsy.png';
+        imgElement.src = '../../Assets/Mons/eggsy.png';
         return;
     }
-    const gifSrc = relativePath.endsWith('.gif') ? `Assets/Mons/${relativePath}` : null;
-    const pngSrc = gifSrc ? gifSrc.replace(/\.gif$/i, '.png') : `Assets/Mons/${relativePath}`;
+    const gifSrc = relativePath.endsWith('.gif') ? `../../Assets/Mons/${relativePath}` : null;
+    const pngSrc = gifSrc ? gifSrc.replace(/\.gif$/i, '.png') : `../../Assets/Mons/${relativePath}`;
 
     imgElement.onerror = () => {
         if (gifSrc && imgElement.src.endsWith('.gif')) {
             imgElement.src = pngSrc;
         } else if (!imgElement.src.endsWith('eggsy.png')) {
             imgElement.onerror = null;
-            imgElement.src = 'Assets/Mons/eggsy.png';
+            imgElement.src = '../../Assets/Mons/eggsy.png';
         }
     };
 
@@ -305,14 +313,7 @@ function updateStatus() {
     statusKadirPoints.textContent = pet.kadirPoints ?? 0;
 
     // Atualizar a imagem do elemento na barra de título
-    const elementImages = {
-        'ar': 'Assets/Elements/ar.png',
-        'fogo': 'Assets/Elements/fogo.png',
-        'agua': 'Assets/Elements/agua.png',
-        'terra': 'Assets/Elements/terra.png',
-        'puro': 'Assets/Elements/puro.png'
-    };
-    const elementImageSrc = elementImages[pet.element.toLowerCase()] || 'Assets/Elements/default.png';
+    const elementImageSrc = elementImages[pet.element.toLowerCase()] || '../../Assets/Elements/default.png';
     console.log('Atualizando elemento na barra de título:', elementImageSrc);
     titleBarElement.src = elementImageSrc;
     titleBarElement.alt = `Elemento: ${pet.element}`;
@@ -372,7 +373,7 @@ function updateStatus() {
         raceText.textContent = raceName ? `Raça: ${raceName}` : '';
     }
     if (elementText) {
-        const imgSrc = elementImages[pet.element?.toLowerCase()] || 'Assets/Elements/default.png';
+        const imgSrc = elementImages[pet.element?.toLowerCase()] || '../../Assets/Elements/default.png';
         const elementName = pet.element || 'Desconhecido';
         elementText.innerHTML = `Elemento: <img src="${imgSrc}" alt="${elementName}" style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> ${elementName}`;
     }
@@ -421,7 +422,7 @@ function updateStatus() {
             const fallback = pet.bioImage || specieBioImages[pet.specie];
             bioPath = fallback ? fallback : '';
         }
-        statusBioImage.src = bioPath ? `Assets/Mons/${bioPath}` : '';
+        statusBioImage.src = bioPath ? `../../Assets/Mons/${bioPath}` : '';
         statusBioImage.style.display = 'none';
     }
 
