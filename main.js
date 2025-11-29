@@ -3,6 +3,7 @@ const windowManager = require('./scripts/windowManager');
 const { registerWindowHandlers } = require('./scripts/handlers/windowHandlers');
 const { registerPetHandlers } = require('./scripts/handlers/petHandlers');
 const { registerStoreHandlers } = require('./scripts/handlers/storeHandlers');
+const { registerGameHandlers } = require('./scripts/handlers/gameHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
@@ -410,16 +411,24 @@ app.whenReady().then(() => {
 
     function getGiftHistory() { return store.get('giftHistory', []); }
 
-    registerStoreHandlers(
-        getCoins,
-        setCoins,
-        getItems,
-        setItems,
-        handleBuyItem,
-        handleUseItem,
-        handleRedeemGift,
-        getGiftHistory
-    );
+    registerStoreHandlers(getCoins, setCoins, getItems, setItems, handleBuyItem, handleUseItem, handleRedeemGift, getGiftHistory);
+
+    // Registro dos handlers de jogo (batalha/jornada/treino/lair)
+    registerGameHandlers({
+        getCurrentPet: () => currentPet,
+        petManager,
+        windowManager,
+        createBattleModeWindow,
+        createJourneyModeWindow,
+        createLairModeWindow,
+        createTrainWindow,
+        createTrainMenuWindow,
+        createTrainAttributesWindow,
+        createTrainForceWindow,
+        createTrainDefenseWindow,
+        xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp },
+        storeFns: { getItems, setItems, getCoins, setCoins }
+    });
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
@@ -449,40 +458,7 @@ ipcMain.handle('get-current-pet', async () => {
     return null;
 });
 
-ipcMain.on('train-pet', async () => {
-    if (!currentPet) {
-        console.error('Nenhum pet selecionado para treinar');
-        return;
-    }
-
-    console.log('Abrindo janela de treinamento para:', currentPet.name);
-    const statusWin = windowManager.createStatusWindow();
-    const trainWin = createTrainWindow({
-        centerOnShow: false,
-        onReadyToShow: () => {
-            if (statusWin) {
-                windowManager.centerWindowsSideBySide(statusWin, trainWin);
-            }
-        }
-    });
-
-    if (trainWin) {
-        trainWin.webContents.on('did-finish-load', () => {
-            currentPet.coins = getCoins();
-            currentPet.items = getItems();
-            trainWin.webContents.send('pet-data', currentPet);
-        });
-    }
-
-    if (statusWin) {
-        statusWin.webContents.on('did-finish-load', () => {
-            currentPet.items = getItems();
-            statusWin.webContents.send('pet-data', currentPet);
-            statusWin.webContents.send('activate-status-tab', 'tab-moves');
-        });
-    }
-
-});
+// (movido para gameHandlers) ipcMain.on('train-pet' ... )
 
 ipcMain.on('itens-pet', (event, options) => {
     if (currentPet) {
@@ -557,82 +533,7 @@ ipcMain.on('store-pet', (event, options) => {
     }
 });
 
-ipcMain.on('battle-pet', async () => {
-    if (currentPet) {
-        if (currentPet.energy < 5) {
-            console.log(`Energia insuficiente para batalhar: ${currentPet.energy}/5`);
-            BrowserWindow.getAllWindows().forEach(window => {
-                if (window.webContents) {
-                    window.webContents.send('show-battle-error', 'Descanse um pouco até sua próxima batalha! Energia insuficiente.');
-                }
-            });
-            return;
-        }
-
-        const minHealth = currentPet.maxHealth * 0.3;
-        if (currentPet.currentHealth < minHealth) {
-            console.log(`Vida insuficiente para batalhar: ${currentPet.currentHealth}/${currentPet.maxHealth}`);
-            BrowserWindow.getAllWindows().forEach(window => {
-                if (window.webContents) {
-                    window.webContents.send('show-battle-error', 'Seu pet precisa de pelo menos 30% de vida para batalhar.');
-                }
-            });
-            return;
-        }
-
-        console.log('Pet batalhando:', currentPet.name);
-
-        currentPet.energy = Math.max(currentPet.energy - 5, 0);
-        console.log(`Energia gasta: ${currentPet.energy + 5} -> ${currentPet.energy}`);
-
-        const damageTaken = Math.floor(Math.random() * 11) + 5;
-        const oldHealth = currentPet.currentHealth;
-        currentPet.currentHealth = Math.max(currentPet.currentHealth - damageTaken, 0);
-        console.log(`Dano recebido: ${damageTaken}. Vida: ${oldHealth} -> ${currentPet.currentHealth}`);
-
-        const baseXp = 10;
-        const xpGained = calculateXpGain(baseXp, currentPet.rarity);
-        currentPet.experience = (currentPet.experience || 0) + xpGained;
-        console.log(`Pet ganhou ${xpGained} XP. Total: ${currentPet.experience}`);
-
-        let requiredXp = getRequiredXpForNextLevel(currentPet.level);
-        while (currentPet.experience >= requiredXp && currentPet.level < 100) {
-            currentPet.level += 1;
-            currentPet.experience -= requiredXp;
-            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 5;
-            increaseAttributesOnLevelUp(currentPet);
-            console.log(`Pet subiu para o nível ${currentPet.level}! XP restante: ${currentPet.experience}`);
-            requiredXp = getRequiredXpForNextLevel(currentPet.level);
-        }
-
-        try {
-            await petManager.updatePet(currentPet.petId, {
-                level: currentPet.level,
-                experience: currentPet.experience,
-                attributes: currentPet.attributes,
-                maxHealth: currentPet.maxHealth,
-                currentHealth: currentPet.currentHealth,
-                energy: currentPet.energy,
-                kadirPoints: currentPet.kadirPoints
-            });
-        } catch (err) {
-            console.error('Erro ao atualizar pet após batalha:', err);
-        }
-
-        BrowserWindow.getAllWindows().forEach(window => {
-            if (window.webContents) {
-                window.webContents.send('pet-data', currentPet);
-            }
-        });
-    } else {
-        console.error('Nenhum pet selecionado para batalhar');
-        BrowserWindow.getAllWindows().forEach(window => {
-            if (window.webContents) {
-                window.webContents.send('show-battle-error', 'Nenhum pet selecionado para batalhar!');
-            }
-        });
-    }
-});
+// (movido para gameHandlers) ipcMain.on('battle-pet' ... )
 
 function createBattleModeWindow() {
     if (battleModeWindow) {
@@ -1171,52 +1072,11 @@ function closeAllGameWindows() {
     closeHatchWindow();
 }
 
-ipcMain.on('open-battle-mode-window', () => {
-    console.log('Recebido open-battle-mode-window');
-    if (!currentPet) {
-        console.error('Nenhum pet selecionado para batalhar');
-        BrowserWindow.getAllWindows().forEach(window => {
-            if (window.webContents) {
-                window.webContents.send('show-battle-error', 'Nenhum pet selecionado para batalhar!');
-            }
-        });
-        return;
-    }
+// (movido para gameHandlers) ipcMain.on('open-battle-mode-window' ... )
 
-    const minHealth = currentPet.maxHealth * 0.3;
-    if (currentPet.currentHealth < minHealth) {
-        BrowserWindow.getAllWindows().forEach(window => {
-            if (window.webContents) {
-                window.webContents.send('show-battle-error', 'Seu pet precisa de pelo menos 30% de vida para batalhar.');
-            }
-        });
-        return;
-    }
+// (movido para gameHandlers) ipcMain.on('open-journey-mode-window' ... )
 
-    createBattleModeWindow();
-});
-
-ipcMain.on('open-journey-mode-window', () => {
-    console.log('Recebido open-journey-mode-window');
-    const win = createJourneyModeWindow();
-    if (currentPet && win) {
-        win.webContents.on('did-finish-load', () => {
-            currentPet.items = getItems();
-            win.webContents.send('pet-data', currentPet);
-        });
-    }
-});
-
-ipcMain.on('open-lair-mode-window', () => {
-    console.log('Recebido open-lair-mode-window');
-    const win = createLairModeWindow();
-    if (currentPet && win) {
-        win.webContents.on('did-finish-load', () => {
-            currentPet.items = getItems();
-            win.webContents.send('pet-data', currentPet);
-        });
-    }
-});
+// (movido para gameHandlers) ipcMain.on('open-lair-mode-window' ... )
 
 ipcMain.on('open-journey-scene-window', async (event, data) => {
     console.log('Recebido open-journey-scene-window');
@@ -1260,47 +1120,13 @@ ipcMain.on('resize-lair-window', (event, size) => {
     }
 });
 
-ipcMain.on('open-train-menu-window', () => {
-    if (!currentPet) {
-        console.error('Nenhum pet selecionado para treinar');
-        return;
-    }
-    createTrainMenuWindow();
-});
+// (movido para gameHandlers) ipcMain.on('open-train-menu-window' ... )
 
-ipcMain.on('open-train-attributes-window', () => {
-    if (!currentPet) {
-        console.error('Nenhum pet selecionado para treinar');
-        return;
-    }
-    createTrainAttributesWindow();
-});
+// (movido para gameHandlers) ipcMain.on('open-train-attributes-window' ... )
 
-ipcMain.on('open-train-force-window', () => {
-    if (!currentPet) {
-        console.error('Nenhum pet selecionado para treinar');
-        return;
-    }
-    const win = createTrainForceWindow();
-    if (win) {
-        win.webContents.on('did-finish-load', () => {
-            win.webContents.send('pet-data', currentPet);
-        });
-    }
-});
+// (movido para gameHandlers) ipcMain.on('open-train-force-window' ... )
 
-ipcMain.on('open-train-defense-window', () => {
-    if (!currentPet) {
-        console.error('Nenhum pet selecionado para treinar');
-        return;
-    }
-    const win = createTrainDefenseWindow();
-    if (win) {
-        win.webContents.on('did-finish-load', () => {
-            win.webContents.send('pet-data', currentPet);
-        });
-    }
-});
+// (movido para gameHandlers) ipcMain.on('open-train-defense-window' ... )
 
 ipcMain.on('buy-item', async (event, item) => {
     if (!currentPet) return;
@@ -1573,74 +1399,9 @@ ipcMain.on('reward-pet', async (event, reward) => {
 });
 
 
-ipcMain.on('journey-complete', async () => {
-    if (!currentPet) return;
-    const specieEggMap = {
-        'Ave': 'eggAve',
-        'Criatura Mística': 'eggCriaturaMistica',
-        'Criatura Sombria': 'eggCriaturaSombria',
-        'Draconídeo': 'eggDraconideo',
-        'Drazraq': 'eggDraconideo',
-        'Fera': 'eggFera',
-        'Monstro': 'eggMonstro',
-        'Reptiloide': 'eggReptiloide'
-    };
-    const eggId = specieEggMap[currentPet.specie] || 'eggAve';
-    const items = getItems();
-    items[eggId] = (items[eggId] || 0) + 1;
-    setItems(items);
-    currentPet.items = items;
-    setCoins(getCoins() + 50);
-    currentPet.coins = getCoins();
-    currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 100;
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            kadirPoints: currentPet.kadirPoints
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aplicar recompensa final da jornada:', err);
-    }
-});
+// (movido para gameHandlers) ipcMain.on('journey-complete' ... )
 
-ipcMain.on('battle-result', async (event, result) => {
-    if (!currentPet || !result) return;
-    const win = !!result.win;
-    let delta = win ? 5 : -10;
-
-    if (win) {
-        currentPet.winStreak = (currentPet.winStreak || 0) + 1;
-        currentPet.lossStreak = 0;
-        if (currentPet.winStreak >= 5) {
-            delta += 15;
-            currentPet.winStreak = 0;
-        }
-    } else {
-        currentPet.lossStreak = (currentPet.lossStreak || 0) + 1;
-        currentPet.winStreak = 0;
-        if (currentPet.lossStreak >= 5) {
-            delta -= 30;
-            currentPet.lossStreak = 0;
-        }
-    }
-
-    currentPet.happiness = Math.max(0, Math.min(100, (currentPet.happiness || 0) + delta));
-
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            happiness: currentPet.happiness,
-            winStreak: currentPet.winStreak,
-            lossStreak: currentPet.lossStreak
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao atualizar felicidade após batalha:', err);
-    }
-});
+// (movido para gameHandlers) ipcMain.on('battle-result' ... )
 
 ipcMain.on('learn-move', async (event, move) => {
     if (!currentPet) return;
