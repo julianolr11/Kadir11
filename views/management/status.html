@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
     <title>Kadir11 - Status do Pet</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../../styles/main.css">
     <style>
         html {
             width: 100%;
@@ -84,6 +84,7 @@
             font-weight: bold;
             text-shadow: none;
         }
+
         /* title-bar-buttons configurado em styles/main.css */
         #back-status-titlebar {
             width: 20px;
@@ -148,7 +149,7 @@
             left: 0;
             width: 250px;
             height: 250px;
-            background: url(Assets/Rarity/texture.png) no-repeat;
+            background: url(../../Assets/Rarity/texture.png) no-repeat;
             background-size: 250px 250px;
             opacity: 0.5;
             z-index: 2;
@@ -483,11 +484,13 @@
             z-index: 1000;
             white-space: nowrap;
         }
+
         /* Ajustes para a lista de equipamentos */
         #equip-items-container {
             max-height: 150px;
-            overflow-y: auto;
+            overflow-y: unset;
         }
+
         #equip-items-container .small-button {
             width: auto;
             font-size: 12px;
@@ -500,7 +503,8 @@
     <div class="window" style="margin:0px; padding: 0px;">
         <div id="title-bar">
             <div id="title-bar-content">
-                <img id="title-bar-element" src="Assets/Elements/default.png" alt="Elemento" style="image-rendering: pixelated;">
+                <img id="title-bar-element" src="../../Assets/Elements/default.png" alt="Elemento"
+                    style="image-rendering: pixelated;">
                 <div id="title-bar-pet-name-container">
                     <span id="title-bar-pet-name">Nome do Pet</span>
                     <span id="edit-pet-name" title="Editar nome">✏️</span>
@@ -517,7 +521,8 @@
                     <div id="status-pet-image-container">
                         <div id="status-pet-image-gradient"></div>
                         <div id="status-pet-image-texture"></div>
-                        <img id="status-pet-image" src="Assets/Mons/eggsy.png" alt="Pet" style="image-rendering: pixelated;">
+                        <img id="status-pet-image" src="../../Assets/Mons/eggsy.png" alt="Pet"
+                            style="image-rendering: pixelated;">
                         <img id="status-bio-image" src="" alt="Bio do Pet" style="image-rendering: pixelated;">
                         <div id="status-rarity-label">RARIDADE</div>
                         <div id="status-level">Level: 0</div>
@@ -581,7 +586,9 @@
                     </div>
                     <div id="tab-moves" class="tab-content-item">
                         <div id="moves-header">
-                            <div id="status-kadir-points"><img src="Assets/Icons/dna-kadir.png" alt="KP" style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> <span id="kadir-points-value">0</span></div>
+                            <div id="status-kadir-points"><img src="../../Assets/Icons/dna-kadir.png" alt="KP"
+                                    style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> <span
+                                    id="kadir-points-value">0</span></div>
                             <button class="button small-button" id="train-moves-button">Treinar</button>
                         </div>
                         <div id="status-moves"></div>
@@ -609,7 +616,8 @@
         </div>
     </div>
 
-    <div id="rename-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000;">
+    <div id="rename-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000;">
         <div style="background:#2a323e; border:2px solid #fff; padding:10px; border-radius:8px; text-align:center;">
             <p style="margin-bottom:8px;">Insira o novo nome do pet:</p>
             <input id="rename-input" type="text" maxlength="15" style="margin-bottom:8px; width:160px;" />
@@ -620,9 +628,12 @@
         </div>
     </div>
 
-    <div id="equipment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000;">
-        <div style="background:#2a323e; border:2px solid #fff; padding:10px; border-radius:8px; text-align:center; width:320px;">
-            <div id="equip-items-container" class="scroll-container" style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;"></div>
+    <div id="equipment-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000; overflow:hidden;">
+        <div
+            style="background:#2a323e; border:2px solid #fff; padding:10px; border-radius:8px; text-align:center; width:320px; box-sizing:border-box; max-width:90%;">
+            <div id="equip-items-container" class="scroll-container"
+                style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;"></div>
             <div style="display:flex; justify-content:center; gap:10px;">
                 <button id="unequip-item-button" class="button small-button">Remover</button>
                 <button id="close-equip-modal" class="button small-button">Fechar</button>
@@ -630,7 +641,7 @@
         </div>
     </div>
 
-    <script type="module" src="scripts/status.js"></script>
+    <script type="module" src="../../scripts/status.js"></script>
 </body>
 
 </html>

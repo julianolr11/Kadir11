@@ -1,5 +1,6 @@
 console.log('journey-scene.js carregado');
 import { getElementMultiplier } from './elements.js';
+import { calculateXpGain } from './xpUtils.js';
 
 function closeWindow() {
     window.close();
@@ -7,8 +8,9 @@ function closeWindow() {
 
 function assetPath(relative) {
     if (!relative) return '';
-    const cleaned = relative.replace(/^[Aa]ssets[\/][Mm]ons[\/]/, '');
-    return `Assets/Mons/${cleaned}`;
+    // Remove Assets/Mons/ do início se já existir para evitar duplicação
+    const cleaned = relative.replace(/^[Aa]ssets[\/][Mm]ons[\/]/, '').replace(/\\/g, '/');
+    return `../../Assets/Mons/${cleaned}`;
 }
 
 function imageExists(src) {
@@ -22,15 +24,29 @@ function imageExists(src) {
 
 async function computeAttackSrc(idleRelative) {
     if (!idleRelative) return '';
-    const candidate = assetPath(idleRelative.replace(/idle\.(gif|png)$/i, 'attack.gif'));
-    return (await imageExists(candidate)) ? candidate : assetPath(idleRelative);
+    console.log('computeAttackSrc input:', idleRelative);
+    const fullPath = assetPath(idleRelative);
+    const attackPath = fullPath.replace(/idle\.(gif|png)$/i, 'attack.gif');
+    console.log('computeAttackSrc checking:', attackPath);
+
+    if (await imageExists(attackPath)) {
+        return attackPath;
+    }
+    return fullPath; // Retorna o idle se não tiver ataque
 }
 
 async function computeFrontSrc(idleRelative) {
     if (!idleRelative) return '';
-    const gif = assetPath(idleRelative.replace(/idle\.(gif|png)$/i, 'front.gif'));
-    if (await imageExists(gif)) return gif;
-    return assetPath(idleRelative.replace(/idle\.(gif|png)$/i, 'front.png'));
+    console.log('computeFrontSrc input:', idleRelative);
+    const fullPath = assetPath(idleRelative);
+    const frontGif = fullPath.replace(/idle\.(gif|png)$/i, 'front.gif');
+
+    if (await imageExists(frontGif)) return frontGif;
+
+    const frontPng = fullPath.replace(/idle\.(gif|png)$/i, 'front.png');
+    if (await imageExists(frontPng)) return frontPng;
+
+    return fullPath;
 }
 
 let pet = null;
@@ -74,7 +90,7 @@ if (window.electronAPI?.getDifficulty) {
 
 async function loadItemsInfo() {
     try {
-        const resp = await fetch('data/items.json');
+        const resp = await fetch('../../data/items.json');
         const data = await resp.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });
@@ -86,7 +102,7 @@ async function loadItemsInfo() {
 
 async function loadStatusEffectsInfo() {
     try {
-        const resp = await fetch('data/status-effects.json');
+        const resp = await fetch('../../data/status-effects.json');
         const data = await resp.json();
         statusEffectsInfo = {};
         data.forEach(se => { statusEffectsInfo[se.id] = se; });
@@ -115,13 +131,18 @@ function updateMoves() {
     if (!pet || !Array.isArray(pet.moves) || pet.moves.length === 0) {
         const span = document.createElement('span');
         span.textContent = 'Você não aprendeu nenhum movimento! Tente fugir!';
+        span.style.gridColumn = '1 / -1';
+        span.style.textAlign = 'center';
+        span.style.padding = '20px';
         menu.appendChild(span);
         return;
     }
     pet.moves.forEach(move => {
         const btn = document.createElement('button');
         btn.className = 'button small-button';
+        btn.title = move.description || move.name;
         const cost = move.cost || 0;
+        const power = move.power || 0;
 
         const moveElement = Array.isArray(move.elements)
             ? (move.elements.includes(pet.element) ? pet.element : move.elements[0])
@@ -129,13 +150,32 @@ function updateMoves() {
         const mult = getElementMultiplier(moveElement, enemyElement);
 
         let indicator = '';
+        let effectivenessClass = '';
         if (mult > 1) {
             indicator = '<span class="move-indicator up">▲</span>';
+            effectivenessClass = 'super-effective';
         } else if (mult < 1) {
             indicator = '<span class="move-indicator down">▼</span>';
+            effectivenessClass = 'not-effective';
         }
 
-        btn.innerHTML = `${move.name} (-${cost}) ${indicator}`;
+        const moveName = document.createElement('div');
+        moveName.style.fontWeight = 'bold';
+        moveName.style.fontSize = '12px';
+        moveName.innerHTML = `${move.name} ${indicator}`;
+
+        const moveInfo = document.createElement('div');
+        moveInfo.style.fontSize = '10px';
+        moveInfo.style.color = '#aaa';
+        moveInfo.textContent = `Poder: ${power} | Custo: ${cost}`;
+
+        btn.appendChild(moveName);
+        btn.appendChild(moveInfo);
+        
+        if (effectivenessClass) {
+            btn.classList.add(effectivenessClass);
+        }
+        
         btn.addEventListener('click', () => {
             performPlayerMove(move);
         });
@@ -150,36 +190,148 @@ function updateItems() {
     if (!pet || !pet.items || Object.keys(pet.items).length === 0) {
         const span = document.createElement('span');
         span.textContent = 'Você não tem itens! Tente fugir!';
+        span.style.gridColumn = '1 / -1';
+        span.style.textAlign = 'center';
+        span.style.padding = '20px';
         menu.appendChild(span);
         return;
     }
-    Object.keys(pet.items).forEach(id => {
+    
+    const itemKeys = Object.keys(pet.items);
+    itemKeys.forEach((id, index) => {
         const qty = pet.items[id];
         if (qty <= 0) return;
-        const info = itemsInfo[id] || { name: id };
-        const btn = document.createElement('button');
-        btn.className = 'button small-button item-button';
-
+        const info = itemsInfo[id] || { name: id, icon: '../../Assets/Shop/health-potion.png' };
+        
+        // Container do item com accordion
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'item-container';
+        
+        // Header do item (clicável para accordion)
+        const itemHeader = document.createElement('div');
+        itemHeader.className = 'item-header';
+        
         const img = document.createElement('img');
-        img.src = info.icon;
+        img.src = info.icon || '../../Assets/Shop/health-potion.png';
         img.alt = info.name;
-
+        img.className = 'item-icon';
+        img.onerror = () => { img.src = '../../Assets/Shop/health-potion.png'; };
+        
+        const itemInfo = document.createElement('div');
+        itemInfo.className = 'item-info';
+        
+        const nameQtyContainer = document.createElement('div');
+        nameQtyContainer.className = 'item-name-qty';
+        
         const label = document.createElement('span');
-        label.textContent = `${info.name} x ${qty}`;
-
-        btn.appendChild(img);
-        btn.appendChild(label);
-
-        btn.addEventListener('click', async () => {
+        label.textContent = info.name;
+        label.className = 'item-name';
+        
+        const infoIcon = document.createElement('span');
+        infoIcon.textContent = 'ⓘ';
+        infoIcon.className = 'info-icon';
+        infoIcon.title = 'Clique para ver detalhes';
+        
+        const qtyLabel = document.createElement('span');
+        qtyLabel.textContent = `x${qty}`;
+        qtyLabel.className = 'item-qty';
+        
+        nameQtyContainer.appendChild(label);
+        nameQtyContainer.appendChild(infoIcon);
+        nameQtyContainer.appendChild(qtyLabel);
+        
+        const arrow = document.createElement('span');
+        arrow.className = 'accordion-arrow';
+        arrow.textContent = '▼';
+        
+        itemInfo.appendChild(nameQtyContainer);
+        itemHeader.appendChild(img);
+        itemHeader.appendChild(itemInfo);
+        itemHeader.appendChild(arrow);
+        
+        // Conteúdo do accordion (descrição)
+        const itemContent = document.createElement('div');
+        itemContent.className = 'item-content';
+        
+        const description = document.createElement('p');
+        description.style.margin = '0 0 10px 0';
+        description.textContent = info.description || info.effect || 'Sem descrição';
+        itemContent.appendChild(description);
+        
+        // Botão de usar
+        const useBtn = document.createElement('button');
+        useBtn.className = 'button small-button use-item-btn';
+        useBtn.textContent = 'Usar';
+        
+        useBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
             if (currentTurn !== 'player' || actionInProgress) return;
             actionInProgress = true;
             hideMenus();
-            const newHealth = await window.electronAPI.useItem(id);
-            if (typeof newHealth === 'number') playerHealth = newHealth;
+            showMessage(`Usando ${info.name}...`);
+            
+            try {
+                const result = await window.electronAPI.useItem(id);
+                
+                if (result && typeof result.currentHealth === 'number') {
+                    playerHealth = result.currentHealth;
+                    updatePlayerHealth();
+                }
+                
+                if (result && typeof result.energy === 'number') {
+                    pet.energy = result.energy;
+                    updatePlayerEnergy();
+                }
+                
+                if (result && typeof result.happiness === 'number') {
+                    pet.happiness = result.happiness;
+                }
+                
+                if (result && typeof result.hunger === 'number') {
+                    pet.hunger = result.hunger;
+                }
+                
+                const petData = await window.electronAPI.invoke('get-current-pet');
+                if (petData) {
+                    pet.items = petData.items;
+                    updateItems();
+                }
+                
+                showMessage(`${info.name} usado com sucesso!`);
+            } catch (err) {
+                console.error('Erro ao usar item:', err);
+                showMessage('Erro ao usar item!');
+            }
+            
             endPlayerTurn();
         });
-
-        menu.appendChild(btn);
+        
+        itemContent.appendChild(useBtn);
+        
+        // Toggle accordion ao clicar no header
+        itemHeader.addEventListener('click', () => {
+            const isOpen = itemContainer.classList.contains('open');
+            // Fechar todos os outros itens
+            document.querySelectorAll('.item-container').forEach(container => {
+                container.classList.remove('open');
+            });
+            // Toggle do item atual
+            if (!isOpen) {
+                itemContainer.classList.add('open');
+            }
+        });
+        
+        itemContainer.appendChild(itemHeader);
+        itemContainer.appendChild(itemContent);
+        
+        // Adicionar divisória se não for o último item
+        if (index < itemKeys.filter(k => pet.items[k] > 0).length - 1) {
+            const divider = document.createElement('div');
+            divider.className = 'item-divider';
+            itemContainer.appendChild(divider);
+        }
+        
+        menu.appendChild(itemContainer);
     });
 }
 
@@ -244,6 +396,22 @@ function updateHealthBars() {
     }
 }
 
+function updatePlayerHealth() {
+    const playerFill = document.getElementById('player-health-fill');
+    if (playerFill) {
+        const percent = (playerHealth / playerMaxHealth) * 100;
+        playerFill.style.width = `${percent}%`;
+    }
+}
+
+function updatePlayerEnergy() {
+    const playerEnergy = pet ? (pet.energy || 0) : 0;
+    const playerEnergyFill = document.getElementById('player-energy-fill');
+    if (playerEnergyFill) {
+        playerEnergyFill.style.width = `${playerEnergy}%`;
+    }
+}
+
 function playAttackAnimation(img, idle, attack, cb) {
     if (!img) { if (cb) cb(); return; }
     img.src = attack;
@@ -265,7 +433,7 @@ function initializeBattle() {
     if (battleInitialized || !pet) return;
     battleInitialized = true;
     const lvl = pet.level || 1;
-    
+
     // Scale enemy health with level
     enemyMaxHealth = 20 + lvl * 10;
     enemyHealth = enemyMaxHealth;
@@ -463,7 +631,7 @@ function enemyAction() {
         const roll = Math.random();
         let movePower = 10; // Normal attack
         let moveName = "Ataque Normal";
-        
+
         if (roll < 0.2) {
             movePower = 5;
             moveName = "Ataque Rápido";
@@ -528,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (menu.style.display === 'none' || menu.style.display === '') {
             hideMenus();
             updateMoves();
-            menu.style.display = 'flex';
+            menu.style.display = 'grid';
         } else {
             menu.style.display = 'none';
         }
@@ -577,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.enemyElement) {
             enemyElement = data.enemyElement;
             if (enemyElementImg) {
-                enemyElementImg.src = `Assets/Elements/${enemyElement}.png`;
+                enemyElementImg.src = `../../Assets/Elements/${enemyElement}.png`;
                 enemyElementImg.alt = enemyElement;
             }
             updateMoves();
@@ -595,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (playerName) playerName.textContent = data.name || '';
         if (playerElementImg) {
             const el = (data.element || 'default').toLowerCase();
-            playerElementImg.src = `Assets/Elements/${el}.png`;
+            playerElementImg.src = `../../Assets/Elements/${el}.png`;
             playerElementImg.alt = el;
         }
         if (playerLevelTxt) playerLevelTxt.textContent = `Lvl ${data.level || 1}`;

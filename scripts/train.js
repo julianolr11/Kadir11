@@ -1,14 +1,14 @@
-import { rarityGradients } from './constants.js';
+import { rarityGradients } from './constants.mjs';
 import { calculateMovePower } from './moveEffectiveness.js';
 
 const statusIcons = {
-    'queimado': 'Assets/Icons/burn.png',
-    'envenenamento': 'Assets/Icons/poison.png',
-    'sangramento': 'Assets/Icons/bleed.png',
-    'dormencia': 'Assets/Icons/sleep.png',
-    'congelamento': 'Assets/Icons/freeze.png',
-    'paralisia': 'Assets/Icons/paralyze.png',
-    'cura': 'Assets/Shop/health-potion.png'
+    'queimado': '../../Assets/Icons/burn.png',
+    'envenenamento': '../../Assets/Icons/poison.png',
+    'sangramento': '../../Assets/Icons/bleed.png',
+    'dormencia': '../../Assets/Icons/sleep.png',
+    'congelamento': '../../Assets/Icons/freeze.png',
+    'paralisia': '../../Assets/Icons/paralyze.png',
+    'cura': '../../Assets/Shop/health-potion.png'
 };
 console.log('train.js carregado');
 
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadMoves() {
     try {
-        const response = await fetch('data/moves.json');
+        const response = await fetch('../../data/moves.json');
         const moves = await response.json();
         renderMoves(moves);
     } catch (err) {
@@ -110,7 +110,7 @@ function renderMoves(moves) {
         if (pet.level < move.level) action = 'Indisponível';
 
         const elementIcons = move.elements.map(el =>
-            `<img class="element-icon" src="Assets/Elements/${el}.png" alt="${el}" style="image-rendering: pixelated;">`
+            `<img class="element-icon" src="../../Assets/Elements/${el}.png" alt="${el}" style="image-rendering: pixelated;">`
         ).join(' ');
 
         let actionClass = '';
@@ -146,7 +146,7 @@ function renderMoves(moves) {
             <td>${elementIcons}</td>
             <td>${calculateMovePower(move.power, pet.level, pet.maxHealth)}</td>
             <td>${effectHtml}</td>
-            <td><img src="Assets/Icons/dna-kadir.png" alt="KP" style="height:16px; vertical-align:middle; image-rendering:pixelated;"> ${displayCost}</td>
+            <td><img src="../../Assets/Icons/dna-kadir.png" alt="KP" style="height:16px; vertical-align:middle; image-rendering:pixelated;"> ${displayCost}</td>
             <td>${move.level}</td>
             <td><button class="button small-button action-button ${actionClass}">${action}</button></td>
         `;

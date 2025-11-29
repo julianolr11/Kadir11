@@ -1,4 +1,4 @@
-import { rarityGradients, rarityColors, specieBioImages, specieDirs } from './constants.js';
+import { rarityGradients, rarityColors, specieBioImages, specieDirs } from './constants.mjs';
 
 const raceNames = {
     viborom: 'Viborom',
@@ -14,6 +14,14 @@ const raceNames = {
     drazraq: 'Drazraq'
 };
 
+const elementImages = {
+    'ar': '../../Assets/Elements/ar.png',
+    'fogo': '../../Assets/Elements/fogo.png',
+    'agua': '../../Assets/Elements/agua.png',
+    'terra': '../../Assets/Elements/terra.png',
+    'puro': '../../Assets/Elements/puro.png'
+};
+
 function getRequiredXpForNextLevel(level) {
     const baseXp = 100;
     const scale = 1.2;
@@ -23,6 +31,44 @@ console.log('status.js carregado com sucesso');
 
 let pet = {};
 let itemsInfo = {};
+
+// Mapeia diretórios para categorias de espécie para exibição na aba Sobre
+const specieDirToCategory = {
+    'Draconideo': 'Draconídeo',
+    'Reptiloide': 'Reptiloide',
+    'Ave': 'Ave',
+    'Fera': 'Fera',
+    'CriaturaMistica': 'Criatura Mística',
+    'CriaturaSombria': 'Criatura Sombria',
+    'Monstro': 'Monstro'
+};
+
+// Normaliza nomes específicos para suas categorias principais
+function getSpecieCategory(p) {
+    if (!p) return 'Desconhecida';
+    // Se já for uma categoria conhecida, normaliza acentuação desejada
+    const direct = {
+        'Reptilóide': 'Reptiloide',
+        'Reptiloide': 'Reptiloide',
+        'Draconídeo': 'Draconídeo',
+        'Ave': 'Ave',
+        'Besta': 'Besta',
+        'Criatura Mística': 'Criatura Mística',
+        'Criatura Sombria': 'Criatura Sombria',
+        'Monstro': 'Monstro',
+        'Fera': 'Fera'
+    };
+    if (p.specie && direct[p.specie]) return direct[p.specie];
+
+    // Caso specie seja um nome de espécie específica, deduzir pela pasta/dir
+    const dir = specieDirs[p.specie];
+    if (dir && specieDirToCategory[dir]) return specieDirToCategory[dir];
+
+    // Como fallback, tentar pelo próprio dir do pet se existir
+    if (p.dir && specieDirToCategory[p.dir]) return specieDirToCategory[p.dir];
+
+    return p.specie || 'Desconhecida';
+}
 
 let descriptionEl = null;
 
@@ -50,7 +96,7 @@ let closeEquipButton = null;
 
 async function loadItemsInfo() {
     try {
-        const resp = await fetch('data/items.json');
+        const resp = await fetch('../../data/items.json');
         const data = await resp.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });
@@ -157,18 +203,18 @@ function closeEquipModal() {
 function setImageWithFallback(imgElement, relativePath) {
     if (!imgElement) return;
     if (!relativePath) {
-        imgElement.src = 'Assets/Mons/eggsy.png';
+        imgElement.src = '../../Assets/Mons/eggsy.png';
         return;
     }
-    const gifSrc = relativePath.endsWith('.gif') ? `Assets/Mons/${relativePath}` : null;
-    const pngSrc = gifSrc ? gifSrc.replace(/\.gif$/i, '.png') : `Assets/Mons/${relativePath}`;
+    const gifSrc = relativePath.endsWith('.gif') ? `../../Assets/Mons/${relativePath}` : null;
+    const pngSrc = gifSrc ? gifSrc.replace(/\.gif$/i, '.png') : `../../Assets/Mons/${relativePath}`;
 
     imgElement.onerror = () => {
         if (gifSrc && imgElement.src.endsWith('.gif')) {
             imgElement.src = pngSrc;
         } else if (!imgElement.src.endsWith('eggsy.png')) {
             imgElement.onerror = null;
-            imgElement.src = 'Assets/Mons/eggsy.png';
+            imgElement.src = '../../Assets/Mons/eggsy.png';
         }
     };
 
@@ -305,14 +351,7 @@ function updateStatus() {
     statusKadirPoints.textContent = pet.kadirPoints ?? 0;
 
     // Atualizar a imagem do elemento na barra de título
-    const elementImages = {
-        'ar': './Assets/Elements/ar.png',
-        'fogo': './Assets/Elements/fogo.png',
-        'agua': './Assets/Elements/agua.png',
-        'terra': './Assets/Elements/terra.png',
-        'puro': './Assets/Elements/puro.png'
-    };
-    const elementImageSrc = elementImages[pet.element.toLowerCase()] || './Assets/Elements/default.png';
+    const elementImageSrc = elementImages[pet.element.toLowerCase()] || '../../Assets/Elements/default.png';
     console.log('Atualizando elemento na barra de título:', elementImageSrc);
     titleBarElement.src = elementImageSrc;
     titleBarElement.alt = `Elemento: ${pet.element}`;
@@ -365,14 +404,15 @@ function updateStatus() {
         xpText.textContent = `${pet.experience || 0}/${requiredXp}`;
     }
     if (specieText) {
-        specieText.textContent = `Espécie: ${pet.specie || 'Desconhecida'}`;
+        const specieCategory = getSpecieCategory(pet);
+        specieText.textContent = `Espécie: ${specieCategory}`;
     }
     if (raceText) {
         const raceName = raceNames[pet.race] || pet.race || '';
         raceText.textContent = raceName ? `Raça: ${raceName}` : '';
     }
     if (elementText) {
-        const imgSrc = elementImages[pet.element?.toLowerCase()] || './Assets/Elements/default.png';
+        const imgSrc = elementImages[pet.element?.toLowerCase()] || '../../Assets/Elements/default.png';
         const elementName = pet.element || 'Desconhecido';
         elementText.innerHTML = `Elemento: <img src="${imgSrc}" alt="${elementName}" style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> ${elementName}`;
     }
@@ -421,7 +461,7 @@ function updateStatus() {
             const fallback = pet.bioImage || specieBioImages[pet.specie];
             bioPath = fallback ? fallback : '';
         }
-        statusBioImage.src = bioPath ? `Assets/Mons/${bioPath}` : '';
+        statusBioImage.src = bioPath ? `../../Assets/Mons/${bioPath}` : '';
         statusBioImage.style.display = 'none';
     }
 

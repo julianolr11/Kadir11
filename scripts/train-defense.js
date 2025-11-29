@@ -21,9 +21,7 @@ function closeWindow() {
 }
 
 function getPointerSpeed(level) {
-    const base = 0.4; // velocidade inicial mais lenta
-    const tier = Math.floor(((level || 1) - 1) / 5);
-    return Math.min(base + tier * 0.1, 1.2);
+    return 0.1; // Velocidade inicial reduzida para 0.5
 }
 
 function startPointer() {
@@ -163,11 +161,13 @@ function evaluateHit() {
         } else {
             showFeedback('Defesa bem-sucedida!', true);
         }
-        pointerSpeed = Math.min(pointerSpeed * speedFactor, maxPointerSpeed);
-        if (shieldImg) shieldImg.src = 'Assets/train/shield-2.png';
+        // Aumenta a velocidade em 0.03 a cada sucesso (mais cadenciado)
+        pointerSpeed = Math.min(pointerSpeed + 0.03, maxPointerSpeed);
+        if (shieldImg) shieldImg.src = '../../Assets/train/shield-2.png';
     } else {
-        pointerSpeed = Math.max(pointerSpeed / speedFactor, basePointerSpeed);
-        if (shieldImg) shieldImg.src = 'Assets/train/shield-3.png';
+        // Reduz a velocidade em 0.1 ao errar, mas não abaixo de 1.0 (base)
+        pointerSpeed = Math.max(pointerSpeed - 0.1, 1.0);
+        if (shieldImg) shieldImg.src = '../../Assets/train/shield-3.png';
         showFeedback('Errou o tempo!', false);
     }
     attempts += 1;
@@ -178,7 +178,7 @@ function evaluateHit() {
     }
     if (attempts < maxAttempts) {
         setTimeout(() => {
-            if (shieldImg) shieldImg.src = 'Assets/train/shield-1.png';
+            if (shieldImg) shieldImg.src = '../../Assets/train/shield-1.png';
             startPointer();
         }, 500);
     } else {

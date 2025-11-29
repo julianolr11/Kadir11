@@ -16,7 +16,6 @@ export const rarityColors = {
     'Lendario': '#FFD700'
 };
 
-// Mapeia o nome da espécie para o nome da pasta correspondente em Assets/Mons
 export const specieDirs = {
     'Draconídeo': 'Draconideo',
     'Reptiloide': 'Reptiloide',
@@ -31,9 +30,6 @@ export const specieDirs = {
     'Drazraq': 'Draconideo'
 };
 
-// Caminho da imagem em alta resolução de cada espécie para ser exibida na aba
-// "Sobre". Utilizada como fallback quando o pet não define uma imagem de bio
-// específica.
 export const specieBioImages = {
     'Draconídeo': 'Draconideo/draconideo.png',
     'Reptiloide': 'Reptiloide/puro/viborom/reptiloide.png',
@@ -43,13 +39,9 @@ export const specieBioImages = {
     'Criatura Sombria': 'CriaturaSombria/criaturasombria.png',
     'Monstro': 'Monstro/monstro.png',
     'Fera': 'Fera/fera.png',
-    // Usa a imagem padrão de Draconídeo como imagem do Drazraq
     'Drazraq': 'Draconideo/draconideo.png'
 };
 
-// Caminho da imagem de destaque de cada espécie para ser exibida na seleção
-// de pets. É preenchido pela função loadSpeciesData usando o sistema de
-// arquivos do processo principal.
 export let specieImages = {};
 
 export const specieData = {
@@ -65,7 +57,7 @@ export const specieData = {
     'Kael': { dir: 'Fera', race: 'Kael', element: 'agua' },
     'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' },
     'Drazraq': { dir: 'Draconideo', race: 'drazraq', element: 'puro' },
-    'Foxyl': { dir: 'Fera/Foxyl', race: 'foxyl', element: 'ar' }  // Espécie de ar
+    'Foxyl': { dir: 'Fera/Foxyl', race: 'foxyl', element: 'ar' }
 };
 
 export const eggSpecieMap = {

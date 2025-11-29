@@ -1,8 +1,11 @@
 const { app, ipcMain, globalShortcut, BrowserWindow, screen } = require('electron');
 const windowManager = require('./scripts/windowManager');
+const { registerWindowHandlers } = require('./scripts/handlers/windowHandlers');
+const { registerPetHandlers } = require('./scripts/handlers/petHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
+const { setupBattleHandler } = require('./scripts/battleHandler');
 const fs = require('fs');
 const path = require('path');
 
@@ -123,7 +126,7 @@ let specieImages = {};
 let specieBioImages = {};
 let loadSpeciesData;
 (async () => {
-    const constants = await import('./scripts/constants.js');
+    const constants = await import('./scripts/constants.mjs');
     eggSpecieMap = constants.eggSpecieMap;
     specieData = constants.specieData;
     specieImages = constants.specieImages;
@@ -213,6 +216,28 @@ app.whenReady().then(() => {
     });
 
     startPetUpdater(() => currentPet);
+    setupBattleHandler(ipcMain, () => currentPet, petManager, BrowserWindow);
+
+    // Registrar handlers modulares da Fase 1
+    registerWindowHandlers(
+        windowManager,
+        getPenInfo,
+        getNestCount,
+        getItems,
+        createNestsWindow,
+        closeNestsWindow,
+        createHatchWindow,
+        closeHatchWindow,
+        updateNestsPosition
+    );
+
+    registerPetHandlers(
+        windowManager,
+        getItems,
+        getCoins,
+        broadcastPenUpdate,
+        closeAllGameWindows
+    );
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
@@ -232,297 +257,14 @@ app.on('will-quit', () => {
     console.log('Atalhos globais desregistrados');
 });
 
-// Handlers de IPC
-ipcMain.on('exit-app', () => {
-    console.log('Recebido exit-app');
-    app.quit();
-});
 
-ipcMain.on('open-create-pet-window', () => {
-    console.log('Recebido open-create-pet-window');
-    windowManager.createCreatePetWindow();
-});
-
-ipcMain.on('open-load-pet-window', () => {
-    console.log('Recebido open-load-pet-window');
-    // Não fechar todas as janelas para permitir voltar
-    // à tela anterior (start ou index) ao sair da seleção
-    const loadWin = windowManager.createLoadPetWindow();
-    const penWin = windowManager.penWindow;
-    if (loadWin && penWin) {
-        const lb = loadWin.getBounds();
-        penWin.setPosition(lb.x + lb.width, lb.y);
-        updateNestsPosition();
-        if (!penWin.__nestsMoveListener) {
-            const reposition = updateNestsPosition;
-            penWin.on('move', reposition);
-            penWin.on('resize', reposition);
-            penWin.__nestsMoveListener = true;
-        }
-    } else if (loadWin) {
-        windowManager.centerWindow(loadWin);
-    }
-});
-
-ipcMain.on("open-pen-window", () => {
-    console.log("Recebido open-pen-window");
-    const loadWin = windowManager.loadPetWindow;
-    if (!loadWin) {
-        console.log("Load-pet window não está aberta. Ignorando pedido de abrir pen.");
-        return;
-    }
-    const info = getPenInfo();
-    const dimsMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
-    const dims = dimsMap[info.size] || dimsMap.small;
-    const w = (dims.w + 2) * 32;
-    const h = (dims.h + 2) * 32;
-    const border = 5; // canvas border size
-    const penWin = windowManager.createPenWindow(w + border, h + border);
-    let nestsWin = null;
-    if (getNestCount() > 0) {
-        nestsWin = createNestsWindow();
-    } else {
-        closeNestsWindow();
-    }
-    if (penWin) {
-        const lb = loadWin.getBounds();
-        penWin.setPosition(lb.x + lb.width, lb.y);
-        penWin.setSize(w + border, h + border);
-        updateNestsPosition();
-        if (!penWin.__nestsMoveListener) {
-            const reposition = updateNestsPosition;
-            penWin.on('move', reposition);
-            penWin.on('resize', reposition);
-            penWin.__nestsMoveListener = true;
-        }
-    }
-});
-
-ipcMain.on('close-create-pet-window', () => {
-    console.log('Recebido close-create-pet-window');
-    windowManager.closeCreatePetWindow();
-});
-
-ipcMain.on("close-load-pet-window", () => {
-    console.log("Recebido close-load-pet-window");
-    windowManager.closeLoadPetWindow();
-    windowManager.closePenWindow();
-    closeNestsWindow();
-});
-
-ipcMain.on("close-pen-window", () => {
-    console.log("Recebido close-pen-window");
-    windowManager.closePenWindow();
-    closeNestsWindow();
-});
-
-ipcMain.on('open-hatch-window', () => {
-    console.log('Recebido open-hatch-window');
-    createHatchWindow();
-});
-
-ipcMain.on('close-hatch-window', () => {
-    console.log('Recebido close-hatch-window');
-    closeHatchWindow();
-});
-
-ipcMain.on('close-start-window', () => {
-    console.log('Recebido close-start-window');
-    windowManager.closeStartWindow();
-});
-
-ipcMain.on('open-start-window', () => {
-    console.log('Recebido open-start-window');
-    windowManager.createStartWindow();
-});
-
-ipcMain.on('open-tray-window', () => {
-    console.log('Recebido open-tray-window');
-    const win = windowManager.createTrayWindow();
-    if (currentPet && win) {
-        win.webContents.on('did-finish-load', () => {
-            win.webContents.send('pet-data', currentPet);
-        });
-    }
-    closeBattleModeWindow();
-    closeLairModeWindow();
-    closeJourneyModeWindow();
-    closeJourneySceneWindow();
-});
-
-ipcMain.on('create-pet', async (event, petData) => {
-    console.log('Recebido create-pet com dados:', petData);
-    try {
-        const newPet = await petManager.createPet(petData);
-        console.log('Novo pet criado:', newPet);
-        currentPet = newPet;
-        lastUpdate = Date.now();
-        resetTimers();
-
-        // Notificar o renderer que o pet foi criado, mas não fechar a janela ainda
-        event.reply('pet-created', newPet);
-        broadcastPenUpdate();
-    } catch (err) {
-        console.error('Erro ao criar pet no main.js:', err);
-        event.reply('create-pet-error', err.message);
-    }
-});
-
-ipcMain.on('animation-finished', () => {
-    console.log('Animação finalizada, prosseguindo com o redirecionamento');
-    windowManager.closeCreatePetWindow();
-    const startWin = windowManager.getStartWindow();
-    if (startWin && !startWin.isDestroyed()) {
-        console.log('Solicitando fade-out da música da startWindow');
-        startWin.webContents.send('fade-out-start-music');
-    }
-    const trayWindow = windowManager.createTrayWindow();
-    trayWindow.webContents.on('did-finish-load', () => {
-        console.log('Enviando pet-data para trayWindow:', currentPet);
-        trayWindow.webContents.send('pet-data', currentPet);
-    });
-});
-
-ipcMain.handle('list-pets', async () => {
-    console.log('Recebido list-pets');
-    const pets = await petManager.listPets();
-    pets.forEach(pet => {
-        const basePath = pet.statusImage || pet.image;
-        pet.idleImage = resolveIdleGif(basePath);
-    });
-    console.log('Pets retornados:', pets);
-    return pets;
-});
-
-ipcMain.on('select-pet', async (event, petId) => {
-    console.log('Recebido select-pet com petId:', petId);
-    try {
-        // Usar loadPet pra carregar o pet e atualizar o lastAccessed
-        const pet = await petManager.loadPet(petId);
-        if (!pet) {
-            throw new Error(`Pet com ID ${petId} não encontrado`);
-        }
-        console.log('Pet selecionado:', pet);
-
-        pet.items = getItems();
-
-        // Definir o pet atual e atualizar os timestamps
-        currentPet = pet;
-        currentPet.coins = getCoins();
-        currentPet.items = getItems();
-        lastUpdate = Date.now();
-        resetTimers();
-
-        // Criar a nova trayWindow antes de fechar outras janelas
-        // para evitar que o aplicativo encerre ao ficar sem janelas abertas
-        const trayWindow = windowManager.createTrayWindow();
-        const sendPetData = () => {
-            console.log('Enviando pet-data:', pet);
-            trayWindow.webContents.send('pet-data', pet);
-        };
-
-        if (trayWindow.webContents.isLoading()) {
-            trayWindow.webContents.once('did-finish-load', sendPetData);
-        } else {
-            sendPetData();
-        }
-
-        // Fechar a janela de load-pet
-        console.log('Fechando a janela de load-pet');
-        windowManager.closeLoadPetWindow();
-
-        // Verificar se a startWindow existe antes de tentar fechá-la
-        const startWindow = windowManager.getStartWindow();
-        if (startWindow && !startWindow.isDestroyed()) {
-            console.log('Fechando a startWindow');
-            windowManager.closeStartWindow();
-        } else {
-            console.log('Nenhuma startWindow encontrada para fechar ou já está destruída');
-        }
-
-        // Fechar janelas extras sem afetar a nova trayWindow
-        closeBattleModeWindow();
-        closeLairModeWindow();
-        closeJourneyModeWindow();
-        closeJourneySceneWindow();
-        closeTrainWindow();
-        closeItemsWindow();
-        closeStoreWindow();
-        windowManager.closeStatusWindow();
-        closeNestsWindow();
-        closeHatchWindow();
-    } catch (err) {
-        console.error('Erro ao selecionar pet no main.js:', err);
-        event.reply('select-pet-error', err.message);
-    }
-});
-
-ipcMain.handle('delete-pet', async (event, petId) => {
-    console.log('Recebido delete-pet com petId:', petId);
-    try {
-        const result = await petManager.deletePet(petId);
-        console.log('Pet excluído:', result);
-        broadcastPenUpdate();
-
-        // Verificar se ainda existem pets após a exclusão
-        const remaining = await petManager.listPets();
-        if (remaining.length === 0) {
-            currentPet = null;
-            windowManager.closeTrayWindow();
-        }
-
-        return result;
-    } catch (err) {
-        console.error('Erro ao deletar pet:', err);
-        try {
-            if (typeof event.reply === 'function') {
-                event.reply('delete-pet-error', err.message);
-            } else {
-                event.sender.send('delete-pet-error', err.message);
-            }
-        } catch (e) {
-            console.error('Falha ao enviar mensagem de erro para o renderer:', e);
-        }
-        throw err;
-    }
-});
-
-ipcMain.on('rename-pet', async (event, data) => {
-    const petId = data?.petId;
-    const newName = typeof data?.newName === 'string' ? data.newName.trim() : '';
-    if (!petId) {
-        console.error('Pet para renomear não encontrado');
-        return;
-    }
-    if (!newName || newName.length > 15) {
-        console.error('Nome inválido para renomear o pet');
-        return;
-    }
-    try {
-        const updatedPet = await petManager.updatePet(petId, { name: newName });
-        if (currentPet && currentPet.petId === petId) {
-            currentPet = updatedPet;
-        }
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', updatedPet);
-        });
-    } catch (err) {
-        console.error('Erro ao renomear pet:', err);
-    }
-});
-
-ipcMain.on('open-status-window', () => {
-    console.log('Recebido open-status-window');
+// Handler para obter o pet atual
+ipcMain.handle('get-current-pet', async () => {
     if (currentPet) {
-        const statusWindow = windowManager.createStatusWindow();
-        statusWindow.webContents.on('did-finish-load', () => {
-            currentPet.items = getItems();
-            console.log('Enviando pet-data para statusWindow:', currentPet);
-            statusWindow.webContents.send('pet-data', currentPet);
-        });
-    } else {
-        console.error('Nenhum pet selecionado para abrir a janela de status');
+        currentPet.items = getItems();
+        return currentPet;
     }
+    return null;
 });
 
 ipcMain.on('train-pet', async () => {
@@ -735,7 +477,7 @@ function createBattleModeWindow() {
         },
     });
 
-    battleModeWindow.loadFile('battle-mode.html');
+    battleModeWindow.loadFile('views/game/battle-mode.html');
     windowManager.attachFadeHandlers(battleModeWindow);
     battleModeWindow.on('closed', () => {
         console.log('battleModeWindow fechada');
@@ -756,7 +498,7 @@ function createJourneyModeWindow() {
     console.log('Caminho do preload.js para journeyModeWindow:', preloadPath);
 
     journeyModeWindow = new BrowserWindow({
-      width: 1100,
+        width: 1100,
         height: 700,
 
         frame: false,
@@ -770,7 +512,7 @@ function createJourneyModeWindow() {
         },
     });
 
-    journeyModeWindow.loadFile('journey-mode.html');
+    journeyModeWindow.loadFile('views/game/journey-mode.html');
     windowManager.attachFadeHandlers(journeyModeWindow);
     journeyModeWindow.on('closed', () => {
         console.log('journeyModeWindow fechada');
@@ -802,7 +544,7 @@ function createLairModeWindow() {
         },
     });
 
-    lairModeWindow.loadFile('lair-mode.html');
+    lairModeWindow.loadFile('views/game/lair-mode.html');
     windowManager.attachFadeHandlers(lairModeWindow);
     lairModeWindow.on('closed', () => { lairModeWindow = null; });
 
@@ -832,7 +574,7 @@ function createJourneySceneWindow() {
         },
     });
 
-    journeySceneWindow.loadFile('journey-scene.html');
+    journeySceneWindow.loadFile('views/game/journey-scene.html');
     windowManager.attachFadeHandlers(journeySceneWindow);
     journeySceneWindow.on('closed', () => {
         journeySceneWindow = null;
@@ -866,7 +608,7 @@ function createTrainWindow(options = {}) {
         },
     });
 
-    trainWindow.loadFile('train.html');
+    trainWindow.loadFile('views/game/train.html');
 
     if (centerOnShow) {
         trainWindow.once('ready-to-show', () => {
@@ -912,7 +654,7 @@ function createTrainMenuWindow() {
         },
     });
 
-    trainMenuWindow.loadFile('train-menu.html');
+    trainMenuWindow.loadFile('views/game/train-menu.html');
     windowManager.attachFadeHandlers(trainMenuWindow);
     trainMenuWindow.on('closed', () => {
         trainMenuWindow = null;
@@ -944,7 +686,7 @@ function createTrainAttributesWindow() {
         },
     });
 
-    trainAttributesWindow.loadFile('train-attributes.html');
+    trainAttributesWindow.loadFile('views/game/train-attributes.html');
     windowManager.attachFadeHandlers(trainAttributesWindow);
     trainAttributesWindow.on('closed', () => {
         trainAttributesWindow = null;
@@ -976,7 +718,7 @@ function createTrainForceWindow() {
         },
     });
 
-    trainForceWindow.loadFile('train-force.html');
+    trainForceWindow.loadFile('views/game/train-force.html');
     windowManager.attachFadeHandlers(trainForceWindow);
     trainForceWindow.on('closed', () => {
         trainForceWindow = null;
@@ -1008,7 +750,7 @@ function createTrainDefenseWindow() {
         },
     });
 
-    trainDefenseWindow.loadFile('train-defense.html');
+    trainDefenseWindow.loadFile('views/game/train-defense.html');
     windowManager.attachFadeHandlers(trainDefenseWindow);
     trainDefenseWindow.on('closed', () => {
         trainDefenseWindow = null;
@@ -1027,8 +769,8 @@ function createItemsWindow() {
     const preloadPath = require('path').join(__dirname, 'preload.js');
 
     itemsWindow = new BrowserWindow({
-        width: 350,
-        height: 300,
+        width: 450,
+        height: 500,
         frame: false,
         transparent: true,
         resizable: false,
@@ -1040,7 +782,7 @@ function createItemsWindow() {
         },
     });
 
-    itemsWindow.loadFile('items.html');
+    itemsWindow.loadFile('views/management/items.html');
     windowManager.attachFadeHandlers(itemsWindow);
     itemsWindow.on('closed', () => {
         itemsWindow = null;
@@ -1075,7 +817,7 @@ function createStoreWindow() {
         },
     });
 
-    storeWindow.loadFile('store.html');
+    storeWindow.loadFile('views/management/store.html');
     windowManager.attachFadeHandlers(storeWindow);
     storeWindow.on('closed', () => {
         storeWindow = null;
@@ -1113,7 +855,7 @@ function createNestsWindow() {
         },
     });
 
-    nestsWindow.loadFile('nests.html');
+    nestsWindow.loadFile('views/management/nests.html');
     windowManager.attachFadeHandlers(nestsWindow);
     nestsWindow.on('closed', () => {
         nestsWindow = null;
@@ -1147,7 +889,7 @@ function createHatchWindow() {
         },
     });
 
-    hatchWindow.loadFile('hatch.html');
+    hatchWindow.loadFile('views/setup/hatch.html');
     windowManager.attachFadeHandlers(hatchWindow);
     hatchWindow.on('closed', () => {
         hatchWindow = null;
@@ -1707,6 +1449,123 @@ ipcMain.on('reward-pet', async (event, reward) => {
     }
 });
 
+const giftCodes = {
+    'KADIR5': { type: 'kadirPoints', amount: 5, name: '5 Kadir Points', icon: 'Assets/Icons/dna-kadir.png' },
+    'KADIR2025': { type: 'kadirPoints', amount: 50, name: '50 Kadir Points', icon: 'Assets/Icons/dna-kadir.png' },
+    'WELCOME': { type: 'coins', amount: 100, name: '100 Moedas', icon: 'Assets/Icons/coin.png' },
+    'STARTER': { type: 'item', item: 'healthPotion', qty: 5, name: '5x Poção de Vida', icon: 'Assets/Shop/health-potion.png' },
+    'ENERGY': { type: 'item', item: 'staminaPotion', qty: 3, name: '3x Poção de Energia', icon: 'Assets/Shop/stamina-potion.png' },
+    'RARE': { type: 'item', item: 'finger', qty: 1, name: 'Garra do Predador', icon: 'Assets/Shop/finger.png' },
+    'NEWPET': { type: 'pet', egg: 'eggFera', name: 'Ovo de Fera', icon: 'Assets/Shop/eggFera.png' },
+    'STARTERPACK': { 
+        type: 'multi', 
+        name: 'Starter Pack',
+        icon: 'Assets/Shop/health-potion.png',
+        items: [
+            { item: 'healthPotion', qty: 2 },
+            { item: 'staminaPotion', qty: 2 },
+            { item: 'meat', qty: 2 }
+        ]
+    }
+};
+
+ipcMain.on('redeem-gift-code', async (event, code) => {
+    console.log('Recebido redeem-gift-code:', code);
+    
+    const giftWindow = windowManager.getGiftWindow();
+    
+    if (!code || typeof code !== 'string') {
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Código inválido.');
+        return;
+    }
+
+    const upperCode = code.toUpperCase().trim();
+    const usedCodes = store.get('usedGiftCodes', []);
+    
+    if (usedCodes.includes(upperCode)) {
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Este código já foi usado.');
+        return;
+    }
+
+    const gift = giftCodes[upperCode];
+    if (!gift) {
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Código não encontrado.');
+        return;
+    }
+
+    try {
+        if (gift.type === 'kadirPoints' && currentPet) {
+            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + gift.amount;
+            await petManager.updatePet(currentPet.petId, { kadirPoints: currentPet.kadirPoints });
+            BrowserWindow.getAllWindows().forEach(w => {
+                if (w.webContents) w.webContents.send('pet-data', currentPet);
+            });
+        } else if (gift.type === 'coins') {
+            setCoins(getCoins() + gift.amount);
+            if (currentPet) {
+                currentPet.coins = getCoins();
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        } else if (gift.type === 'item') {
+            const items = getItems();
+            items[gift.item] = (items[gift.item] || 0) + gift.qty;
+            setItems(items);
+            if (currentPet) {
+                currentPet.items = items;
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        } else if (gift.type === 'pet') {
+            const items = getItems();
+            items[gift.egg] = (items[gift.egg] || 0) + 1;
+            setItems(items);
+            if (currentPet) {
+                currentPet.items = items;
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        } else if (gift.type === 'multi') {
+            const items = getItems();
+            gift.items.forEach(itemData => {
+                items[itemData.item] = (items[itemData.item] || 0) + itemData.qty;
+            });
+            setItems(items);
+            if (currentPet) {
+                currentPet.items = items;
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        }
+
+        // Salvar no histórico
+        const history = store.get('giftHistory', []);
+        history.unshift({
+            code: upperCode,
+            name: gift.name,
+            icon: gift.icon,
+            date: new Date().toISOString(),
+            description: gift.type === 'multi' 
+                ? gift.items.map(i => `${i.qty}x ${i.item}`).join(', ')
+                : gift.name
+        });
+        if (history.length > 20) history.pop();
+        store.set('giftHistory', history);
+
+        usedCodes.push(upperCode);
+        store.set('usedGiftCodes', usedCodes);
+
+        if (giftWindow) giftWindow.webContents.send('gift-redeemed', gift.name);
+    } catch (err) {
+        console.error('Erro ao processar presente:', err);
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Erro ao processar presente.');
+    }
+});
+
 ipcMain.on('journey-complete', async () => {
     if (!currentPet) return;
     const specieEggMap = {
@@ -1717,7 +1576,7 @@ ipcMain.on('journey-complete', async () => {
         'Drazraq': 'eggDraconideo',
         'Fera': 'eggFera',
         'Monstro': 'eggMonstro',
-        'Reptilóide': 'eggReptiloide'
+        'Reptiloide': 'eggReptiloide'
     };
     const eggId = specieEggMap[currentPet.specie] || 'eggAve';
     const items = getItems();
@@ -1849,6 +1708,10 @@ ipcMain.handle('get-difficulty', async () => {
 ipcMain.handle('set-difficulty', async (event, value) => {
     setDifficulty(value);
     return true;
+});
+
+ipcMain.handle('get-gift-history', async () => {
+    return store.get('giftHistory', []);
 });
 
 ipcMain.handle('get-species-info', async () => {

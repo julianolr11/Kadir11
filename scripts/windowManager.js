@@ -114,18 +114,6 @@ function centerVertical(winTop, winBottom) {
 
 
 class WindowManager {
-    constructor() {
-        this.startWindow = null;
-        this.createPetWindow = null;
-        this.loadPetWindow = null;
-        this.trayWindow = null;
-        this.statusWindow = null;
-        this.penWindow = null;
-    }
-
-    attachFadeHandlers(win) {
-        attachFadeHandlers(win);
-    }
 
     centerWindow(win) {
         centerWindowAnimated(win);
@@ -161,7 +149,7 @@ class WindowManager {
             },
         });
 
-        this.startWindow.loadFile('start.html');
+        this.startWindow.loadFile('views/setup/start.html');
         attachFadeHandlers(this.startWindow);
         this.startWindow.on('closed', () => {
             this.startWindow = null;
@@ -204,7 +192,7 @@ class WindowManager {
             },
         });
 
-        this.createPetWindow.loadFile('create-pet.html');
+        this.createPetWindow.loadFile('views/setup/create-pet.html');
         attachFadeHandlers(this.createPetWindow);
         this.createPetWindow.on('closed', () => {
             this.createPetWindow = null;
@@ -218,6 +206,11 @@ class WindowManager {
         if (this.createPetWindow) {
             this.createPetWindow.close();
         }
+    }
+
+    // Obter a createPetWindow
+    getCreatePetWindow() {
+        return this.createPetWindow;
     }
 
     // Criar a janela de carregar pet (load-pet.html)
@@ -242,7 +235,7 @@ class WindowManager {
             },
         });
 
-        this.loadPetWindow.loadFile('load-pet.html');
+        this.loadPetWindow.loadFile('views/setup/load-pet.html');
         attachFadeHandlers(this.loadPetWindow);
         this.loadPetWindow.on('closed', () => {
             this.loadPetWindow = null;
@@ -336,7 +329,7 @@ class WindowManager {
             },
         });
 
-        this.statusWindow.loadFile('status.html');
+        this.statusWindow.loadFile('views/management/status.html');
         this.statusWindow.once('ready-to-show', () => {
             centerWindowAnimated(this.statusWindow);
         });
@@ -369,7 +362,7 @@ class WindowManager {
             },
         });
 
-        this.penWindow.loadFile("pen.html");
+        this.penWindow.loadFile("views/management/pen.html");
         attachFadeHandlers(this.penWindow);
         this.penWindow.on("closed", () => {
             this.penWindow = null;
@@ -392,6 +385,61 @@ class WindowManager {
             this.statusWindow.close();
         }
     }
+    // Criar a janela de presentes (gift.html)
+    createGiftWindow() {
+        if (this.giftWindow) {
+            this.giftWindow.focus();
+            return this.giftWindow;
+        }
+
+        const preloadPath = path.join(__dirname, '..', 'preload.js');
+        this.giftWindow = new BrowserWindow({
+            width: 400,
+            height: 500,
+            frame: false,
+            transparent: true,
+            resizable: false,
+            show: false,
+            alwaysOnTop: true,
+            webPreferences: {
+                preload: preloadPath,
+                nodeIntegration: false,
+                contextIsolation: true,
+            },
+        });
+
+        this.giftWindow.loadFile('views/management/gift.html');
+        this.giftWindow.once('ready-to-show', () => {
+            centerWindowAnimated(this.giftWindow);
+        });
+        attachFadeHandlers(this.giftWindow);
+        this.giftWindow.on('closed', () => {
+            this.giftWindow = null;
+        });
+
+        return this.giftWindow;
+    }
+
+    // Fechar a giftWindow
+    closeGiftWindow() {
+        if (this.giftWindow) {
+            this.giftWindow.close();
+        }
+    }
+
+    // Obter a giftWindow
+    getGiftWindow() {
+        return this.giftWindow;
+    }
 }
 
-module.exports = new WindowManager();
+const windowManagerInstance = new WindowManager();
+
+// Exportar a instância e as funções utilitárias
+module.exports = windowManagerInstance;
+module.exports.attachFadeHandlers = attachFadeHandlers;
+module.exports.centerWindowAnimated = centerWindowAnimated;
+module.exports.centerSideBySide = centerSideBySide;
+module.exports.animateMove = animateMove;
+module.exports.fadeInWindow = fadeInWindow;
+module.exports.fadeOutAndDestroy = fadeOutAndDestroy;

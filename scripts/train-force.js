@@ -18,9 +18,7 @@ function closeWindow() {
 }
 
 function getPointerSpeed(level) {
-    const base = 0.6; // velocidade inicial mais rápida
-    const tier = Math.floor(((level || 1) - 1) / 5);
-    return Math.min(base + tier * 0.1, 1.2);
+    return 0.2; // Velocidade inicial reduzida para 0.5
 }
 
 function startPointer() {
@@ -110,15 +108,15 @@ function evaluateHit() {
             attrGain = getAttrGain(true);
             success = true;
         }
-        if (logImg) logImg.src = 'Assets/train/wood-3.png';
+        if (logImg) logImg.src = '../../Assets/train/wood-3.png';
     } else if (pointerPos >= 70) {
         if (Math.random() < 0.3) {
             attrGain = getAttrGain(false);
             success = true;
         }
-        if (logImg) logImg.src = 'Assets/train/wood-2.png';
+        if (logImg) logImg.src = '../../Assets/train/wood-2.png';
     } else {
-        if (logImg) logImg.src = 'Assets/train/wood-1.png';
+        if (logImg) logImg.src = '../../Assets/train/wood-1.png';
     }
     if (success) {
         if (totalXp < maxTotalGain) {
@@ -132,10 +130,10 @@ function evaluateHit() {
         } else {
             success = false;
         }
-    }
-    if (pointerPos >= 90) {
+        // Aumenta a velocidade em 0.1 a cada sucesso
         pointerSpeed = Math.min(pointerSpeed + speedIncrement, maxPointerSpeed);
     }
+
     showFeedback(result, success);
     attempts += 1;
     updateCounters();
@@ -148,7 +146,7 @@ function evaluateHit() {
     }
     if (attempts < maxAttempts) {
         setTimeout(() => {
-            if (logImg) logImg.src = 'Assets/train/wood-1.png';
+            if (logImg) logImg.src = '../../Assets/train/wood-1.png';
             pointerPos = 0;
             direction = 1;
             startPointer();

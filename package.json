@@ -2,6 +2,7 @@
   "name": "kadir11",
   "version": "1.0.0",
   "description": "Tamagotchi RPG",
+  
   "main": "main.js",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:vite\" \"npm:dev:electron\"",

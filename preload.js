@@ -63,7 +63,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'animation-finished', // Novo canal pra sinalizar o fim da animação
             'close-start-window',  // Fechar a janela de start
             'open-start-window',  // Abrir a janela de start
-            'open-tray-window'    // Abrir a janela da bandeja
+            'open-tray-window',    // Abrir a janela da bandeja
+            'open-gift-window',    // Abrir a janela de presentes
+            'redeem-gift-code'     // Resgatar código de presente
         ];
         if (validChannels.includes(channel)) {
             console.log(`Enviando canal IPC: ${channel}`, data);
@@ -86,7 +88,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
             'pen-updated',
             'nest-updated',
             'nests-data-updated',
-            'activate-status-tab'
+            'activate-status-tab',
+            'gift-redeemed',       // Presente resgatado com sucesso
+            'gift-error'           // Erro ao resgatar presente
         ];
         if (validChannels.includes(channel)) {
             console.log(`Registrando listener para o canal: ${channel}`);
@@ -172,5 +176,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
         ipcRenderer.send('close-hatch-window');
     },
     useItem: (id) => ipcRenderer.invoke('use-item', id),
+    invoke: (channel, ...args) => {
+        const validChannels = [
+            'get-current-pet',
+            'use-item',
+            'list-pets',
+            'delete-pet',
+            'get-mute-state',
+            'get-journey-images',
+            'get-pen-info',
+            'get-nest-count',
+            'get-nest-price',
+            'get-nests-data',
+            'get-difficulty',
+            'set-difficulty',
+            'get-species-info',
+            'get-gift-history'
+        ];
+        if (validChannels.includes(channel)) {
+            console.log(`Invocando canal IPC: ${channel}`, ...args);
+            return ipcRenderer.invoke(channel, ...args);
+        } else {
+            console.error(`Canal IPC não permitido para invoke: ${channel}`);
+            return Promise.reject(new Error(`Canal não permitido: ${channel}`));
+        }
+    },
     getSpeciesInfo
 });console.log('electronAPI exposto com sucesso');

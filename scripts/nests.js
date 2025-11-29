@@ -1,12 +1,12 @@
 const nestsContainer = document.getElementById('nests-container');
 const eggIcons = {
-    eggAve: 'Assets/tileset/ave_egg.png',
-    eggCriaturaMistica: 'Assets/tileset/criaturamistica_egg.png',
-    eggCriaturaSombria: 'Assets/tileset/criaturasombria_egg.png',
-    eggDraconideo: 'Assets/tileset/draconideo_egg.png',
-    eggFera: 'Assets/tileset/fera_egg.png',
-    eggMonstro: 'Assets/tileset/monster_egg.png',
-    eggReptiloide: 'Assets/tileset/reptiloide_egg.png'
+    eggAve: '../../Assets/tileset/ave_egg.png',
+    eggCriaturaMistica: '../../Assets/tileset/criaturamistica_egg.png',
+    eggCriaturaSombria: '../../Assets/tileset/criaturasombria_egg.png',
+    eggDraconideo: '../../Assets/tileset/draconideo_egg.png',
+    eggFera: '../../Assets/tileset/fera_egg.png',
+    eggMonstro: '../../Assets/tileset/monster_egg.png',
+    eggReptiloide: '../../Assets/tileset/reptiloide_egg.png'
 };
 
 const eggIds = Object.keys(eggIcons);
@@ -55,7 +55,7 @@ let progressInterval = null;
 function showHatchAnimation(newPet) {
     if (!hatchOverlay || !hatchVideo || !hatchVideoGif || !hatchName || !hatchGif || !hatchInput) return;
     hatchedPet = newPet;
-    hatchGif.src = newPet.statusImage ? `Assets/Mons/${newPet.statusImage}` : (newPet.image ? `Assets/Mons/${newPet.image}` : 'Assets/Mons/eggsy.png');
+    hatchGif.src = newPet.statusImage ? `../../Assets/Mons/${newPet.statusImage}` : (newPet.image ? `../../Assets/Mons/${newPet.image}` : '../../Assets/Mons/eggsy.png');
     hatchInput.value = '';
     hatchName.style.display = 'none';
     hatchOverlay.style.display = 'flex';
@@ -108,7 +108,7 @@ function hasEggInInventory() {
 
 async function loadItemsInfo() {
     try {
-        const resp = await fetch('data/items.json');
+        const resp = await fetch('../../data/items.json');
         const data = await resp.json();
         itemsInfo = {};
         data.forEach(it => { itemsInfo[it.id] = it; });
@@ -177,9 +177,9 @@ function drawNests(count) {
         const baseImg = document.createElement('img');
         const egg = nestsData[i];
         if (egg) {
-            baseImg.src = 'Assets/tileset/nest.png';
+            baseImg.src = '../../Assets/tileset/nest.png';
         } else {
-            baseImg.src = hasEggInInventory() ? 'Assets/tileset/nest-plus.png' : 'Assets/tileset/nest.png';
+            baseImg.src = hasEggInInventory() ? '../../Assets/tileset/nest-plus.png' : '../../Assets/tileset/nest.png';
         }
         baseImg.className = 'nest-image';
         wrapper.appendChild(baseImg);

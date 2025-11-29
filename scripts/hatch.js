@@ -10,7 +10,7 @@ let hatchedPet = null;
 function showHatchAnimation(newPet) {
     if (!hatchOverlay || !hatchVideo || !hatchVideoGif || !hatchName || !hatchGif || !hatchInput) return;
     hatchedPet = newPet;
-    hatchGif.src = newPet.statusImage ? `Assets/Mons/${newPet.statusImage}` : (newPet.image ? `Assets/Mons/${newPet.image}` : 'Assets/Mons/eggsy.png');
+    hatchGif.src = newPet.statusImage ? `../../Assets/Mons/${newPet.statusImage}` : (newPet.image ? `../../Assets/Mons/${newPet.image}` : '../../Assets/Mons/eggsy.png');
     hatchInput.value = '';
     hatchName.style.display = 'none';
     hatchOverlay.style.display = 'flex';
