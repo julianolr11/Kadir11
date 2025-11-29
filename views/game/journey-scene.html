@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
     <title>Cenário da Jornada</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../../styles/main.css">
     <style>
         html, body {
             width: 100%;
@@ -218,27 +218,231 @@
             bottom: 60px;
             left: 50%;
             transform: translateX(-50%);
-            background: #2a323e;
-            border: 2px solid #ffffff;
-            border-radius: 7px;
-            padding: 8px;
+            background: rgba(42, 50, 62, 0.95);
+            border: 3px solid #ffffff;
+            border-radius: 10px;
+            padding: 12px;
             display: none;
-            flex-direction: column;
-            gap: 5px;
             z-index: 2;
+            min-width: 450px;
+            max-width: 650px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
         }
 
-        .item-button {
+        .sub-menu::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sub-menu::-webkit-scrollbar-track {
+            background: #1a2028;
+            border-radius: 10px;
+        }
+
+        .sub-menu::-webkit-scrollbar-thumb {
+            background: #4a5868;
+            border-radius: 10px;
+        }
+
+        .sub-menu::-webkit-scrollbar-thumb:hover {
+            background: #5a6878;
+        }
+
+        /* Grid layout para golpes */
+        #moves-menu {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+        }
+
+        #moves-menu .button {
+            width: 100%;
+            padding: 10px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        #moves-menu .button.super-effective {
+            border-color: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        #moves-menu .button.not-effective {
+            border-color: #f87171;
+            opacity: 0.8;
+        }
+
+        .move-indicator {
+            font-size: 14px;
+            margin-left: 4px;
+        }
+
+        .move-indicator.up {
+            color: #4ade80;
+        }
+
+        .move-indicator.down {
+            color: #f87171;
+        }
+
+        /* Layout para itens */
+        #items-menu {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .item-container {
+            background: rgba(58, 68, 80, 0.9);
+            border: 2px solid #4a5868;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .item-container:hover {
+            border-color: #6a7888;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .item-container.open {
+            border-color: #4a9eff;
+        }
+
+        .item-header {
             display: flex;
             align-items: center;
-            gap: 4px;
-            justify-content: flex-start;
+            padding: 12px;
+            cursor: pointer;
+            gap: 12px;
+            transition: background 0.2s;
+            user-select: none;
         }
 
-        .item-button img {
-            width: 24px;
-            height: 24px;
+        .item-header:hover {
+            background: rgba(68, 78, 90, 0.6);
+        }
+
+        .item-header:active {
+            background: rgba(78, 88, 100, 0.7);
+        }
+
+        .item-icon {
+            width: 40px;
+            height: 40px;
             image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-name-qty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .info-icon {
+            font-size: 12px;
+            color: #4a9eff;
+            margin-left: 4px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .item-header:hover .info-icon {
+            opacity: 1;
+        }
+
+        .item-qty {
+            font-size: 11px;
+            color: #aaa;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        .accordion-arrow {
+            font-size: 14px;
+            color: #4a9eff;
+            transition: transform 0.3s ease, color 0.2s;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .item-header:hover .accordion-arrow {
+            color: #5aafff;
+        }
+
+        .item-container.open .accordion-arrow {
+            transform: rotate(180deg);
+            color: #6bbfff;
+        }
+
+        .item-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+            background: rgba(42, 50, 62, 0.9);
+            padding: 0 12px;
+            font-size: 13px;
+            color: #e0e0e0;
+            line-height: 1.6;
+            opacity: 0;
+        }
+
+        .item-container.open .item-content {
+            max-height: 200px;
+            padding: 14px 16px;
+            border-top: 1px solid rgba(74, 158, 255, 0.3);
+            opacity: 1;
+        }
+
+        .item-content p {
+            margin: 0 0 12px 0;
+            font-style: italic;
+            color: #c8d0d8;
+        }
+
+        .use-item-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(135deg, #4a9eff, #357abd);
+            border: 2px solid #ffffff;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .use-item-btn:hover {
+            background: linear-gradient(135deg, #5aafff, #4585cd);
+            transform: scale(1.02);
+        }
+
+        .item-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #4a5868, transparent);
+            margin: 0;
         }
 
         .message-box {
@@ -309,9 +513,9 @@
         </div>
 
         <img id="player-pet" class="pet" src="" alt="pet">
-        <img id="player-hit" class="hit-effect" src="Assets/train/hit.gif" alt="hit">
+        <img id="player-hit" class="hit-effect" src="../../Assets/train/hit.gif" alt="hit">
         <img id="enemy-pet" class="pet" src="" alt="inimigo">
-        <img id="enemy-hit" class="hit-effect" src="Assets/train/hit.gif" alt="hit">
+        <img id="enemy-hit" class="hit-effect" src="../../Assets/train/hit.gif" alt="hit">
 
         <div id="action-menu">
             <button id="fight-btn" class="button small-button">Lutar</button>
@@ -337,6 +541,6 @@
             </div>
         </div>
     </div>
-    <script type="module" src="scripts/journey-scene.js"></script>
+    <script type="module" src="../../scripts/journey-scene.js"></script>
 </body>
 </html>

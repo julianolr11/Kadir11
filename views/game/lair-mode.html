@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
 <title>Kadir11 - Covil</title>
-<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="../../styles/main.css">
 <style>
     html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
     .window { position:relative; display:flex; flex-direction:column; width:fit-content; height:fit-content; }
@@ -27,6 +27,66 @@
         transform-origin: top left;
     }
     #ui { margin-top:5px; font-family:'PixelOperator', sans-serif; color:#fff; }
+    
+    /* Overlay de derrota */
+    #defeat-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    #defeat-message {
+        background: linear-gradient(135deg, #2a323e, #1a222e);
+        border: 3px solid #ff6b6b;
+        border-radius: 15px;
+        padding: 30px 40px;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        max-width: 400px;
+    }
+    
+    #defeat-message h2 {
+        color: #ff6b6b;
+        font-family: 'PixelOperator', sans-serif;
+        font-size: 24px;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    #defeat-message p {
+        color: #ffffff;
+        font-family: 'PixelOperator', sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 25px 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    #defeat-ok-btn {
+        background: linear-gradient(135deg, #4a9eff, #357abd);
+        border: 2px solid #ffffff;
+        border-radius: 8px;
+        padding: 12px 40px;
+        font-family: 'PixelOperator', sans-serif;
+        font-size: 16px;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    #defeat-ok-btn:hover {
+        background: linear-gradient(135deg, #5aafff, #4585cd);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(74, 158, 255, 0.5);
+    }
 </style>
 </head>
 <body>
@@ -47,7 +107,16 @@
             <button id="buy-bravura">Comprar +1 Movimento (30 KP)</button>
         </div>
     </div>
+    
+    <!-- Overlay de derrota -->
+    <div id="defeat-overlay">
+        <div id="defeat-message">
+            <h2>Você perdeu a batalha!</h2>
+            <p>Mas não desanime, treine e volte mais forte!</p>
+            <button id="defeat-ok-btn">OK</button>
+        </div>
+    </div>
 </div>
-<script src="scripts/lair-mode.js"></script>
+<script src="../../scripts/lair-mode.js"></script>
 </body>
 </html>

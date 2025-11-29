@@ -3,6 +3,7 @@ const windowManager = require('./scripts/windowManager');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const { startPetUpdater, resetTimers } = require('./scripts/petUpdater');
+const { setupBattleHandler } = require('./scripts/battleHandler');
 const fs = require('fs');
 const path = require('path');
 
@@ -213,6 +214,7 @@ app.whenReady().then(() => {
     });
 
     startPetUpdater(() => currentPet);
+    setupBattleHandler(ipcMain, () => currentPet, petManager, BrowserWindow);
 
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
@@ -338,16 +340,7 @@ ipcMain.on('open-start-window', () => {
 
 ipcMain.on('open-tray-window', () => {
     console.log('Recebido open-tray-window');
-    const win = windowManager.createTrayWindow();
-    if (currentPet && win) {
-        win.webContents.on('did-finish-load', () => {
-            win.webContents.send('pet-data', currentPet);
-        });
-    }
-    closeBattleModeWindow();
-    closeLairModeWindow();
-    closeJourneyModeWindow();
-    closeJourneySceneWindow();
+    windowManager.createTrayWindow();
 });
 
 ipcMain.on('create-pet', async (event, petData) => {
@@ -359,12 +352,18 @@ ipcMain.on('create-pet', async (event, petData) => {
         lastUpdate = Date.now();
         resetTimers();
 
-        // Notificar o renderer que o pet foi criado, mas não fechar a janela ainda
-        event.reply('pet-created', newPet);
+        // Notificar o renderer que o pet foi criado
+        const createPetWindow = windowManager.getCreatePetWindow();
+        if (createPetWindow) {
+            createPetWindow.webContents.send('pet-created', newPet);
+        }
         broadcastPenUpdate();
     } catch (err) {
         console.error('Erro ao criar pet no main.js:', err);
-        event.reply('create-pet-error', err.message);
+        const createPetWindow = windowManager.getCreatePetWindow();
+        if (createPetWindow) {
+            createPetWindow.webContents.send('create-pet-error', err.message);
+        }
     }
 });
 
@@ -467,8 +466,20 @@ ipcMain.handle('delete-pet', async (event, petId) => {
         // Verificar se ainda existem pets após a exclusão
         const remaining = await petManager.listPets();
         if (remaining.length === 0) {
+            console.log('Nenhum pet restante. Fechando todas as janelas e voltando ao menu inicial.');
             currentPet = null;
-            windowManager.closeTrayWindow();
+            
+            // Fechar todas as janelas abertas
+            BrowserWindow.getAllWindows().forEach(win => {
+                if (win && !win.isDestroyed()) {
+                    win.close();
+                }
+            });
+            
+            // Abrir a janela inicial (start.html)
+            setTimeout(() => {
+                windowManager.createStartWindow();
+            }, 500);
         }
 
         return result;
@@ -523,6 +534,25 @@ ipcMain.on('open-status-window', () => {
     } else {
         console.error('Nenhum pet selecionado para abrir a janela de status');
     }
+});
+
+ipcMain.on('open-gift-window', () => {
+    console.log('Recebido open-gift-window');
+    windowManager.createGiftWindow();
+});
+
+ipcMain.on('close-gift-window', () => {
+    console.log('Recebido close-gift-window');
+    windowManager.closeGiftWindow();
+});
+
+// Handler para obter o pet atual
+ipcMain.handle('get-current-pet', async () => {
+    if (currentPet) {
+        currentPet.items = getItems();
+        return currentPet;
+    }
+    return null;
 });
 
 ipcMain.on('train-pet', async () => {
@@ -735,7 +765,7 @@ function createBattleModeWindow() {
         },
     });
 
-    battleModeWindow.loadFile('battle-mode.html');
+    battleModeWindow.loadFile('views/game/battle-mode.html');
     windowManager.attachFadeHandlers(battleModeWindow);
     battleModeWindow.on('closed', () => {
         console.log('battleModeWindow fechada');
@@ -756,7 +786,7 @@ function createJourneyModeWindow() {
     console.log('Caminho do preload.js para journeyModeWindow:', preloadPath);
 
     journeyModeWindow = new BrowserWindow({
-      width: 1100,
+        width: 1100,
         height: 700,
 
         frame: false,
@@ -770,7 +800,7 @@ function createJourneyModeWindow() {
         },
     });
 
-    journeyModeWindow.loadFile('journey-mode.html');
+    journeyModeWindow.loadFile('views/game/journey-mode.html');
     windowManager.attachFadeHandlers(journeyModeWindow);
     journeyModeWindow.on('closed', () => {
         console.log('journeyModeWindow fechada');
@@ -802,7 +832,7 @@ function createLairModeWindow() {
         },
     });
 
-    lairModeWindow.loadFile('lair-mode.html');
+    lairModeWindow.loadFile('views/game/lair-mode.html');
     windowManager.attachFadeHandlers(lairModeWindow);
     lairModeWindow.on('closed', () => { lairModeWindow = null; });
 
@@ -832,7 +862,7 @@ function createJourneySceneWindow() {
         },
     });
 
-    journeySceneWindow.loadFile('journey-scene.html');
+    journeySceneWindow.loadFile('views/game/journey-scene.html');
     windowManager.attachFadeHandlers(journeySceneWindow);
     journeySceneWindow.on('closed', () => {
         journeySceneWindow = null;
@@ -866,7 +896,7 @@ function createTrainWindow(options = {}) {
         },
     });
 
-    trainWindow.loadFile('train.html');
+    trainWindow.loadFile('views/game/train.html');
 
     if (centerOnShow) {
         trainWindow.once('ready-to-show', () => {
@@ -912,7 +942,7 @@ function createTrainMenuWindow() {
         },
     });
 
-    trainMenuWindow.loadFile('train-menu.html');
+    trainMenuWindow.loadFile('views/game/train-menu.html');
     windowManager.attachFadeHandlers(trainMenuWindow);
     trainMenuWindow.on('closed', () => {
         trainMenuWindow = null;
@@ -944,7 +974,7 @@ function createTrainAttributesWindow() {
         },
     });
 
-    trainAttributesWindow.loadFile('train-attributes.html');
+    trainAttributesWindow.loadFile('views/game/train-attributes.html');
     windowManager.attachFadeHandlers(trainAttributesWindow);
     trainAttributesWindow.on('closed', () => {
         trainAttributesWindow = null;
@@ -976,7 +1006,7 @@ function createTrainForceWindow() {
         },
     });
 
-    trainForceWindow.loadFile('train-force.html');
+    trainForceWindow.loadFile('views/game/train-force.html');
     windowManager.attachFadeHandlers(trainForceWindow);
     trainForceWindow.on('closed', () => {
         trainForceWindow = null;
@@ -1008,7 +1038,7 @@ function createTrainDefenseWindow() {
         },
     });
 
-    trainDefenseWindow.loadFile('train-defense.html');
+    trainDefenseWindow.loadFile('views/game/train-defense.html');
     windowManager.attachFadeHandlers(trainDefenseWindow);
     trainDefenseWindow.on('closed', () => {
         trainDefenseWindow = null;
@@ -1027,8 +1057,8 @@ function createItemsWindow() {
     const preloadPath = require('path').join(__dirname, 'preload.js');
 
     itemsWindow = new BrowserWindow({
-        width: 350,
-        height: 300,
+        width: 450,
+        height: 500,
         frame: false,
         transparent: true,
         resizable: false,
@@ -1040,7 +1070,7 @@ function createItemsWindow() {
         },
     });
 
-    itemsWindow.loadFile('items.html');
+    itemsWindow.loadFile('views/management/items.html');
     windowManager.attachFadeHandlers(itemsWindow);
     itemsWindow.on('closed', () => {
         itemsWindow = null;
@@ -1075,7 +1105,7 @@ function createStoreWindow() {
         },
     });
 
-    storeWindow.loadFile('store.html');
+    storeWindow.loadFile('views/management/store.html');
     windowManager.attachFadeHandlers(storeWindow);
     storeWindow.on('closed', () => {
         storeWindow = null;
@@ -1113,7 +1143,7 @@ function createNestsWindow() {
         },
     });
 
-    nestsWindow.loadFile('nests.html');
+    nestsWindow.loadFile('views/management/nests.html');
     windowManager.attachFadeHandlers(nestsWindow);
     nestsWindow.on('closed', () => {
         nestsWindow = null;
@@ -1147,7 +1177,7 @@ function createHatchWindow() {
         },
     });
 
-    hatchWindow.loadFile('hatch.html');
+    hatchWindow.loadFile('views/setup/hatch.html');
     windowManager.attachFadeHandlers(hatchWindow);
     hatchWindow.on('closed', () => {
         hatchWindow = null;
@@ -1707,6 +1737,123 @@ ipcMain.on('reward-pet', async (event, reward) => {
     }
 });
 
+const giftCodes = {
+    'KADIR5': { type: 'kadirPoints', amount: 5, name: '5 Kadir Points', icon: 'Assets/Icons/dna-kadir.png' },
+    'KADIR2025': { type: 'kadirPoints', amount: 50, name: '50 Kadir Points', icon: 'Assets/Icons/dna-kadir.png' },
+    'WELCOME': { type: 'coins', amount: 100, name: '100 Moedas', icon: 'Assets/Icons/coin.png' },
+    'STARTER': { type: 'item', item: 'healthPotion', qty: 5, name: '5x Poção de Vida', icon: 'Assets/Shop/health-potion.png' },
+    'ENERGY': { type: 'item', item: 'staminaPotion', qty: 3, name: '3x Poção de Energia', icon: 'Assets/Shop/stamina-potion.png' },
+    'RARE': { type: 'item', item: 'finger', qty: 1, name: 'Garra do Predador', icon: 'Assets/Shop/finger.png' },
+    'NEWPET': { type: 'pet', egg: 'eggFera', name: 'Ovo de Fera', icon: 'Assets/Shop/eggFera.png' },
+    'STARTERPACK': { 
+        type: 'multi', 
+        name: 'Starter Pack',
+        icon: 'Assets/Shop/health-potion.png',
+        items: [
+            { item: 'healthPotion', qty: 2 },
+            { item: 'staminaPotion', qty: 2 },
+            { item: 'meat', qty: 2 }
+        ]
+    }
+};
+
+ipcMain.on('redeem-gift-code', async (event, code) => {
+    console.log('Recebido redeem-gift-code:', code);
+    
+    const giftWindow = windowManager.getGiftWindow();
+    
+    if (!code || typeof code !== 'string') {
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Código inválido.');
+        return;
+    }
+
+    const upperCode = code.toUpperCase().trim();
+    const usedCodes = store.get('usedGiftCodes', []);
+    
+    if (usedCodes.includes(upperCode)) {
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Este código já foi usado.');
+        return;
+    }
+
+    const gift = giftCodes[upperCode];
+    if (!gift) {
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Código não encontrado.');
+        return;
+    }
+
+    try {
+        if (gift.type === 'kadirPoints' && currentPet) {
+            currentPet.kadirPoints = (currentPet.kadirPoints || 0) + gift.amount;
+            await petManager.updatePet(currentPet.petId, { kadirPoints: currentPet.kadirPoints });
+            BrowserWindow.getAllWindows().forEach(w => {
+                if (w.webContents) w.webContents.send('pet-data', currentPet);
+            });
+        } else if (gift.type === 'coins') {
+            setCoins(getCoins() + gift.amount);
+            if (currentPet) {
+                currentPet.coins = getCoins();
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        } else if (gift.type === 'item') {
+            const items = getItems();
+            items[gift.item] = (items[gift.item] || 0) + gift.qty;
+            setItems(items);
+            if (currentPet) {
+                currentPet.items = items;
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        } else if (gift.type === 'pet') {
+            const items = getItems();
+            items[gift.egg] = (items[gift.egg] || 0) + 1;
+            setItems(items);
+            if (currentPet) {
+                currentPet.items = items;
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        } else if (gift.type === 'multi') {
+            const items = getItems();
+            gift.items.forEach(itemData => {
+                items[itemData.item] = (items[itemData.item] || 0) + itemData.qty;
+            });
+            setItems(items);
+            if (currentPet) {
+                currentPet.items = items;
+                BrowserWindow.getAllWindows().forEach(w => {
+                    if (w.webContents) w.webContents.send('pet-data', currentPet);
+                });
+            }
+        }
+
+        // Salvar no histórico
+        const history = store.get('giftHistory', []);
+        history.unshift({
+            code: upperCode,
+            name: gift.name,
+            icon: gift.icon,
+            date: new Date().toISOString(),
+            description: gift.type === 'multi' 
+                ? gift.items.map(i => `${i.qty}x ${i.item}`).join(', ')
+                : gift.name
+        });
+        if (history.length > 20) history.pop();
+        store.set('giftHistory', history);
+
+        usedCodes.push(upperCode);
+        store.set('usedGiftCodes', usedCodes);
+
+        if (giftWindow) giftWindow.webContents.send('gift-redeemed', gift.name);
+    } catch (err) {
+        console.error('Erro ao processar presente:', err);
+        if (giftWindow) giftWindow.webContents.send('gift-error', 'Erro ao processar presente.');
+    }
+});
+
 ipcMain.on('journey-complete', async () => {
     if (!currentPet) return;
     const specieEggMap = {
@@ -1849,6 +1996,10 @@ ipcMain.handle('get-difficulty', async () => {
 ipcMain.handle('set-difficulty', async (event, value) => {
     setDifficulty(value);
     return true;
+});
+
+ipcMain.handle('get-gift-history', async () => {
+    return store.get('giftHistory', []);
 });
 
 ipcMain.handle('get-species-info', async () => {

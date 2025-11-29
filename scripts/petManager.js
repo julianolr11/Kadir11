@@ -308,11 +308,35 @@ async function cleanupOrphanPets() {
     return removals;
 }
 
+async function addItem(petId, itemId, amount = 1) {
+    return withLock(petId, async () => {
+        const petFileName = `pet_${petId}.json`;
+        const petFilePath = path.join(petsDir, petFileName);
+        try {
+            const data = await fs.readFile(petFilePath, 'utf8');
+            const pet = JSON.parse(data);
+            if (!pet.items) pet.items = {};
+            pet.items[itemId] = (pet.items[itemId] || 0) + amount;
+            await fs.writeFile(petFilePath, JSON.stringify(pet, null, 2), 'utf8');
+            return pet;
+        } catch (err) {
+            console.error(`Erro ao adicionar item ao pet ${petId}:`, err);
+            throw err;
+        }
+    });
+}
+
+async function getPet(petId) {
+    return loadPet(petId);
+}
+
 module.exports = {
     createPet,
     listPets,
     loadPet,
+    getPet,
     updatePet,
     deletePet,
     cleanupOrphanPets,
+    addItem
 };

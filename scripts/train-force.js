@@ -18,9 +18,7 @@ function closeWindow() {
 }
 
 function getPointerSpeed(level) {
-    const base = 0.6; // velocidade inicial mais rápida
-    const tier = Math.floor(((level || 1) - 1) / 5);
-    return Math.min(base + tier * 0.1, 1.2);
+    return 0.2; // Velocidade inicial reduzida para 0.5
 }
 
 function startPointer() {
@@ -132,10 +130,10 @@ function evaluateHit() {
         } else {
             success = false;
         }
-    }
-    if (pointerPos >= 90) {
+        // Aumenta a velocidade em 0.1 a cada sucesso
         pointerSpeed = Math.min(pointerSpeed + speedIncrement, maxPointerSpeed);
     }
+
     showFeedback(result, success);
     attempts += 1;
     updateCounters();

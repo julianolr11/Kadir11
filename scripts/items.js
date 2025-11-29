@@ -1,25 +1,9 @@
 let pet = null;
 let itemsInfo = {};
-let descriptionEl = null;
-let cheatBuffer = '';
 let swapModal = null;
 let swapConfirmBtn = null;
 let swapCancelBtn = null;
 let pendingEquipId = null;
-
-function showDescription(text, evt) {
-    if (!descriptionEl) return;
-    descriptionEl.textContent = text;
-    descriptionEl.style.left = `${evt.pageX + 10}px`;
-    descriptionEl.style.top = `${evt.pageY + 10}px`;
-    descriptionEl.style.visibility = 'visible';
-}
-
-function hideDescription() {
-    if (!descriptionEl) return;
-    descriptionEl.textContent = '';
-    descriptionEl.style.visibility = 'hidden';
-}
 
 function openSwapModal(equipId) {
     pendingEquipId = equipId;
@@ -41,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.electronAPI.send('store-pet', { fromItems: true });
     });
 
-    descriptionEl = document.getElementById('item-description');
     swapModal = document.getElementById('swap-modal');
     swapConfirmBtn = document.getElementById('swap-confirm');
     swapCancelBtn = document.getElementById('swap-cancel');
@@ -64,18 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const countEl = document.getElementById('coin-count');
         if (countEl) countEl.textContent = pet.coins ?? 0;
         updateItems();
-    });
-
-    document.addEventListener('keydown', (e) => {
-        const key = e.key.toLowerCase();
-        if (key.length === 1 && /[a-z0-9]/.test(key)) {
-            cheatBuffer += key;
-            if (cheatBuffer.length > 7) cheatBuffer = cheatBuffer.slice(-7);
-            if (cheatBuffer === 'kadir11') {
-                cheatBuffer = '';
-                window.electronAPI.send('reward-pet', { coins: 100, kadirPoints: 100 });
-            }
-        }
     });
 });
 
@@ -112,37 +83,68 @@ function updateItems() {
         return;
     }
 
-    Object.keys(items).forEach(id => {
+    const itemKeys = Object.keys(items).filter(id => items[id] > 0);
+    itemKeys.forEach((id, index) => {
         const qty = items[id];
         const info = itemsInfo[id];
         if (!info || qty <= 0) return;
 
-        const div = document.createElement('div');
-        div.className = 'inventory-item';
-        div.addEventListener('mouseenter', (e) => showDescription(info.description || '', e));
-        div.addEventListener('mousemove', (e) => {
-            if (descriptionEl && descriptionEl.style.visibility === 'visible') {
-                descriptionEl.style.left = `${e.pageX + 10}px`;
-                descriptionEl.style.top = `${e.pageY + 10}px`;
-            }
-        });
-        div.addEventListener('mouseleave', hideDescription);
+        // Container do item com accordion
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'item-container';
+
+        // Header do item (clicável para accordion)
+        const itemHeader = document.createElement('div');
+        itemHeader.className = 'item-header';
 
         const img = document.createElement('img');
         img.src = info.icon;
         img.alt = info.name;
-        img.style.imageRendering = 'pixelated';
+        img.className = 'item-icon';
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'item-name';
-        nameSpan.textContent = info.name;
+        const itemInfo = document.createElement('div');
+        itemInfo.className = 'item-info';
 
-        const qtySpan = document.createElement('span');
-        qtySpan.className = 'item-qty';
-        qtySpan.textContent = `x ${qty}`;
+        const nameQtyContainer = document.createElement('div');
+        nameQtyContainer.className = 'item-name-qty';
 
+        const label = document.createElement('span');
+        label.textContent = info.name;
+        label.className = 'item-name';
+
+        const infoIcon = document.createElement('span');
+        infoIcon.textContent = 'ⓘ';
+        infoIcon.className = 'info-icon';
+        infoIcon.title = 'Clique para ver detalhes';
+
+        const qtyLabel = document.createElement('span');
+        qtyLabel.textContent = `x${qty}`;
+        qtyLabel.className = 'item-qty';
+
+        nameQtyContainer.appendChild(label);
+        nameQtyContainer.appendChild(infoIcon);
+        nameQtyContainer.appendChild(qtyLabel);
+
+        itemInfo.appendChild(nameQtyContainer);
+
+        const arrow = document.createElement('span');
+        arrow.className = 'accordion-arrow';
+        arrow.textContent = '▼';
+
+        // Criar área clicável do header (ícone, info, seta)
+        const headerClickable = document.createElement('div');
+        headerClickable.className = 'item-header-clickable';
+        headerClickable.appendChild(img);
+        headerClickable.appendChild(itemInfo);
+        
+        // Criar área de ações (botão usar + seta)
+        const headerActions = document.createElement('div');
+        headerActions.className = 'item-header-actions';
+
+        // Botão de usar/equipar/chocar
         const useBtn = document.createElement('button');
-        useBtn.className = 'button small-button use-button';
+        useBtn.className = 'button small-button use-item-btn';
+
         if (id.startsWith('egg')) {
             useBtn.textContent = 'Chocar';
             useBtn.addEventListener('click', (e) => {
@@ -166,10 +168,50 @@ function updateItems() {
             });
         }
 
-        div.appendChild(img);
-        div.appendChild(nameSpan);
-        div.appendChild(qtySpan);
-        div.appendChild(useBtn);
-        listEl.appendChild(div);
+        headerActions.appendChild(useBtn);
+        headerActions.appendChild(arrow);
+        
+        itemHeader.appendChild(headerClickable);
+        itemHeader.appendChild(headerActions);
+
+        // Conteúdo do accordion (descrição)
+        const itemContent = document.createElement('div');
+        itemContent.className = 'item-content';
+
+        const description = document.createElement('p');
+        description.style.margin = '0';
+        description.textContent = info.description || info.effect || 'Sem descrição';
+        itemContent.appendChild(description);
+
+        // Toggle accordion ao clicar na área clicável ou na seta
+        const toggleAccordion = () => {
+            const isOpen = itemContainer.classList.contains('open');
+            // Fechar todos os outros itens
+            document.querySelectorAll('.item-container').forEach(container => {
+                container.classList.remove('open');
+            });
+            // Toggle do item atual
+            if (!isOpen) {
+                itemContainer.classList.add('open');
+            }
+        };
+
+        headerClickable.addEventListener('click', toggleAccordion);
+        arrow.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAccordion();
+        });
+
+        itemContainer.appendChild(itemHeader);
+        itemContainer.appendChild(itemContent);
+
+        // Adicionar divisória se não for o último item
+        if (index < itemKeys.length - 1) {
+            const divider = document.createElement('div');
+            divider.className = 'item-divider';
+            itemContainer.appendChild(divider);
+        }
+
+        listEl.appendChild(itemContainer);
     });
 }

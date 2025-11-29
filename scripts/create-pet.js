@@ -43,11 +43,25 @@ function generateRarity() {
 function generateSpecie(attributes, element) {
     const { attack, defense, speed, magic, life } = attributes;
 
-    // Filtra as espécies pelo elemento selecionado
+    // 1. Tentar filtrar espécies pelo elemento selecionado
     let species = Object.keys(specieData).filter(s => specieData[s].element === element);
+    
+    // 2. Se não houver espécies para o elemento, usar espécies sem elemento definido
     if (species.length === 0) {
-        // Caso nenhuma espécie possua o elemento, usar apenas as sem elemento definido
+        console.log(`Nenhuma espécie encontrada para elemento '${element}', tentando espécies neutras...`);
         species = Object.keys(specieData).filter(s => !specieData[s].element);
+    }
+    
+    // 3. Se ainda não houver, usar TODAS as espécies disponíveis (fallback garantido)
+    if (species.length === 0) {
+        console.warn('Nenhuma espécie neutra encontrada, usando todas as espécies disponíveis');
+        species = Object.keys(specieData);
+    }
+    
+    // 4. Último fallback: se specieData estiver vazio (erro crítico), usar lista hardcoded
+    if (species.length === 0) {
+        console.error('ERRO CRÍTICO: specieData está vazio! Usando fallback de emergência.');
+        species = ['Draconídeo', 'Reptilóide', 'Ave', 'Fera', 'Monstro', 'Criatura Mística'];
     }
 
     // Calcular um "peso" baseado nos atributos pra influenciar levemente a escolha
@@ -56,11 +70,20 @@ function generateSpecie(attributes, element) {
         "Reptilóide": defense + speed,         // Favorece defesa e velocidade
         "Ave": speed + magic,                  // Favorece velocidade e magia
         "Criatura Mística": magic + life,      // Favorece magia e vida
-        // Anteriormente a Criatura Sombria era favorecida por ataque e magia.
-        // Ajustado para usar defesa e magia conforme solicitado.
         "Criatura Sombria": defense + magic,   // Favorece defesa e magia
         "Monstro": defense + life,             // Favorece defesa e vida
-        "Fera": attack + defense               // Favorece ataque e defesa
+        "Fera": attack + defense,              // Favorece ataque e defesa
+        // Fallback para espécies específicas (Pidgly, Ashfang, etc)
+        "Pidgly": speed + magic,
+        "Ashfang": attack + defense,
+        "Ignis": speed + attack,
+        "Mawthorn": defense + life,
+        "Owlberoth": magic + life,
+        "Digitama": magic + attack,
+        "Kael": speed + defense,
+        "Leoracal": attack + defense,
+        "Drazraq": attack + magic,
+        "Foxyl": speed + magic                 // Elemento ar: velocidade e magia
     };
 
     // Gerar uma pontuação base aleatória pra cada espécie (0 a 10)
@@ -72,16 +95,30 @@ function generateSpecie(attributes, element) {
 
     // Ordenar por pontuação (maior primeiro) e pegar a vencedora
     scores.sort((a, b) => b.score - a.score);
-    console.log('Scores das espécies:', scores); // Debug pra ver as pontuações
+    console.log(`Elemento '${element}' - Espécies disponíveis: ${species.length} - Escolhida: ${scores[0].specie}`);
 
-    return scores[0].specie; // Retorna a espécie com maior pontuação
+    return scores[0].specie; // Retorna a espécie com maior pontuação (sempre retorna algo)
+}
+
+// Função para resetar o quiz
+function resetQuiz() {
+    currentQuestionIndex = 0;
+    stats = { attack: 1, defense: 1, speed: 1, magic: 1, life: 1 };
+    selectedElement = null;
+    document.getElementById('create-pet-container').style.display = 'block';
+    document.getElementById('element-selection').style.display = 'none';
+    document.getElementById('name-selection').style.display = 'none';
+    document.getElementById('no-pet-available').style.display = 'none';
+    document.getElementById('create-pet-button').disabled = false;
+    showQuestion();
 }
 
 // Estado do quiz
 let currentQuestionIndex = 0;
 const selectedQuestions = [];
-const stats = { attack: 1, defense: 1, speed: 1, magic: 1, life: 1 }; // Inicializa com 1
+let stats = { attack: 1, defense: 1, speed: 1, magic: 1, life: 1 }; // Inicializa com 1
 const totalQuestions = 5;
+let selectedElement = null; // Armazenar o elemento escolhido
 
 // Selecionar 5 perguntas aleatoriamente
 function selectRandomQuestions() {
@@ -217,33 +254,45 @@ function showFinalAnimation(newPet) {
 // Exibir a seleção de nome
 function showNameSelection(element) {
     document.getElementById('element-selection').style.display = 'none';
+    
+    // Armazenar o elemento escolhido
+    selectedElement = element;
+    
     document.getElementById('name-selection').style.display = 'block';
+    
+    // Configurar listener do botão criar apenas uma vez
+    const createBtn = document.getElementById('create-pet-button');
+    createBtn.onclick = handleCreatePet;
+}
 
-    document.getElementById('create-pet-button').addEventListener('click', () => {
-        const name = document.getElementById('pet-name').value.trim();
-        if (!name) {
-            alert('Por favor, insira um nome para o pet!');
-            return;
-        }
-        if (name.length > 15) {
-            alert('O nome do pet deve ter no máximo 15 caracteres!');
-            return;
-        }
+// Função para lidar com a criação do pet
+function handleCreatePet() {
+    const name = document.getElementById('pet-name').value.trim();
+    if (!name) {
+        alert('Por favor, insira um nome para o pet!');
+        return;
+    }
+    if (name.length > 15) {
+        alert('O nome do pet deve ter no máximo 15 caracteres!');
+        return;
+    }
 
-        // Desabilitar o botão "Criar" pra evitar cliques múltiplos
-        document.getElementById('create-pet-button').disabled = true;
+    // Desabilitar o botão "Criar" pra evitar cliques múltiplos
+    document.getElementById('create-pet-button').disabled = true;
 
-        // Esconder a seção de nomeação
-        document.getElementById('name-selection').style.display = 'none';
+    // Esconder a seção de nomeação
+    document.getElementById('name-selection').style.display = 'none';
 
-        // Multiplicar a vida por 10
-        stats.life *= 10;
+    // Multiplicar a vida por 10
+    stats.life *= 10;
 
-        // Gerar espécie e raridade
-        const specie = generateSpecie(stats, element);
-        const rarity = generateRarity();
+    // Gerar espécie e raridade usando o elemento armazenado
+    const specie = generateSpecie(stats, selectedElement);
+    const rarity = generateRarity();
+    
+    console.log(`Pet gerado: Espécie=${specie}, Elemento=${selectedElement}, Raridade=${rarity}`);
 
-        // Definir a imagem e demais caminhos de acordo com a espécie
+    // Definir a imagem e demais caminhos de acordo com a espécie
         let race = null;
         let statusImage = null;
         let bioImage = `${name}.png`;
@@ -262,7 +311,7 @@ function showNameSelection(element) {
 
         const petData = {
             name,
-            element,
+            element: selectedElement,
             attributes: stats,
             specie,
             rarity,
@@ -287,26 +336,6 @@ function showNameSelection(element) {
 
         // Enviar o pedido de criação do pet
         window.electronAPI.createPet(petData);
-
-        // Escutar a confirmação de criação e exibir a animação + revelar o pet
-        window.electronAPI.onPetCreated((newPet) => {
-            console.log('Pet criado com sucesso no renderer:', newPet);
-            showFinalAnimation(newPet);
-        });
-
-        // Lidar com erro de criação
-        window.electronAPI.on('create-pet-error', (event, error) => {
-            console.error('Erro ao criar o pet:', error);
-            const match = /Limite de (\d+) pets/.exec(error);
-            if (match) {
-                alert(`Você já possui ${match[1]} pets. Exclua um pet para criar outro.`);
-            } else {
-                alert('Erro ao criar o pet. Tente novamente.');
-            }
-            document.getElementById('create-pet-button').disabled = false;
-            document.getElementById('name-selection').style.display = 'block';
-        });
-    }, { once: true }); // Listener único
 }
 
 function initQuiz() {
@@ -325,6 +354,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         quizContainer.style.display = 'flex';
         loadQuestions();
     });
+    
+    // Registrar listener para quando o pet for criado com sucesso
+    if (window.electronAPI && window.electronAPI.onPetCreated) {
+        window.electronAPI.onPetCreated((newPet) => {
+            console.log('Pet criado com sucesso no renderer:', newPet);
+            showFinalAnimation(newPet);
+        });
+    }
+
+    // Registrar listener para erros de criação
+    if (window.electronAPI && window.electronAPI.on) {
+        window.electronAPI.on('create-pet-error', (event, error) => {
+            console.error('Erro ao criar o pet:', error);
+            const match = /Limite de (\d+) pets/.exec(error);
+            if (match) {
+                alert(`Você já possui ${match[1]} pets. Exclua um pet para criar outro.`);
+            } else {
+                alert('Erro ao criar o pet. Tente novamente.');
+            }
+            document.getElementById('create-pet-button').disabled = false;
+            document.getElementById('name-selection').style.display = 'block';
+        });
+    }
 });
 
 // Permite utilizar a função em testes Node.js

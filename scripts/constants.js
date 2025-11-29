@@ -62,7 +62,8 @@ export const specieData = {
     'Digitama': { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo' },
     'Kael': { dir: 'Fera', race: 'Kael', element: 'agua' },
     'Leoracal': { dir: 'Fera', race: 'Kael', element: 'terra' },
-    'Drazraq': { dir: 'Draconideo', race: 'drazraq', element: 'puro' }
+    'Drazraq': { dir: 'Draconideo', race: 'drazraq', element: 'puro' },
+    'Foxyl': { dir: 'Fera/Foxyl', race: 'foxyl', element: 'ar' }  // Espécie de ar
 };
 
 export const eggSpecieMap = {
@@ -70,7 +71,7 @@ export const eggSpecieMap = {
     eggCriaturaMistica: ['Owlberoth', 'Digitama'],
     eggCriaturaSombria: ['Criatura Sombria'],
     eggDraconideo: ['Draconídeo', 'Drazraq'],
-    eggFera: ['Ashfang', 'Kael', 'Leoracal'],
+    eggFera: ['Ashfang', 'Kael', 'Leoracal', 'Foxyl'],
     eggMonstro: ['Mawthorn'],
     eggReptiloide: ['Reptilóide']
 };

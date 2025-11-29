@@ -53,6 +53,11 @@ let exitPos = null;
 let playerHealth = 0;
 let playerMaxHealth = 0;
 let difficulty = 1;
+let pet = null;
+
+function getJourneyKey(base) {
+    return pet && pet.petId ? `${base}_${pet.petId}` : base;
+}
 
 if (window.electronAPI?.getDifficulty) {
     window.electronAPI.getDifficulty().then(val => {
@@ -366,6 +371,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     document.getElementById('close-lair-mode')?.addEventListener('click',()=>window.close());
     document.getElementById('back-lair-mode')?.addEventListener('click',()=>{window.electronAPI.send('open-battle-mode-window');window.close();});
+    
+    // Handler para o botão OK do overlay de derrota
+    document.getElementById('defeat-ok-btn')?.addEventListener('click',()=>{
+        document.getElementById('defeat-overlay').style.display = 'none';
+        window.close();
+    });
 
     const titleBar=document.getElementById('title-bar');
     const rect=container.getBoundingClientRect();
@@ -376,6 +387,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 window.electronAPI.on('pet-data',(e,data)=>{
     if(!data) return;
+    pet = data; // Armazenar o pet globalmente
     moves=data.bravura||10;
     playerHealth = data.currentHealth ?? playerHealth;
     playerMaxHealth = data.maxHealth ?? playerMaxHealth;
@@ -387,5 +399,17 @@ window.electronAPI.on('pet-data',(e,data)=>{
     if(moves<=0){
         alert('Lhe falta bravura para prosseguir');
         window.close();
+    }
+    
+    // Verificar se o pet perdeu a última batalha
+    const battleWon = localStorage.getItem(getJourneyKey('journeyBattleWin'));
+    if (battleWon === '0') {
+        // Mostrar overlay de derrota
+        const overlay = document.getElementById('defeat-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+        }
+        // Limpar o flag
+        localStorage.removeItem(getJourneyKey('journeyBattleWin'));
     }
 });

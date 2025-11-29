@@ -99,7 +99,7 @@ function startPetUpdater(getCurrentPet) {
             }
 
             const elapsedKadirSeconds = Math.floor((now - lastKadirUpdate) / 1000);
-            if (currentPet.happiness >= 80 && elapsedKadirSeconds >= 1200) { // 20 minutos
+            if (currentPet.happiness >= 80 && elapsedKadirSeconds >= 600) { // 10 minutos
                 currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 1;
                 console.log(`Ganho de Kadir Point por felicidade! Total: ${currentPet.kadirPoints}`);
 

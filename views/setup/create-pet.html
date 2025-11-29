@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
     <title>Kadir11 - Criar Pet</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../../styles/main.css">
     <style>
         html {
             width: 100%;
@@ -63,6 +63,28 @@
             width: 200px;
             padding: 10px;
             font-size: 16px;
+        }
+        
+        #no-pet-available {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            max-width: 500px;
+        }
+        
+        #no-pet-available h2 {
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-size: 20px;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        #retry-quiz-button {
+            padding: 12px 30px;
+            font-size: 18px;
         }
 
         .create-pet-container .element-selection {
@@ -144,23 +166,23 @@
                 <h2>Escolha um Elemento</h2>
                 <div class="element-selection">
                     <button class="element-button" data-element="fogo">
-                        <img src="Assets/Elements/fogo.png" alt="Fogo" style="image-rendering: pixelated;">
+                        <img src="../../Assets/Elements/fogo.png" alt="Fogo" style="image-rendering: pixelated;">
                         <span class="element-label"></span>
                     </button>
                     <button class="element-button" data-element="ar">
-                        <img src="Assets/Elements/ar.png" alt="Ar" style="image-rendering: pixelated;">
+                        <img src="../../Assets/Elements/ar.png" alt="Ar" style="image-rendering: pixelated;">
                         <span class="element-label"></span>
                     </button>
                     <button class="element-button" data-element="terra">
-                        <img src="Assets/Elements/terra.png" alt="Terra" style="image-rendering: pixelated;">
+                        <img src="../../Assets/Elements/terra.png" alt="Terra" style="image-rendering: pixelated;">
                         <span class="element-label"></span>
                     </button>
                     <button class="element-button" data-element="agua">
-                        <img src="Assets/Elements/agua.png" alt="Água" style="image-rendering: pixelated;">
+                        <img src="../../Assets/Elements/agua.png" alt="Água" style="image-rendering: pixelated;">
                         <span class="element-label"></span>
                     </button>
                     <button class="element-button" data-element="puro">
-                        <img src="Assets/Elements/puro.png" alt="Puro" style="image-rendering: pixelated;">
+                        <img src="../../Assets/Elements/puro.png" alt="Puro" style="image-rendering: pixelated;">
                         <span class="element-label"></span>
                     </button>
                 </div>
@@ -170,12 +192,16 @@
                 <input type="text" id="pet-name" placeholder="Nome do pet (máx. 15 caracteres)" maxlength="15" />
                 <button class="button" id="create-pet-button">Criar</button>
             </div>
+            <div id="no-pet-available" style="display: none;">
+                <h2>Você ainda não tem o que é necessário para construir um vínculo de kadir</h2>
+                <button class="button" id="retry-quiz-button">Refazer</button>
+            </div>
             <!-- Animação final (egg_hatch.mp4) -->
             <div id="final-animation"
                 style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10; justify-content: center; align-items: center;">
-                <video id="final-animation-video" src="Assets/Mons/evolution.mp4" autoplay muted playsinline
+                <video id="final-animation-video" src="../../Assets/Mons/evolution.mp4" autoplay muted playsinline
                     style="width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.5s ease-in;"></video>
-                <img id="final-animation-gif" src="Assets/Mons/evolution.gif"
+                <img id="final-animation-gif" src="../../Assets/Mons/evolution.gif"
                     style="display:none;width: 100%; height: 100%; object-fit: contain;" />
             </div>
 
@@ -191,7 +217,7 @@
         </div>
     </div>
 
-    <script src="scripts/create-pet.js"></script>
+    <script src="../../scripts/create-pet.js"></script>
 </body>
 
 </html>

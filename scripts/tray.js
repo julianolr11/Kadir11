@@ -345,9 +345,9 @@ document.querySelectorAll('.menu-item').forEach(item => {
         } else if (action === 'train-pet') {
             console.log('Treinar Pet');
             window.electronAPI.send('open-train-menu-window');
-        } else if (action === 'care-pet') {
-            console.log('Cuidar do Pet');
-            window.electronAPI.send('care-pet');
+        } else if (action === 'gift-pet') {
+            console.log('Abrir Presentes');
+            window.electronAPI.send('open-gift-window');
         } else if (action === 'battle-pet') {
             // Verificar se o pet tem golpes
             const moves = petData.knownMoves || petData.moves || [];

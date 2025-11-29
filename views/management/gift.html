@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+    <title>Kadir11 - Presentes</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <style>
+        html, body { width:100%; height:100%; margin:0; padding:0; background:transparent; }
+        .window {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: 0;
+            margin: 0;
+        }
+        /* Título configurado em styles/main.css */
+        #close-gift-window {
+            width: 20px;
+            height: 20px;
+            background-color: #ff4444;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #813a3a;
+            font-family: cursive;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: none;
+        }
+        /* title-bar-buttons configurado em styles/main.css */
+        #back-gift-window {
+            width: 20px;
+            height: 20px;
+            background-color: #44aaff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2a435b;
+            font-family: cursive;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: none;
+        }
+
+        #gift-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #gift-input {
+            width: 80%;
+            max-width: 300px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #fff;
+            background-color: #2a323e;
+            color: #fff;
+            font-family: 'PixelOperator', sans-serif;
+            font-size: 16px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        #gift-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+        }
+
+        #gift-alert {
+            display: none;
+            color: #ff4444;
+            font-family: 'PixelOperator', sans-serif;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 5px;
+            border: 1px solid #ff4444;
+        }
+
+        #gift-history {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 10px;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        #gift-history h3 {
+            color: #fff;
+            font-family: 'PixelOperator', sans-serif;
+            font-size: 16px;
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .history-container {
+            background: rgba(58, 68, 80, 0.9);
+            border: 2px solid #4a5868;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .history-container:hover {
+            border-color: #6a7888;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .history-container.open {
+            border-color: #4a9eff;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .history-header:hover {
+            background: rgba(68, 78, 90, 0.6);
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        .history-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .history-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .history-date {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .accordion-arrow {
+            font-size: 14px;
+            color: #4a9eff;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .history-container.open .accordion-arrow {
+            transform: rotate(180deg);
+        }
+
+        .history-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+            background: rgba(42, 50, 62, 0.9);
+            padding: 0 12px;
+            font-size: 13px;
+            color: #e0e0e0;
+            opacity: 0;
+        }
+
+        .history-container.open .history-content {
+            max-height: 200px;
+            padding: 14px 16px;
+            border-top: 1px solid rgba(74, 158, 255, 0.3);
+            opacity: 1;
+        }
+
+        .history-content p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Modal Styles */
+        #reward-modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #reward-content {
+            background-color: #2a323e;
+            border: 2px solid #ffffff;
+            border-radius: 7px;
+            padding: 20px;
+            text-align: center;
+            font-family: 'PixelOperator', sans-serif;
+            color: #fff;
+            max-width: 80%;
+        }
+
+        #reward-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #reward-description {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="window">
+        <div id="title-bar">
+            <div id="title-bar-content"><span>Presentes</span></div>
+            <div id="title-bar-buttons">
+                <div id="back-gift-window">←</div>
+                <div id="close-gift-window">X</div>
+            </div>
+        </div>
+        <div id="gift-content">
+            <label for="gift-input" style="color: #fff; font-family: 'PixelOperator', sans-serif;">Digite o código do
+                presente:</label>
+            <input type="text" id="gift-input" placeholder="Código">
+            <button class="button" id="redeem-button">Resgatar</button>
+            <div id="gift-alert"></div>
+        </div>
+        
+        <div id="gift-history">
+            <h3>Histórico de Presentes</h3>
+            <div id="history-list" class="scroll-container"></div>
+        </div>
+
+        <div id="reward-modal">
+            <div id="reward-content">
+                <div id="reward-title">Parabéns!</div>
+                <div id="reward-description">Você adquiriu [Recompensa]</div>
+                <button class="button small-button" id="close-reward-modal">Ok</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="../../scripts/gift.js"></script>
+</body>
+
+</html>
