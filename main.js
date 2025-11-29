@@ -8,6 +8,9 @@ const { registerMovesHandlers } = require('./scripts/handlers/movesHandlers');
 const { registerSettingsHandlers } = require('./scripts/handlers/settingsHandlers');
 const { registerAssetsHandlers } = require('./scripts/handlers/assetsHandlers');
 const { registerLifecycleHandlers } = require('./scripts/handlers/lifecycleHandlers');
+const { setupWindowPositioningHandlers } = require('./scripts/handlers/windowPositioningHandlers');
+const { setupNestHandlers } = require('./scripts/handlers/nestHandlers');
+const { setupBattleMechanicsHandlers } = require('./scripts/handlers/battleMechanicsHandlers');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const fs = require('fs');
@@ -468,6 +471,38 @@ app.whenReady().then(() => {
     // Expor resetTimers globalmente para uso ao selecionar pet
     global.resetTimers = resetTimers;
 
+    // Registrar window positioning handlers (itens-pet, store-pet, resize-*)
+    setupWindowPositioningHandlers({
+        createItemsWindow,
+        createStoreWindow,
+        getStoreWindow: () => storeWindow,
+        getItemsWindow: () => itemsWindow,
+        getCurrentPet: () => currentPet,
+        getCoins,
+        getItems
+    });
+
+    // Registrar nest handlers (place-egg-in-nest, hatch-egg)
+    setupNestHandlers({
+        getCurrentPet: () => currentPet,
+        getItems,
+        setItems,
+        getNestCount,
+        getNestsData,
+        setNestsData,
+        generateRarity,
+        generatePetFromEgg,
+        petManager,
+        broadcastPenUpdate,
+        getHatchWindow: () => hatchWindow
+    });
+
+    // Registrar battle mechanics handlers (use-move, use-bravura)
+    setupBattleMechanicsHandlers({
+        getCurrentPet: () => currentPet,
+        petManager
+    });
+
     app.on('activate', () => {
         if (windowManager.getStartWindow() === null) {
             windowManager.createStartWindow();
@@ -498,78 +533,9 @@ ipcMain.handle('get-current-pet', async () => {
 
 // (movido para gameHandlers) ipcMain.on('train-pet' ... )
 
-ipcMain.on('itens-pet', (event, options) => {
-    if (currentPet) {
-        console.log('Abrindo janela de itens para:', currentPet.name);
-        const win = createItemsWindow();
-        if (win) {
-            win.webContents.on('did-finish-load', () => {
-                currentPet.coins = getCoins();
-                currentPet.items = getItems();
-                win.webContents.send('pet-data', currentPet);
-            });
+// (movido para windowPositioningHandlers) ipcMain.on('itens-pet' ... )
 
-            // Se os itens foram abertos a partir da janela de loja, alinhar as janelas
-            if (options && options.fromStore && storeWindow) {
-                try {
-                    const display = screen.getPrimaryDisplay();
-                    const screenWidth = display.workAreaSize.width;
-                    const screenHeight = display.workAreaSize.height;
-                    const storeBounds = storeWindow.getBounds();
-                    const itemsBounds = win.getBounds();
-                    const totalWidth = storeBounds.width + itemsBounds.width;
-                    const maxHeight = Math.max(storeBounds.height, itemsBounds.height);
-
-                    const startX = Math.round((screenWidth - totalWidth) / 2);
-                    const startY = Math.round((screenHeight - maxHeight) / 2);
-
-                    win.setPosition(startX, startY);
-                    storeWindow.setPosition(startX + itemsBounds.width, startY);
-                } catch (err) {
-                    console.error('Erro ao posicionar janelas:', err);
-                }
-            }
-        }
-    } else {
-        console.error('Nenhum pet selecionado para abrir itens');
-    }
-});
-
-ipcMain.on('store-pet', (event, options) => {
-    if (currentPet) {
-        console.log('Abrindo janela de loja para:', currentPet.name);
-        const win = createStoreWindow();
-        if (win) {
-            win.webContents.on('did-finish-load', () => {
-                currentPet.items = getItems();
-                win.webContents.send('pet-data', currentPet);
-            });
-
-            // Se a loja foi aberta a partir da janela de itens, alinhar as janelas
-            if (options && options.fromItems && itemsWindow) {
-                try {
-                    const display = screen.getPrimaryDisplay();
-                    const screenWidth = display.workAreaSize.width;
-                    const screenHeight = display.workAreaSize.height;
-                    const itemsBounds = itemsWindow.getBounds();
-                    const storeBounds = win.getBounds();
-                    const totalWidth = itemsBounds.width + storeBounds.width;
-                    const maxHeight = Math.max(itemsBounds.height, storeBounds.height);
-
-                    const startX = Math.round((screenWidth - totalWidth) / 2);
-                    const startY = Math.round((screenHeight - maxHeight) / 2);
-
-                    itemsWindow.setPosition(startX, startY);
-                    win.setPosition(startX + itemsBounds.width, startY);
-                } catch (err) {
-                    console.error('Erro ao posicionar janelas:', err);
-                }
-            }
-        }
-    } else {
-        console.error('Nenhum pet selecionado para abrir loja');
-    }
-});
+// (movido para windowPositioningHandlers) ipcMain.on('store-pet' ... )
 
 // (movido para gameHandlers) ipcMain.on('battle-pet' ... )
 
@@ -1139,24 +1105,11 @@ ipcMain.on('open-journey-scene-window', async (event, data) => {
     });
 });
 
-ipcMain.on('resize-journey-window', (event, size) => {
-    if (journeyModeWindow && size && size.width && size.height) {
-        journeyModeWindow.setSize(Math.round(size.width), Math.round(size.height));
-    }
-});
+// (movido para windowPositioningHandlers) ipcMain.on('resize-journey-window' ... )
 
-ipcMain.on('resize-pen-window', (event, size) => {
-    if (windowManager.penWindow && size && size.width && size.height) {
-        windowManager.penWindow.setSize(Math.round(size.width), Math.round(size.height));
-        updateNestsPosition();
-    }
-});
+// (movido para windowPositioningHandlers) ipcMain.on('resize-pen-window' ... )
 
-ipcMain.on('resize-lair-window', (event, size) => {
-    if (lairModeWindow && size && size.width && size.height) {
-        lairModeWindow.setSize(Math.round(size.width), Math.round(size.height));
-    }
-});
+// (movido para windowPositioningHandlers) ipcMain.on('resize-lair-window' ... )
 
 // (movido para gameHandlers) ipcMain.on('open-train-menu-window' ... )
 
@@ -1232,81 +1185,13 @@ ipcMain.on('buy-item', async (event, item) => {
 
 // (movido para storeHandlers) ipcMain.on('unequip-item' ... )
 
-ipcMain.on('place-egg-in-nest', async (event, eggId) => {
-    if (!currentPet) return;
-    const items = getItems();
-    if (!items[eggId] || items[eggId] <= 0) return;
-    const nestCount = getNestCount();
-    let nests = getNestsData();
-    if (nests.length >= nestCount) return;
-    items[eggId] -= 1;
-    setItems(items);
-    currentPet.items = items;
-    nests.push({ eggId, start: Date.now(), rarity: generateRarity() });
-    setNestsData(nests);
-    BrowserWindow.getAllWindows().forEach(w => {
-        if (w.webContents) w.webContents.send('pet-data', currentPet);
-        if (w.webContents) w.webContents.send('nests-data-updated', nests);
-    });
-});
+// (movido para nestHandlers) ipcMain.on('place-egg-in-nest' ... )
 
-ipcMain.on('hatch-egg', async (event, index) => {
-    const nests = getNestsData();
-    const egg = nests[index];
-    if (!egg) return;
-    nests.splice(index, 1);
-    setNestsData(nests);
-    try {
-        const petData = generatePetFromEgg(egg.eggId, egg.rarity);
-        const newPet = await petManager.createPet(petData);
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('nests-data-updated', nests);
-            if (w !== hatchWindow && w.webContents) {
-                w.webContents.send('pet-created', newPet);
-            }
-        });
-        if (hatchWindow && hatchWindow.webContents) {
-            const sendPet = () => hatchWindow.webContents.send('pet-created', newPet);
-            if (hatchWindow.webContents.isLoading()) {
-                hatchWindow.webContents.once('did-finish-load', sendPet);
-            } else {
-                sendPet();
-            }
-        }
-        broadcastPenUpdate();
-    } catch (err) {
-        console.error('Erro ao chocar ovo:', err);
-    }
-});
+// (movido para nestHandlers) ipcMain.on('hatch-egg' ... )
 
-ipcMain.on('use-move', async (event, move) => {
-    if (!currentPet || !move) return;
-    const cost = move.cost || 0;
-    currentPet.energy = Math.max((currentPet.energy || 0) - cost, 0);
+// (movido para battleMechanicsHandlers) ipcMain.on('use-move' ... )
 
-    try {
-        await petManager.updatePet(currentPet.petId, {
-            energy: currentPet.energy
-        });
-        BrowserWindow.getAllWindows().forEach(w => {
-            if (w.webContents) w.webContents.send('pet-data', currentPet);
-        });
-    } catch (err) {
-        console.error('Erro ao aplicar custo do movimento:', err);
-    }
-});
-
-ipcMain.on('use-bravura', async (event, amount) => {
-    if (!currentPet) return;
-    const cost = amount || 1;
-    currentPet.bravura = Math.max((currentPet.bravura || 0) - cost, 0);
-    try {
-        await petManager.updatePet(currentPet.petId, { bravura: currentPet.bravura });
-        BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
-    } catch (err) {
-        console.error('Erro ao atualizar bravura:', err);
-    }
-});
+// (movido para battleMechanicsHandlers) ipcMain.on('use-bravura' ... )
 
 ipcMain.on('update-health', async (event, newHealth) => {
     if (!currentPet) return;
