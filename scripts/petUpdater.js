@@ -4,11 +4,14 @@ const petManager = require('./petManager');
 let lastRecovery = Date.now();
 let lastHungerUpdate = Date.now();
 let lastHappinessUpdate = Date.now();
+let lastKadirUpdate = Date.now();
 
 function resetTimers() {
     lastRecovery = Date.now();
     lastHungerUpdate = Date.now();
+    lastHungerUpdate = Date.now();
     lastHappinessUpdate = Date.now();
+    lastKadirUpdate = Date.now();
 }
 
 function startPetUpdater(getCurrentPet) {
@@ -87,6 +90,28 @@ function startPetUpdater(getCurrentPet) {
                 }
 
                 lastRecovery = now;
+
+                BrowserWindow.getAllWindows().forEach(window => {
+                    if (window.webContents) {
+                        window.webContents.send('pet-data', currentPet);
+                    }
+                });
+            }
+
+            const elapsedKadirSeconds = Math.floor((now - lastKadirUpdate) / 1000);
+            if (currentPet.happiness >= 80 && elapsedKadirSeconds >= 1200) { // 20 minutos
+                currentPet.kadirPoints = (currentPet.kadirPoints || 0) + 1;
+                console.log(`Ganho de Kadir Point por felicidade! Total: ${currentPet.kadirPoints}`);
+
+                try {
+                    await petManager.updatePet(currentPet.petId, {
+                        kadirPoints: currentPet.kadirPoints
+                    });
+                } catch (err) {
+                    console.error('Erro ao atualizar Kadir Points:', err);
+                }
+
+                lastKadirUpdate = now;
 
                 BrowserWindow.getAllWindows().forEach(window => {
                     if (window.webContents) {

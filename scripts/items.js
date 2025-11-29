@@ -97,6 +97,21 @@ function updateItems() {
     const listEl = document.getElementById('items-list');
     if (!listEl) return;
     listEl.innerHTML = '';
+
+    // Verificar se há itens disponíveis
+    const hasItems = Object.keys(items).some(id => items[id] > 0);
+
+    if (!hasItems) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.padding = '20px';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.color = '#888';
+        emptyMsg.style.fontFamily = 'PixelOperator, sans-serif';
+        emptyMsg.textContent = 'Sem itens disponíveis';
+        listEl.appendChild(emptyMsg);
+        return;
+    }
+
     Object.keys(items).forEach(id => {
         const qty = items[id];
         const info = itemsInfo[id];

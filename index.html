@@ -295,9 +295,11 @@
             0% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0;
             }
+
             100% {
                 opacity: 1;
             }
@@ -316,8 +318,15 @@
         }
 
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
         }
 
         /* Espaçamento vertical (será ajustado pelo JS) */
@@ -331,17 +340,16 @@
             display: none;
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            left: 33%;
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
             z-index: 20;
             font-family: 'PixelOperator', sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
-            max-width: 200px;
+            width: inherit;
             line-height: 1.2;
         }
 
@@ -400,7 +408,8 @@
                 <div class="pet-level" id="level-display">Lvl 5</div>
             </div>
             <div class="hamburger-menu">
-                <img class="hamburger-icon" src="Assets/Icons/Hamburger_icon.svg.png" alt="Menu" style="image-rendering: pixelated;" />
+                <img class="hamburger-icon" src="Assets/Icons/Hamburger_icon.svg.png" alt="Menu"
+                    style="image-rendering: pixelated;" />
                 <div class="menu-dropdown">
                     <div class="menu-item" data-action="open-status">Status</div>
                     <div class="menu-item" data-action="care-pet">Cuidar</div>
@@ -413,8 +422,10 @@
                 </div>
             </div>
             <!-- Imagens de alerta -->
-            <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png" alt="Fome baixa" style="image-rendering: pixelated;">
-            <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png" alt="Felicidade baixa" style="image-rendering: pixelated;">
+            <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png" alt="Fome baixa"
+                style="image-rendering: pixelated;">
+            <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png" alt="Felicidade baixa"
+                style="image-rendering: pixelated;">
             <div id="item-found-bubble" class="item-bubble">
                 <img id="item-found-img" src="" alt="Item" />
             </div>

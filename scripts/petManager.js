@@ -152,18 +152,18 @@ async function listPets() {
                 try {
                     const data = await fs.readFile(filePath, 'utf8');
                     const pet = JSON.parse(data);
-                   if (pet.kadirPoints === undefined) {
-                       pet.kadirPoints = 10;
-                   }
-                   if (pet.bravura === undefined) {
-                       pet.bravura = 10;
-                   }
-                   if (pet.items === undefined) {
-                       pet.items = {};
-                   }
-                   if (pet.statusEffects === undefined) {
-                       pet.statusEffects = [];
-                   }
+                    if (pet.kadirPoints === undefined) {
+                        pet.kadirPoints = 10;
+                    }
+                    if (pet.bravura === undefined) {
+                        pet.bravura = 10;
+                    }
+                    if (pet.items === undefined) {
+                        pet.items = {};
+                    }
+                    if (pet.statusEffects === undefined) {
+                        pet.statusEffects = [];
+                    }
                     if (pet.equippedItem === undefined) {
                         pet.equippedItem = null;
                     }
@@ -207,12 +207,12 @@ async function loadPet(petId) {
         if (pet.bravura === undefined) {
             pet.bravura = 10;
         }
-       if (pet.items === undefined) {
-           pet.items = {};
-       }
-       if (pet.statusEffects === undefined) {
-           pet.statusEffects = [];
-       }
+        if (pet.items === undefined) {
+            pet.items = {};
+        }
+        if (pet.statusEffects === undefined) {
+            pet.statusEffects = [];
+        }
         if (pet.equippedItem === undefined) {
             pet.equippedItem = null;
         }
@@ -236,21 +236,41 @@ async function loadPet(petId) {
     }
 }
 
+const locks = {};
+
+async function withLock(petId, fn) {
+    if (!locks[petId]) {
+        locks[petId] = Promise.resolve();
+    }
+    const currentLock = locks[petId];
+    const nextLock = currentLock.then(async () => {
+        try {
+            return await fn();
+        } catch (err) {
+            throw err;
+        }
+    });
+    locks[petId] = nextLock.catch(() => { });
+    return nextLock;
+}
+
 // Função para atualizar um pet
 async function updatePet(petId, updates) {
-    const petFileName = `pet_${petId}.json`;
-    const petFilePath = path.join(petsDir, petFileName);
+    return withLock(petId, async () => {
+        const petFileName = `pet_${petId}.json`;
+        const petFilePath = path.join(petsDir, petFileName);
 
-    try {
-        const data = await fs.readFile(petFilePath, 'utf8');
-        const pet = JSON.parse(data);
-        const updatedPet = { ...pet, ...updates, fileName: petFileName };
-        await fs.writeFile(petFilePath, JSON.stringify(updatedPet, null, 2), 'utf8');
-        return updatedPet;
-    } catch (err) {
-        console.error(`Erro ao atualizar pet ${petId}:`, err);
-        throw err;
-    }
+        try {
+            const data = await fs.readFile(petFilePath, 'utf8');
+            const pet = JSON.parse(data);
+            const updatedPet = { ...pet, ...updates, fileName: petFileName };
+            await fs.writeFile(petFilePath, JSON.stringify(updatedPet, null, 2), 'utf8');
+            return updatedPet;
+        } catch (err) {
+            console.error(`Erro ao atualizar pet ${petId}:`, err);
+            throw err;
+        }
+    });
 }
 
 // Função para deletar um pet

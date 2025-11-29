@@ -1,6 +1,5 @@
 console.log('journey-scene.js carregado');
 import { getElementMultiplier } from './elements.js';
-import { calculateXpGain } from './petExperience.js';
 
 function closeWindow() {
     window.close();
@@ -46,6 +45,7 @@ let playerStatusEffects = [];
 let playerHealth = 100;
 let playerMaxHealth = 100;
 let enemyHealth = 100;
+let enemyMaxHealth = 100;
 let enemyEnergy = 100;
 let enemyAttributes = { attack: 5, defense: 5, magic: 5, speed: 5 };
 let currentTurn = 'player';
@@ -230,7 +230,7 @@ function updateHealthBars() {
     }
     const enemyFill = document.getElementById('enemy-health-fill');
     if (enemyFill) {
-        const percent = (enemyHealth / 100) * 100;
+        const percent = (enemyHealth / enemyMaxHealth) * 100;
         enemyFill.style.width = `${percent}%`;
     }
     const playerEnergy = pet ? (pet.energy || 0) : 0;
@@ -265,6 +265,11 @@ function initializeBattle() {
     if (battleInitialized || !pet) return;
     battleInitialized = true;
     const lvl = pet.level || 1;
+    
+    // Scale enemy health with level
+    enemyMaxHealth = 20 + lvl * 10;
+    enemyHealth = enemyMaxHealth;
+
     enemyAttributes = {
         attack: lvl * 2,
         defense: lvl,
@@ -454,7 +459,22 @@ function enemyAction() {
             return;
         }
 
-        const base = 8 + enemyAttributes.attack;
+        // Simulate enemy moves
+        const roll = Math.random();
+        let movePower = 10; // Normal attack
+        let moveName = "Ataque Normal";
+        
+        if (roll < 0.2) {
+            movePower = 5;
+            moveName = "Ataque Rápido";
+            showMessage(`Inimigo usou ${moveName}!`);
+        } else if (roll > 0.8) {
+            movePower = 15;
+            moveName = "Ataque Poderoso";
+            showMessage(`Inimigo usou ${moveName}!`);
+        }
+
+        const base = movePower + enemyAttributes.attack * 0.5;
         const mult = getElementMultiplier(enemyElement, pet.element || 'puro');
         const defStat = pet.attributes?.defense || 0;
         const scaled = base * mult * difficulty * (100 / (100 + defStat));

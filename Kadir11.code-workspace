@@ -1,25 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "Kadir11"
-		},
-		{
-			"path": "Assets"
-		},
-		{
-			"path": "backups"
-		},
-		{
-			"path": "node_modules"
-		},
-		{
-			"path": "pets"
-		},
-		{
-			"path": "scripts"
-		},
-		{
-			"path": "styles"
+			"path": "."
 		}
 	],
 	"settings": {}
