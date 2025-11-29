@@ -19,7 +19,7 @@ export const rarityColors = {
 // Mapeia o nome da espécie para o nome da pasta correspondente em Assets/Mons
 export const specieDirs = {
     'Draconídeo': 'Draconideo',
-    'Reptilóide': 'Reptiloide',
+    'Reptiloide': 'Reptiloide',
     'Pidgly': 'Ave',
     'Ashfang': 'Fera',
     'Ignis': 'Ave',
@@ -36,7 +36,7 @@ export const specieDirs = {
 // específica.
 export const specieBioImages = {
     'Draconídeo': 'Draconideo/draconideo.png',
-    'Reptilóide': 'Reptiloide/puro/viborom/reptiloide.png',
+    'Reptiloide': 'Reptiloide/puro/viborom/reptiloide.png',
     'Ave': 'Ave/ave.png',
     'Criatura Mística': 'CriaturaMistica/CriaturaMistica.png',
     'Criatura Sombria': 'CriaturaSombria/criaturasombria.png',
@@ -53,7 +53,7 @@ export let specieImages = {};
 
 export const specieData = {
     'Draconídeo': { dir: 'Draconideo', race: 'draak', element: 'puro' },
-    'Reptilóide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
+    'Reptiloide': { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
     'Pidgly': { dir: 'Ave', race: 'Pidgly', element: 'terra' },
     'Ashfang': { dir: 'Fera', race: 'Ashfang', element: 'fogo' },
     'Ignis': { dir: 'Ave', race: 'ignis', element: 'fogo' },
@@ -73,7 +73,7 @@ export const eggSpecieMap = {
     eggDraconideo: ['Draconídeo', 'Drazraq'],
     eggFera: ['Ashfang', 'Kael', 'Leoracal', 'Foxyl'],
     eggMonstro: ['Mawthorn'],
-    eggReptiloide: ['Reptilóide']
+    eggReptiloide: ['Reptiloide']
 };
 
 let specieLoaded = false;

@@ -1864,7 +1864,7 @@ ipcMain.on('journey-complete', async () => {
         'Drazraq': 'eggDraconideo',
         'Fera': 'eggFera',
         'Monstro': 'eggMonstro',
-        'Reptilóide': 'eggReptiloide'
+        'Reptiloide': 'eggReptiloide'
     };
     const eggId = specieEggMap[currentPet.specie] || 'eggAve';
     const items = getItems();
