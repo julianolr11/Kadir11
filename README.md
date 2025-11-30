@@ -1,5 +1,11 @@
 # Kadir11
 
+[![CI](https://github.com/julianolr11/Kadir11/actions/workflows/test.yml/badge.svg)](https://github.com/julianolr11/Kadir11/actions/workflows/test.yml)
+![Coverage Statements](https://img.shields.io/badge/statements-99.7%25-brightgreen)
+![Coverage Branches](https://img.shields.io/badge/branches-87.42%25-yellow)
+![Coverage Lines](https://img.shields.io/badge/lines-100%25-brightgreen)
+![Coverage Functions](https://img.shields.io/badge/functions-99.04%25-brightgreen)
+
 Kadir11 é um jogo estilo Tamagotchi escrito em [Electron](https://electronjs.org/).
 
 ## Instalação

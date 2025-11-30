@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run coverage
+        run: npm run coverage
+
+      - name: Enforce branch coverage >= 85%
+        run: |
+          node -e "const s=require('./coverage/coverage-summary.json');const b=s.total.branches.pct; if(b<85){console.error(`Branch coverage gate failed: ${b}% < 85%`);process.exit(1)} else {console.log(`Branch coverage OK: ${b}% >= 85%`) }"
+        if: always()
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov-report
+
+      - name: Summary
+        run: |
+          echo "### Test & Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Branches >=85% gate aplicado" >> $GITHUB_STEP_SUMMARY
+          node -e "const s=require('./coverage/coverage-summary.json');console.log(`Statements: ${s.total.lines.pct}%\nBranches: ${s.total.branches.pct}%\nFunctions: ${s.total.functions.pct}%\nLines: ${s.total.lines.pct}%`)" >> $GITHUB_STEP_SUMMARY
