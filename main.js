@@ -14,25 +14,21 @@ const { setupBattleMechanicsHandlers } = require('./scripts/handlers/battleMecha
 const { resolveIdleGif, getRandomEnemyIdle, extractElementFromPath } = require('./scripts/utils/idleAssets');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
-const fs = require('fs');
-const path = require('path');
+const { createStoreState } = require('./scripts/state/storeState');
+const { initSpecies, generatePetFromEgg, generateRarity, getSpeciesData } = require('./scripts/logic/petGeneration');
 
-// Importar o electron-store no processo principal
+// Bootstrap do electron-store isolado
 let Store;
 try {
-    console.log('Tentando carregar o electron-store no main.js');
+    console.log('Inicializando electron-store (bootstrap)');
     Store = require('electron-store');
-    console.log('electron-store carregado com sucesso:', typeof Store);
-    if (typeof Store !== 'function') {
-        throw new Error('electron-store não é uma função construtora');
-    }
+    if (typeof Store !== 'function') throw new Error('electron-store inválido');
 } catch (err) {
-    console.error('Erro ao carregar electron-store no main.js:', err.message);
-    console.error('Stack do erro:', err.stack);
-    throw err; // Re-throw pra ver o erro completo
+    console.error('Falha ao inicializar electron-store:', err);
+    throw err;
 }
-
 const store = new Store();
+const state = createStoreState(store);
 
 let currentPet = null;
 let lastUpdate = Date.now();
@@ -58,150 +54,25 @@ function updateNestsPosition() {
     }
 }
 
-function getCoins() {
-    return store.get('coins', 20);
-}
+// Proxy para funções de estado (mantém assinatura para handlers existentes)
+const {
+  getCoins,
+  setCoins,
+  getItems,
+  setItems,
+  getDifficulty,
+  setDifficulty,
+  getPenInfo,
+  broadcastPenUpdate,
+  getNestCount,
+  getNestPrice,
+  getNestsData,
+  setNestsData,
+  broadcastNestUpdate
+} = state;
 
-function setCoins(value) {
-    store.set('coins', value);
-}
-
-function getItems() {
-    return store.get('items', {});
-}
-
-function setItems(value) {
-    store.set('items', value);
-}
-
-function getDifficulty() {
-    return store.get('difficulty', 1);
-}
-
-function setDifficulty(value) {
-    store.set('difficulty', value);
-}
-
-const penLimits = { small: 3, medium: 6, large: 10 };
-
-function getPenInfo() {
-    const size = store.get('penSize', 'small');
-    return { size, maxPets: penLimits[size] || 3 };
-}
-
-function broadcastPenUpdate() {
-    const info = getPenInfo();
-    BrowserWindow.getAllWindows().forEach(w => {
-        if (w.webContents) w.webContents.send('pen-updated', info);
-    });
-}
-
-function getNestCount() {
-    return store.get('nestCount', 0);
-}
-
-function getNestPrice() {
-    return 50 * Math.pow(2, getNestCount());
-}
-
-function getNestsData() {
-    return store.get('nestsData', []);
-}
-
-function setNestsData(data) {
-    store.set('nestsData', data);
-}
-
-function broadcastNestUpdate() {
-    const count = getNestCount();
-    BrowserWindow.getAllWindows().forEach(w => {
-        if (w.webContents) w.webContents.send('nest-updated', count);
-    });
-}
-
-function generateRarity() {
-    const roll = Math.floor(Math.random() * 100);
-    if (roll < 40) return 'Comum';
-    if (roll < 70) return 'Incomum';
-    if (roll < 85) return 'Raro';
-    if (roll < 95) return 'MuitoRaro';
-    if (roll < 99) return 'Epico';
-    return 'Lendario';
-}
-let eggSpecieMap = {};
-let specieData = {};
-let specieImages = {};
-let specieBioImages = {};
-let loadSpeciesData;
-(async () => {
-    const constants = await import('./scripts/constants.mjs');
-    eggSpecieMap = constants.eggSpecieMap;
-    specieData = constants.specieData;
-    specieImages = constants.specieImages;
-    specieBioImages = constants.specieBioImages;
-    loadSpeciesData = constants.loadSpeciesData;
-    await loadSpeciesData(__dirname);
-})();
-
-function generatePetFromEgg(eggId, rarity) {
-    const list = eggSpecieMap[eggId] || ['Ave'];
-    const specie = Array.isArray(list) ? list[Math.floor(Math.random() * list.length)] : list;
-    const info = specieData[specie] || {};
-    const attributes = {
-        attack: Math.floor(Math.random() * 5) + 1,
-        defense: Math.floor(Math.random() * 5) + 1,
-        speed: Math.floor(Math.random() * 5) + 1,
-        magic: Math.floor(Math.random() * 5) + 1,
-        life: (Math.floor(Math.random() * 5) + 1) * 10
-    };
-
-    let statusImage = '';
-    let bioImage = '';
-    if (info.race) {
-        const base = info.element
-            ? path.posix.join(info.dir, info.element, info.race)
-            : path.posix.join(info.dir, info.race);
-        const monsBase = path.join(__dirname, 'Assets', 'Mons');
-        const frontGif = path.join(monsBase, base, 'front.gif');
-        const raceGif = path.join(monsBase, base, `${info.race}.gif`);
-        if (fs.existsSync(frontGif)) {
-            statusImage = path.posix.join(base, 'front.gif');
-        } else if (fs.existsSync(raceGif)) {
-            statusImage = path.posix.join(base, `${info.race}.gif`);
-        } else {
-            statusImage = path.posix.join(base, `${info.race}.png`);
-        }
-        bioImage = path.posix.join(base, `${info.race}.png`);
-    } else if (info.dir) {
-        statusImage = `${info.dir}/${info.dir.toLowerCase()}.png`;
-        bioImage = `${info.dir}/${info.dir.toLowerCase()}.png`;
-    } else {
-        statusImage = 'eggsy.png';
-        bioImage = 'eggsy.png';
-    }
-
-    return {
-        name: 'Eggsy',
-        element: info.element || 'puro',
-        attributes,
-        specie,
-        rarity: rarity || generateRarity(),
-        level: 1,
-        experience: 0,
-        createdAt: new Date().toISOString(),
-        image: statusImage,
-        race: info.race || null,
-        bio: '',
-        bioImage,
-        statusImage,
-        hunger: 100,
-        happiness: 100,
-        currentHealth: attributes.life,
-        maxHealth: attributes.life,
-        energy: 100,
-        kadirPoints: 10
-    };
-}
+// Inicializar species (mantém side-effect anterior)
+initSpecies(__dirname).catch(err => console.error('Erro initSpecies:', err));
 
 app.whenReady().then(() => {
     console.log('Aplicativo iniciado');
@@ -286,8 +157,8 @@ app.whenReady().then(() => {
     registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty });
 
     registerAssetsHandlers({
-        loadSpeciesData,
-        getSpeciesData: () => ({ specieData, specieBioImages, specieImages }),
+        loadSpeciesData: () => {}, // já carregado em initSpecies
+        getSpeciesData: () => getSpeciesData(),
         getJourneyImagesCache: () => journeyImagesCache,
         setJourneyImagesCache: (cache) => { journeyImagesCache = cache; },
         baseDir: __dirname
