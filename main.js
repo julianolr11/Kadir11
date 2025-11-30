@@ -1,64 +1,62 @@
-const { app, ipcMain, globalShortcut, BrowserWindow, screen } = require('electron');
+const { app, ipcMain, globalShortcut, BrowserWindow } = require('electron');
 const windowManager = require('./scripts/windowManager');
-const { registerWindowHandlers } = require('./scripts/handlers/windowHandlers');
-const { registerPetHandlers } = require('./scripts/handlers/petHandlers');
-const { registerStoreHandlers } = require('./scripts/handlers/storeHandlers');
-const { registerGameHandlers } = require('./scripts/handlers/gameHandlers');
-const { registerMovesHandlers } = require('./scripts/handlers/movesHandlers');
-const { registerSettingsHandlers } = require('./scripts/handlers/settingsHandlers');
-const { registerAssetsHandlers } = require('./scripts/handlers/assetsHandlers');
-const { registerLifecycleHandlers } = require('./scripts/handlers/lifecycleHandlers');
-const { setupWindowPositioningHandlers } = require('./scripts/handlers/windowPositioningHandlers');
-const { setupNestHandlers } = require('./scripts/handlers/nestHandlers');
-const { setupBattleMechanicsHandlers } = require('./scripts/handlers/battleMechanicsHandlers');
-const { resolveIdleGif, getRandomEnemyIdle, extractElementFromPath } = require('./scripts/utils/idleAssets');
+// Bootstrap unificado de handlers
+const { registerAllHandlers } = require('./scripts/bootstrap/registerHandlers');
 const petManager = require('./scripts/petManager');
-const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
+const {
+  getRequiredXpForNextLevel,
+  calculateXpGain,
+  increaseAttributesOnLevelUp,
+} = require('./scripts/petExperience');
 const appState = require('./scripts/managers/stateManager');
 const { createStoreState } = require('./scripts/state/storeState');
-const { initSpecies, generatePetFromEgg, generateRarity, getSpeciesData } = require('./scripts/logic/petGeneration');
+const {
+  initSpecies,
+  generatePetFromEgg,
+  generateRarity,
+  getSpeciesData,
+} = require('./scripts/logic/petGeneration');
 
 // Bootstrap do electron-store isolado
 let Store;
 try {
-    console.log('Inicializando electron-store (bootstrap)');
-    Store = require('electron-store');
-    if (typeof Store !== 'function') throw new Error('electron-store inválido');
+  console.log('Inicializando electron-store (bootstrap)');
+  Store = require('electron-store');
+  if (typeof Store !== 'function') throw new Error('electron-store inválido');
 } catch (err) {
-    console.error('Falha ao inicializar electron-store:', err);
-    throw err;
+  console.error('Falha ao inicializar electron-store:', err);
+  throw err;
 }
 const store = new Store();
 const state = createStoreState(store);
 
 // currentPet agora gerenciado exclusivamente via stateManager (appState)
 // Removido estado duplicado local
-let lastUpdate = Date.now();
 let journeyImagesCache = null;
 
 // Inicializa módulo de janelas centralizado
 const { initGameWindows } = require('./scripts/windows/gameWindows');
 const {
-    createBattleModeWindow,
-    createJourneyModeWindow,
-    createJourneySceneWindow,
-    createLairModeWindow,
-    createTrainWindow,
-    createTrainMenuWindow,
-    createTrainAttributesWindow,
-    createTrainForceWindow,
-    createTrainDefenseWindow,
-    createItemsWindow,
-    createStoreWindow,
-    createNestsWindow,
-    createHatchWindow,
-    updateNestsPosition,
-    getStoreWindow,
-    getItemsWindow,
-    getHatchWindow,
-    closeAllGameWindows
+  createBattleModeWindow,
+  createJourneyModeWindow,
+  createJourneySceneWindow,
+  createLairModeWindow,
+  createTrainWindow,
+  createTrainMenuWindow,
+  createTrainAttributesWindow,
+  createTrainForceWindow,
+  createTrainDefenseWindow,
+  createItemsWindow,
+  createStoreWindow,
+  createNestsWindow,
+  createHatchWindow,
+  updateNestsPosition,
+  getStoreWindow,
+  getItemsWindow,
+  getHatchWindow,
+  closeAllGameWindows,
+  closeNestsWindow,
 } = initGameWindows({ windowManager });
-
 
 // Proxy para funções de estado (mantém assinatura para handlers existentes)
 const {
@@ -74,172 +72,107 @@ const {
   getNestPrice,
   getNestsData,
   setNestsData,
-  broadcastNestUpdate
+  broadcastNestUpdate,
 } = state;
 
 // Inicializar species (mantém side-effect anterior)
-initSpecies(__dirname).catch(err => console.error('Erro initSpecies:', err));
+initSpecies(__dirname).catch((err) => console.error('Erro initSpecies:', err));
 
 app.whenReady().then(() => {
-    console.log('Aplicativo iniciado');
-    petManager.cleanupOrphanPets().catch(err => {
-        console.error('Erro ao limpar pets órfãos:', err);
-    });
-    if (store.get('coins') === undefined) {
-        store.set('coins', 20);
+  console.log('Aplicativo iniciado');
+  petManager.cleanupOrphanPets().catch((err) => {
+    console.error('Erro ao limpar pets órfãos:', err);
+  });
+  if (store.get('coins') === undefined) {
+    store.set('coins', 20);
+  }
+  windowManager.createStartWindow();
+
+  globalShortcut.register('Ctrl+Shift+D', () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow && focusedWindow.webContents) {
+      focusedWindow.webContents.toggleDevTools();
+      console.log('DevTools aberto na janela ativa');
+    } else {
+      console.log('Nenhuma janela ativa encontrada para abrir o DevTools');
     }
-    windowManager.createStartWindow();
+  });
 
-    globalShortcut.register('Ctrl+Shift+D', () => {
-        const focusedWindow = BrowserWindow.getFocusedWindow();
-        if (focusedWindow && focusedWindow.webContents) {
-            focusedWindow.webContents.toggleDevTools();
-            console.log('DevTools aberto na janela ativa');
-        } else {
-            console.log('Nenhuma janela ativa encontrada para abrir o DevTools');
-        }
-    });
+  // Bootstrap único dos handlers
+  const journeyImagesCacheRef = { value: journeyImagesCache };
+  registerAllHandlers({
+    electron: { ipcMain, BrowserWindow },
+    managers: { windowManager, appState, petManager },
+    store: { store },
+    stateAccessors: {
+      getCoins,
+      setCoins,
+      getItems,
+      setItems,
+      getPenInfo,
+      getNestCount,
+      getNestPrice,
+      getNestsData,
+      setNestsData,
+      broadcastPenUpdate,
+      broadcastNestUpdate,
+      getDifficulty,
+      setDifficulty,
+    },
+    petGeneration: { generateRarity, generatePetFromEgg, getSpeciesData, baseDir: __dirname },
+    cache: { journeyImagesCacheRef },
+    windows: {
+      createBattleModeWindow,
+      createJourneyModeWindow,
+      createJourneySceneWindow,
+      createLairModeWindow,
+      createTrainWindow,
+      createTrainMenuWindow,
+      createTrainAttributesWindow,
+      createTrainForceWindow,
+      createTrainDefenseWindow,
+      createItemsWindow,
+      createStoreWindow,
+      createNestsWindow,
+      createHatchWindow,
+      updateNestsPosition,
+      closeNestsWindow,
+      getStoreWindow,
+      getItemsWindow,
+      getHatchWindow,
+      closeAllGameWindows,
+    },
+    xp: { xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp } },
+    handlers: require('./scripts/handlers/handlersIndex'),
+  });
+  journeyImagesCache = journeyImagesCacheRef.value;
 
-    // Registrar handlers modulares da Fase 1
-    registerWindowHandlers(
-        windowManager,
-        getPenInfo,
-        getNestCount,
-        getItems,
-        createNestsWindow,
-        () => {}, // closeNestsWindow responsabilidade movida para módulo de janelas
-        createHatchWindow,
-        () => {}, // closeHatchWindow idem
-        updateNestsPosition
-    );
-
-    registerPetHandlers(
-        windowManager,
-        getItems,
-        getCoins,
-        broadcastPenUpdate,
-        closeAllGameWindows
-    );
-
-    // ---- Fase 2: Store handlers migrados (buy/use/redeem/unequip) ----
-    registerStoreHandlers({
-        getCurrentPet: () => currentPet,
-        getCoins,
-        setCoins,
-        getItems,
-        setItems,
-        getNestPrice,
-        getNestCount,
-        broadcastPenUpdate,
-        broadcastNestUpdate,
-        petManager,
-        store,
-        windowManager
-    });
-
-    // Registro dos handlers de jogo (batalha/jornada/treino/lair)
-    registerGameHandlers({
-        getCurrentPet: () => appState.currentPet,
-        petManager,
-        windowManager,
-        createBattleModeWindow,
-        createJourneyModeWindow,
-        createJourneySceneWindow,
-        createLairModeWindow,
-        createTrainWindow,
-        createTrainMenuWindow,
-        createTrainAttributesWindow,
-        createTrainForceWindow,
-        createTrainDefenseWindow,
-        getRandomEnemyIdle,
-        resolveIdleGif,
-        extractElementFromPath,
-        xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp },
-        storeFns: { getItems, setItems, getCoins, setCoins }
-    });
-
-    registerMovesHandlers({ getCurrentPet: () => appState.currentPet, petManager });
-
-    registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty });
-
-    registerAssetsHandlers({
-        loadSpeciesData: () => {}, // já carregado em initSpecies
-        getSpeciesData: () => getSpeciesData(),
-        getJourneyImagesCache: () => journeyImagesCache,
-        setJourneyImagesCache: (cache) => { journeyImagesCache = cache; },
-        baseDir: __dirname
-    });
-
-    // Registrar lifecycle (timers e battle handler)
-    const { resetTimers } = registerLifecycleHandlers({
-        ipcMain,
-        getCurrentPet: () => appState.currentPet,
-        petManager,
-        BrowserWindow
-    });
-
-    // Expor resetTimers globalmente para uso ao selecionar pet
-    global.resetTimers = resetTimers;
-
-    // Registrar window positioning handlers (itens-pet, store-pet, resize-*)
-    setupWindowPositioningHandlers({
-        createItemsWindow,
-        createStoreWindow,
-        getStoreWindow,
-        getItemsWindow,
-        getCurrentPet: () => appState.currentPet,
-        getCoins,
-        getItems
-    });
-
-    // Registrar nest handlers (place-egg-in-nest, hatch-egg)
-    setupNestHandlers({
-        getCurrentPet: () => appState.currentPet,
-        getItems,
-        setItems,
-        getNestCount,
-        getNestsData,
-        setNestsData,
-        generateRarity,
-        generatePetFromEgg,
-        petManager,
-        broadcastPenUpdate,
-        getHatchWindow
-    });
-
-    // Registrar battle mechanics handlers (use-move, use-bravura)
-    setupBattleMechanicsHandlers({
-        getCurrentPet: () => appState.currentPet,
-        petManager
-    });
-
-    app.on('activate', () => {
-        if (windowManager.getStartWindow() === null) {
-            windowManager.createStartWindow();
-        }
-    });
+  app.on('activate', () => {
+    if (windowManager.getStartWindow() === null) {
+      windowManager.createStartWindow();
+    }
+  });
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 app.on('will-quit', () => {
-    globalShortcut.unregisterAll();
-    console.log('Atalhos globais desregistrados');
+  globalShortcut.unregisterAll();
+  console.log('Atalhos globais desregistrados');
 });
-
 
 // Handler para obter o pet atual
 ipcMain.handle('get-current-pet', async () => {
-    const pet = appState.currentPet;
-    if (pet) {
-        pet.items = getItems();
-        return pet;
-    }
-    return null;
+  const pet = appState.currentPet;
+  if (pet) {
+    pet.items = getItems();
+    return pet;
+  }
+  return null;
 });
 
 // (movido para gameHandlers) ipcMain.on('train-pet' ... )
@@ -277,7 +210,6 @@ ipcMain.handle('get-current-pet', async () => {
 
 // (duplicado / movido para storeHandlers) ipcMain.on('buy-item' ... )
 
-
 // (movido para storeHandlers) ipcMain.on('unequip-item' ... )
 
 // (movido para nestHandlers) ipcMain.on('place-egg-in-nest' ... )
@@ -295,7 +227,6 @@ ipcMain.handle('get-current-pet', async () => {
 // (movido para petHandlers) ipcMain.on('kadirfull' ... )
 
 // (movido para gameHandlers) ipcMain.on('reward-pet' ... )
-
 
 // (movido para gameHandlers) ipcMain.on('journey-complete' ... )
 

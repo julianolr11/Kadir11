@@ -1,0 +1,59 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "browser": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/recommended",
+    "plugin:promise/recommended",
+    "plugin:node/recommended",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "script"
+  },
+  "rules": {
+    "no-console": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+    "import/no-unresolved": "off", // Electron and relative dynamic requires
+    "node/no-unpublished-require": "off",
+    "promise/always-return": "off",
+    "promise/catch-or-return": "off",
+    "node/no-unsupported-features/node-builtins": "off",
+    "promise/param-names": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.mjs"],
+      "parserOptions": { "sourceType": "module" }
+    },
+    {
+      "files": ["test/**/*.js"],
+      "env": { "mocha": true },
+      "rules": { "no-unused-vars": "off", "no-empty-pattern": "off" }
+    },
+    {
+      "files": [
+        "scripts/constants.js",
+        "scripts/elements.js",
+        "scripts/journey-scene.js",
+        "scripts/moveEffectiveness.js",
+        "scripts/status.js",
+        "scripts/train.js",
+        "scripts/tray.js",
+        "scripts/xpUtils.js"
+      ],
+      "parserOptions": { "sourceType": "module" }
+    }
+  ],
+  "ignorePatterns": [
+    "coverage/**",
+    "Assets/**",
+    "pets/**",
+    "frontend/**"
+  ]
+}

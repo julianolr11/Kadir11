@@ -92,6 +92,12 @@
         }
         #player-pet { left: 100px; transform: scaleX(-1); }
         #enemy-pet { right: 100px; transform: scaleX(1); }
+        /* Boss pet específico - maior */
+        .boss #enemy-pet {
+            width: 400px;
+            bottom: 90px;
+            right: 100px;
+        }
         .hit-effect {
             position: absolute;
             bottom: 120px;
@@ -125,25 +131,52 @@
             flex-direction: column;
             align-items: center;
         }
+        .name-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 3px;
+        }
         .pet-name {
             color: #ffffff;
             font-family: 'PixelOperator', sans-serif;
             font-size: 15px;
             padding: 2px 5px;
             border-radius: 3px;
-            margin-bottom: 3px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
         }
-        .name-container {
-            display: flex;
+        .boss #enemy-hud .pet-name {
+            color: #ffffff;
+            -webkit-text-stroke: 1px #ff3b30; /* contorno vermelho */
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+        }
+        .boss #enemy-hud .name-container {
+            justify-content: flex-end;
+        }
+        .boss #enemy-hud {
+            right: 10px;
+            flex-direction: row-reverse; /* ícone ao lado das barras */
             align-items: center;
-            gap: 4px;
+        }
+        .boss #enemy-hud .hud-front {
+            align-items: center;
+        }
+        .boss #enemy-hud .hud-bars {
+            margin: 0 15px;
+            width: 280px;
+        }
+        .boss #enemy-hud .health-bar,
+        .boss #enemy-hud .energy-bar {
+            width: 280px;
+        }
+        .boss #enemy-hud .health-bar .bar {
+            background-image: linear-gradient(to bottom, #6d28d9, #4c1d95); /* roxo escuro */
+            border-color: #ffd700;
         }
         .element-icon {
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             image-rendering: pixelated;
+            margin-left: 5px;
         }
         .pet-level {
             color: #ffffff;
@@ -153,17 +186,20 @@
             border-radius: 3px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
             font-weight: bold;
-            margin-bottom: 4px;
+            margin-top: 4px;
+        }
+        .boss #enemy-hud .pet-level {
+            align-self: flex-end;
         }
         .hud-bars {
             display: flex;
             flex-direction: column;
-            margin: 0 28px;
-            width: 300px;
+            margin: 0 15px;
+            width: 280px;
         }
         .health-bar,
         .energy-bar {
-            width: 300px;
+            width: 280px;
             height: 18px;
             background-color: #222;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -465,7 +501,7 @@
 <body>
     <div class="window">
         <div id="title-bar">
-            <div id="title-bar-content"><span>Cenário da Jornada</span></div>
+            <div id="title-bar-content"><span id="scene-title">Cenário da Jornada</span></div>
             <div id="title-bar-buttons">
                 <div id="back-journey-scene">↩</div>
                 <div id="close-journey-scene">X</div>
@@ -476,19 +512,19 @@
         <div id="player-hud" class="hud-container">
             <div class="hud-front">
                 <img id="player-front" class="hud-pet" src="" alt="pet">
+            </div>
+            <div class="hud-bars">
                 <div class="name-container">
                     <img id="player-element" class="element-icon" src="" alt="elemento">
                     <div id="player-name" class="pet-name"></div>
                 </div>
-            </div>
-            <div class="hud-bars">
-                <div id="player-level" class="pet-level"></div>
                 <div class="health-bar">
                     <div class="bar" id="player-health-fill" style="width:100%"></div>
                 </div>
                 <div class="energy-bar">
                     <div class="bar" id="player-energy-fill" style="width:100%"></div>
                 </div>
+                <div id="player-level" class="pet-level"></div>
                 <div class="status-icons" id="player-status-icons" style="display:none"></div>
             </div>
         </div>
@@ -496,19 +532,19 @@
         <div id="enemy-hud" class="hud-container">
             <div class="hud-front">
                 <img id="enemy-front" class="hud-pet" src="" alt="inimigo">
+            </div>
+            <div class="hud-bars">
                 <div class="name-container">
                     <img id="enemy-element" class="element-icon" src="" alt="elemento">
                     <div id="enemy-name" class="pet-name"></div>
                 </div>
-            </div>
-            <div class="hud-bars">
-                <div id="enemy-level" class="pet-level"></div>
                 <div class="health-bar">
                     <div class="bar" id="enemy-health-fill" style="width:100%"></div>
                 </div>
                 <div class="energy-bar">
                     <div class="bar" id="enemy-energy-fill" style="width:100%"></div>
                 </div>
+                <div id="enemy-level" class="pet-level"></div>
             </div>
         </div>
 

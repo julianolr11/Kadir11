@@ -4,34 +4,43 @@ const { setupNestHandlers } = require('../scripts/handlers/nestHandlers');
 describe('nestHandlers extra branches', () => {
   function base(options = {}) {
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
     const wins = [];
     const BrowserWindow = {
-      getAllWindows: () => wins
+      getAllWindows: () => wins,
     };
     const currentPet = { name: 'Atual', petId: '000001', items: { eggAve: 1 } };
     const state = {
       items: { eggAve: 1 },
       nests: [],
-      hatchWindow: options.hatchWindow || null
+      hatchWindow: options.hatchWindow || null,
     };
     const petManager = {
-      createPet: async (data) => ({ ...data, petId: '000099' })
+      createPet: async (data) => ({ ...data, petId: '000099' }),
     };
     setupNestHandlers({
-      getCurrentPet: () => options.hasPet === false ? null : currentPet,
+      getCurrentPet: () => (options.hasPet === false ? null : currentPet),
       getItems: () => state.items,
-      setItems: (i) => { if (options.failSetItems) throw new Error('set fail'); state.items = i; },
+      setItems: (i) => {
+        if (options.failSetItems) throw new Error('set fail');
+        state.items = i;
+      },
       getNestCount: () => 3,
       getNestsData: () => state.nests,
-      setNestsData: (n) => { state.nests = n; },
+      setNestsData: (n) => {
+        state.nests = n;
+      },
       generateRarity: () => 'Raro',
       generatePetFromEgg: (eggId, rarity) => ({ name: 'Gerado', eggId, rarity }),
       petManager,
       broadcastPenUpdate: () => {},
       getHatchWindow: () => state.hatchWindow,
       ipcMain,
-      BrowserWindow
+      BrowserWindow,
     });
     return { handlers, state };
   }
@@ -46,9 +55,13 @@ describe('nestHandlers extra branches', () => {
     const hatchWindow = {
       webContents: {
         isLoading: () => true,
-        once: (evt, cb) => { if (evt === 'did-finish-load') { onceHandler = cb; } },
-        send: () => {}
-      }
+        once: (evt, cb) => {
+          if (evt === 'did-finish-load') {
+            onceHandler = cb;
+          }
+        },
+        send: () => {},
+      },
     };
     const { handlers, state } = base({ hatchWindow });
     // Prepare a nest
@@ -63,8 +76,8 @@ describe('nestHandlers extra branches', () => {
       webContents: {
         isLoading: () => false,
         once: () => {},
-        send: () => {}
-      }
+        send: () => {},
+      },
     };
     const { handlers, state } = base({ hatchWindow });
     state.nests.push({ eggId: 'eggAve', start: Date.now(), rarity: 'Raro' });
@@ -74,7 +87,11 @@ describe('nestHandlers extra branches', () => {
   it('covers insufficient eggs path', () => {
     // items eggAve = 0 triggers insufficient eggs
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
     setupNestHandlers({
       getCurrentPet: () => ({ name: 'P', items: { eggAve: 0 } }),
       getItems: () => ({ eggAve: 0 }),
@@ -88,37 +105,47 @@ describe('nestHandlers extra branches', () => {
       broadcastPenUpdate: () => {},
       getHatchWindow: () => null,
       ipcMain,
-      BrowserWindow: { getAllWindows: () => [] }
+      BrowserWindow: { getAllWindows: () => [] },
     });
     handlers['place-egg-in-nest']({}, 'eggAve');
   });
 
   it('cobre erro em broadcast rollback quando getAllWindows lança', async () => {
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
     let callCount = 0;
     const BrowserWindow = {
       getAllWindows: () => {
         callCount++;
         if (callCount === 1) return []; // primeira vez ok (broadcast sucesso)
         throw new Error('crash'); // segunda vez (rollback) lança
-      }
+      },
     };
-    let nests = [{ eggId:'eggAve', start:Date.now(), rarity:'Comum' }];
+    let nests = [{ eggId: 'eggAve', start: Date.now(), rarity: 'Comum' }];
     setupNestHandlers({
       getCurrentPet: () => ({ name: 'P', items: {} }),
       getItems: () => ({}),
       setItems: () => {},
       getNestCount: () => 3,
       getNestsData: () => nests,
-      setNestsData: (n) => { nests = n; },
+      setNestsData: (n) => {
+        nests = n;
+      },
       generateRarity: () => 'Raro',
-      generatePetFromEgg: () => ({ name:'Pet' }),
-      petManager: { createPet: async () => { throw new Error('fail'); } },
+      generatePetFromEgg: () => ({ name: 'Pet' }),
+      petManager: {
+        createPet: async () => {
+          throw new Error('fail');
+        },
+      },
       broadcastPenUpdate: () => {},
       getHatchWindow: () => null,
       ipcMain,
-      BrowserWindow
+      BrowserWindow,
     });
     // Executar handler, espera que entre no catch e re-adicione egg
     await handlers['hatch-egg']({}, 0);
@@ -130,22 +157,34 @@ describe('nestHandlers extra branches', () => {
 
   it('cobre broadcast rollback com window sem webContents', async () => {
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
-    let nests = [{ eggId:'eggAve', start:Date.now(), rarity:'Comum' }];
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
+    let nests = [{ eggId: 'eggAve', start: Date.now(), rarity: 'Comum' }];
     setupNestHandlers({
       getCurrentPet: () => ({ name: 'P', items: {} }),
       getItems: () => ({}),
       setItems: () => {},
       getNestCount: () => 3,
       getNestsData: () => nests,
-      setNestsData: (n) => { nests = n; },
+      setNestsData: (n) => {
+        nests = n;
+      },
       generateRarity: () => 'Raro',
-      generatePetFromEgg: () => ({ name:'Pet' }),
-      petManager: { createPet: async () => { throw new Error('fail'); } },
+      generatePetFromEgg: () => ({ name: 'Pet' }),
+      petManager: {
+        createPet: async () => {
+          throw new Error('fail');
+        },
+      },
       broadcastPenUpdate: () => {},
       getHatchWindow: () => null,
       ipcMain,
-      BrowserWindow: { getAllWindows: () => [ {}, { webContents: null }, { webContents: { send: () => {} } } ] }
+      BrowserWindow: {
+        getAllWindows: () => [{}, { webContents: null }, { webContents: { send: () => {} } }],
+      },
     });
     await handlers['hatch-egg']({}, 0);
     // Ao entrar no catch de createPet, egg é re-adicionado
@@ -154,22 +193,28 @@ describe('nestHandlers extra branches', () => {
 
   it('cobre sucesso com hatchWindow ausente (null)', () => {
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
-    let nests = [{ eggId:'eggAve', start:Date.now(), rarity:'Comum' }];
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
+    let nests = [{ eggId: 'eggAve', start: Date.now(), rarity: 'Comum' }];
     setupNestHandlers({
       getCurrentPet: () => ({ name: 'P', items: {} }),
       getItems: () => ({}),
       setItems: () => {},
       getNestCount: () => 3,
       getNestsData: () => nests,
-      setNestsData: (n) => { nests = n; },
+      setNestsData: (n) => {
+        nests = n;
+      },
       generateRarity: () => 'Raro',
-      generatePetFromEgg: () => ({ name:'Pet' }),
-      petManager: { createPet: async () => ({ petId:'99', name:'Novo' }) },
+      generatePetFromEgg: () => ({ name: 'Pet' }),
+      petManager: { createPet: async () => ({ petId: '99', name: 'Novo' }) },
       broadcastPenUpdate: () => {},
       getHatchWindow: () => null,
       ipcMain,
-      BrowserWindow: { getAllWindows: () => [ { webContents: { send: () => {} } } ] }
+      BrowserWindow: { getAllWindows: () => [{ webContents: { send: () => {} } }] },
     });
     handlers['hatch-egg']({}, 0);
     assert.strictEqual(nests.length, 0);
@@ -177,22 +222,28 @@ describe('nestHandlers extra branches', () => {
 
   it('cobre hatchWindow com webContents null', () => {
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
-    let nests = [{ eggId:'eggAve', start:Date.now(), rarity:'Comum' }];
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
+    let nests = [{ eggId: 'eggAve', start: Date.now(), rarity: 'Comum' }];
     setupNestHandlers({
       getCurrentPet: () => ({ name: 'P', items: {} }),
       getItems: () => ({}),
       setItems: () => {},
       getNestCount: () => 3,
       getNestsData: () => nests,
-      setNestsData: (n) => { nests = n; },
+      setNestsData: (n) => {
+        nests = n;
+      },
       generateRarity: () => 'Raro',
-      generatePetFromEgg: () => ({ name:'Pet' }),
-      petManager: { createPet: async () => ({ petId:'99', name:'Novo' }) },
+      generatePetFromEgg: () => ({ name: 'Pet' }),
+      petManager: { createPet: async () => ({ petId: '99', name: 'Novo' }) },
       broadcastPenUpdate: () => {},
       getHatchWindow: () => ({ webContents: null }),
       ipcMain,
-      BrowserWindow: { getAllWindows: () => [ { webContents: { send: () => {} } } ] }
+      BrowserWindow: { getAllWindows: () => [{ webContents: { send: () => {} } }] },
     });
     handlers['hatch-egg']({}, 0);
     assert.strictEqual(nests.length, 0);

@@ -75,20 +75,73 @@
         #store-items {
             flex:1;
             display:flex;
-            gap:15px;
+            gap:10px;
             padding:10px;
-            justify-content:center;
+            justify-content:flex-start;
             flex-wrap:wrap;
             overflow-y:auto;
         }
-        .store-item { display:flex; flex-direction:column; align-items:center; }
-        .store-item img { width:32px; height:32px; image-rendering:pixelated; }
+        .store-item { 
+            display:flex; 
+            flex-direction:column; 
+            align-items:center;
+            width: 100px;
+            padding: 8px;
+            background: rgba(42, 50, 62, 0.6);
+            border-radius: 8px;
+            border: 2px solid #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .store-item:hover {
+            background: rgba(52, 60, 72, 0.8);
+            border-color: #5a6578;
+            transform: translateY(-2px);
+        }
+        .store-item.expanded {
+            width: 100px;
+            background: rgba(52, 60, 72, 0.9);
+            border-color: #6a7588;
+        }
+        .store-item img { width:48px; height:48px; image-rendering:pixelated; margin-bottom: 5px; }
         .terrain-icon {
-            width: 32px;
-            height: 32px;
+            width: 48px;
+            height: 48px;
             image-rendering: pixelated;
         }
-        .item-price { margin:4px 0; }
+        .item-name {
+            font-size: 11px;
+            text-align: center;
+            margin-bottom: 3px;
+            font-weight: bold;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .item-price { 
+            margin:4px 0; 
+            font-size: 11px;
+            color: #ffd700;
+        }
+        .item-description {
+            display: none;
+            font-size: 9px;
+            color: #fff;
+            text-align: center;
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            line-height: 1.3;
+        }
+        .store-item.expanded .item-description {
+            display: block;
+        }
+        .store-item .buy-button {
+            margin-top: 5px;
+            font-size: 10px;
+            padding: 4px 8px;
+            min-width: 60px;
+        }
         #store-item-description {
             position: fixed;
             pointer-events: none;
@@ -132,58 +185,80 @@
         <button class="button small-button" id="open-items-button">Itens</button>
         <div id="store-items" class="scroll-container">
             <div class="store-item" data-item="healthPotion">
-                <img src="../../Assets/Shop/health-potion.png" alt="Health Potion">
+                <img src="../../Assets/Shop/health-potion.png" onerror="this.style.display='none'" alt="Health Potion">
+                <div class="item-name">Poção de Vida</div>
                 <div class="item-price">10 moedas</div>
+                <div class="item-description">Restaura 50 de vida</div>
                 <button class="button small-button buy-button" data-item="healthPotion">Comprar</button>
             </div>
             <div class="store-item" data-item="meat">
-                <img src="../../Assets/Shop/meat1.png" alt="Meat">
+                <img src="../../Assets/Shop/meat1.png" onerror="this.src='../../Assets/Shop/health-potion.png'" alt="Meat">
+                <div class="item-name">Carne</div>
                 <div class="item-price">5 moedas</div>
+                <div class="item-description">Diminui a fome em 30</div>
                 <button class="button small-button buy-button" data-item="meat">Comprar</button>
             </div>
             <div class="store-item" data-item="staminaPotion">
-                <img src="../../Assets/Shop/stamina-potion.png" alt="Stamina Potion">
+                <img src="../../Assets/Shop/stamina-potion.png" onerror="this.src='../../Assets/Shop/health-potion.png'" alt="Stamina Potion">
+                <div class="item-name">Poção de Energia</div>
                 <div class="item-price">8 moedas</div>
+                <div class="item-description">Restaura 50 de energia</div>
                 <button class="button small-button buy-button" data-item="staminaPotion">Comprar</button>
             </div>
             <div class="store-item" data-item="chocolate">
-                <img src="../../Assets/Shop/chocolate.png" alt="Chocolate">
+                <img src="../../Assets/Shop/chocolate.png" onerror="this.src='../../Assets/Shop/health-potion.png'" alt="Chocolate">
+                <div class="item-name">Chocolate</div>
                 <div class="item-price">2 moedas</div>
+                <div class="item-description">Aumenta felicidade em 10</div>
                 <button class="button small-button buy-button" data-item="chocolate">Comprar</button>
             </div>
             <div class="store-item" data-item="finger">
                 <img src="../../Assets/Shop/finger.png" alt="Garra do Predador">
+                <div class="item-name">Garra do Predador</div>
                 <div class="item-price">35 moedas</div>
+                <div class="item-description">+5 de Força</div>
                 <button class="button small-button buy-button" data-item="finger">Comprar</button>
             </div>
             <div class="store-item" data-item="turtleShell">
                 <img src="../../Assets/Shop/turtle_shell.png" alt="Casco de Protetor">
+                <div class="item-name">Casco Protetor</div>
                 <div class="item-price">35 moedas</div>
+                <div class="item-description">+5 de Defesa</div>
                 <button class="button small-button buy-button" data-item="turtleShell">Comprar</button>
             </div>
             <div class="store-item" data-item="feather">
                 <img src="../../Assets/Shop/feather.png" alt="Pena da Tempestade">
+                <div class="item-name">Pena da Tempestade</div>
                 <div class="item-price">35 moedas</div>
+                <div class="item-description">+5 de Velocidade</div>
                 <button class="button small-button buy-button" data-item="feather">Comprar</button>
             </div>
             <div class="store-item" data-item="orbe">
                 <img src="../../Assets/Shop/orbe.png" alt="Orbe de Éter">
+                <div class="item-name">Orbe de Éter</div>
                 <div class="item-price">35 moedas</div>
+                <div class="item-description">+5 de Magia</div>
                 <button class="button small-button buy-button" data-item="orbe">Comprar</button>
             </div>
             <div class="store-item" data-item="terrainMedium">
                 <img class="terrain-icon" src="../../Assets/tileset/tileset.png" alt="Terreno Médio">
+                <div class="item-name">Terreno Médio</div>
                 <div class="item-price">100 moedas</div>
+                <div class="item-description">Capacidade: 6 pets</div>
                 <button class="button small-button buy-button" data-item="terrainMedium">Comprar</button>
             </div>
             <div class="store-item" data-item="terrainLarge">
                 <img class="terrain-icon" src="../../Assets/tileset/tileset.png" alt="Terreno Grande">
+                <div class="item-name">Terreno Grande</div>
                 <div class="item-price">200 moedas</div>
+                <div class="item-description">Capacidade: 10 pets</div>
                 <button class="button small-button buy-button" data-item="terrainLarge">Comprar</button>
             </div>
             <div class="store-item" data-item="nest">
                 <img src="../../Assets/tileset/nest.png" alt="Ninho">
+                <div class="item-name">Ninho</div>
                 <div class="item-price">50 moedas</div>
+                <div class="item-description">Para chocar ovos</div>
                 <button class="button small-button buy-button" data-item="nest">Comprar</button>
             </div>
         </div>

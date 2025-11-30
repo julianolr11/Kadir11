@@ -1,12 +1,14 @@
 const assert = require('assert');
 const { JSDOM } = require('jsdom');
 
-function setupDom(html = `<!DOCTYPE html><body>
+function setupDom(
+  html = `<!DOCTYPE html><body>
   <div id="final-animation" style="display:none"></div>
   <video id="final-animation-video" style="display:none"></video>
   <img id="final-animation-gif" style="display:none" />
   <div id="pet-reveal" style="display:none"><img id="pet-image" style="opacity:0" /><div id="pet-message" style="opacity:0"></div></div>
-</body>`){
+</body>`
+) {
   const dom = new JSDOM(html, { pretendToBeVisual: true });
   global.window = dom.window;
   global.document = dom.window.document;
@@ -28,8 +30,11 @@ describe('create-pet animation error handler branch', () => {
     video.play = () => undefined;
     // Executa todos setTimeout imediatamente para evitar execução tardia após suite
     const originalSetTimeout = global.setTimeout;
-    global.setTimeout = (fn) => { fn(); return 0; };
-    mod.showFinalAnimation({ name:'Erro', image:'path.gif' });
+    global.setTimeout = (fn) => {
+      fn();
+      return 0;
+    };
+    mod.showFinalAnimation({ name: 'Erro', image: 'path.gif' });
     // Dispara erro explícito para acionar onerror
     video.onerror();
     // Restaura setTimeout

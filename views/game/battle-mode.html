@@ -132,15 +132,17 @@
 
         /* Imagens de fundo pra cada modo (substitua pelos caminhos reais) */
         #mode-journey {
-            background-image: url('Assets/Modes/journey-bg.jpg'); /* Adicione uma imagem pra Jornada */
+            /* Caminho corrigido relativo a views/game */
+            background-image: url('../../Assets/Modes/journey-bg.jpg'); /* Jornada */
         }
 
         #mode-lair {
-            background-image: url('Assets/Modes/lair.png');
+            /* Asset lair.png inexistente: usando mesmo bg provisório */
+            background-image: url('../../Assets/Modes/journey-bg.jpg'); /* TODO: substituir quando lair.png existir */
         }
 
         #mode-placeholder2 {
-            background-image: url('Assets/Modes/worldboss.jpg'); /* Placeholder */
+            background-image: url('../../Assets/Modes/worldboss.jpg'); /* Placeholder */
         }
     </style>
 </head>

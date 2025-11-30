@@ -24,18 +24,18 @@ function applyJourneyRewards(pet, { eggId, coins = 0, kadirPoints = 0 } = {}, st
   if (!pet) return { error: 'Pet não definido' };
   const { getItems, setItems, getCoins, setCoins } = storeFns;
   const items = getItems();
-  
+
   if (eggId) items[eggId] = (items[eggId] || 0) + 1;
-  
+
   setItems(items);
   pet.items = items;
-  
+
   if (coins) {
     setCoins(getCoins() + coins);
     pet.coins = getCoins();
   }
   if (kadirPoints) pet.kadirPoints = (pet.kadirPoints || 0) + kadirPoints;
-  
+
   return { pet, eggId, coinsAwarded: coins, kadirPointsAwarded: kadirPoints };
 }
 

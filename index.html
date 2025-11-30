@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'">
     <title>Kadir11 - Pet Tray (Teste)</title>
     <link rel="stylesheet" href="styles/main.css">
     <style>
@@ -422,12 +423,12 @@
                 </div>
             </div>
             <!-- Imagens de alerta -->
-            <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png" alt="Fome baixa"
+            <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png" onerror="this.src=this.dataset.fallback||'Assets/Shop/health-potion.png'" data-fallback="Assets/Shop/health-potion.png" alt="Fome baixa"
                 style="image-rendering: pixelated;">
-            <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png" alt="Felicidade baixa"
+            <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png" onerror="this.src=this.dataset.fallback||'Assets/Shop/smile.png'" data-fallback="Assets/Shop/smile.png" alt="Felicidade baixa"
                 style="image-rendering: pixelated;">
             <div id="item-found-bubble" class="item-bubble">
-                <img id="item-found-img" src="" alt="Item" />
+                <img id="item-found-img" alt="Item" style="display:none;" />
             </div>
             <div id="pet-status-bubble"></div>
             <!-- Alerta de batalha -->

@@ -1,4 +1,8 @@
-const { ipcMain: electronIpcMain, screen: electronScreen, BrowserWindow: ElectronBrowserWindow } = require('electron');
+const {
+  ipcMain: electronIpcMain,
+  screen: electronScreen,
+  BrowserWindow: ElectronBrowserWindow,
+} = require('electron');
 const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('WindowPositioningHandlers');
@@ -18,172 +22,182 @@ const logger = createLogger('WindowPositioningHandlers');
  * @param {Object} [options.screen] - Electron screen module
  */
 function setupWindowPositioningHandlers(options = {}) {
-    const {
-        createItemsWindow,
-        createStoreWindow,
-        getStoreWindow,
-        getItemsWindow,
-        getCurrentPet,
-        getCoins,
-        getItems,
-        ipcMain = electronIpcMain,
-        BrowserWindow = ElectronBrowserWindow,
-        screen = electronScreen
-    } = options;
+  const {
+    createItemsWindow,
+    createStoreWindow,
+    getStoreWindow,
+    getItemsWindow,
+    getCurrentPet,
+    getCoins,
+    getItems,
+    ipcMain = electronIpcMain,
+    BrowserWindow = ElectronBrowserWindow,
+    screen = electronScreen,
+  } = options;
 
-    logger.info('Setting up window positioning handlers...');
+  logger.info('Setting up window positioning handlers...');
 
-    /**
-     * Creates a window and sets up its event handlers with optional alignment
-     * @param {Function} createFn - Function that creates and returns a BrowserWindow
-     * @param {string} failMsg - Error message if window creation fails
-     * @param {Function} sendDataFn - Callback invoked on did-finish-load to send initial data
-     * @param {Object} [alignOptions] - Optional alignment configuration
-     * @param {boolean} alignOptions.enabled - Whether to align the window
-     * @param {BrowserWindow} alignOptions.otherWindow - Window to align with
-     * @param {BrowserWindow} alignOptions.win1 - First window for alignment
-     * @param {BrowserWindow} alignOptions.win2 - Second window for alignment
-     * @param {string} alignOptions.side - Which side to align ('left' or 'right')
-     * @param {string} alignOptions.logMsg - Success log message
-     * @param {string} alignOptions.errMsg - Error log message
-     * @returns {BrowserWindow|null} The created window or null if creation failed
-     * @private
-     */
-    const setupWindow = (createFn, failMsg, sendDataFn, alignOptions = null) => {
-        const win = createFn();
-        if (!win) {
-            logger.error(failMsg);
-            return null;
-        }
-        win.webContents.on('did-finish-load', sendDataFn);
-        if (alignOptions?.enabled && alignOptions.otherWindow) {
+  /**
+   * Creates a window and sets up its event handlers with optional alignment
+   * @param {Function} createFn - Function that creates and returns a BrowserWindow
+   * @param {string} failMsg - Error message if window creation fails
+   * @param {Function} sendDataFn - Callback invoked on did-finish-load to send initial data
+   * @param {Object} [alignOptions] - Optional alignment configuration
+   * @param {boolean} alignOptions.enabled - Whether to align the window
+   * @param {BrowserWindow} alignOptions.otherWindow - Window to align with
+   * @param {BrowserWindow} alignOptions.win1 - First window for alignment
+   * @param {BrowserWindow} alignOptions.win2 - Second window for alignment
+   * @param {string} alignOptions.side - Which side to align ('left' or 'right')
+   * @param {string} alignOptions.logMsg - Success log message
+   * @param {string} alignOptions.errMsg - Error log message
+   * @returns {BrowserWindow|null} The created window or null if creation failed
+   * @private
+   */
+  const setupWindow = (createFn, failMsg, sendDataFn, alignOptions = null) => {
+    const win = createFn();
+    if (!win) {
+      logger.error(failMsg);
+      return null;
+    }
+    win.webContents.on('did-finish-load', sendDataFn);
+    if (alignOptions?.enabled && alignOptions.otherWindow) {
+      try {
+        alignWindowsSideBySide(alignOptions.win1, alignOptions.win2);
+        logger.debug(alignOptions.logMsg);
+      } catch (err) {
+        logger.error(alignOptions.errMsg, err);
+      }
+    }
+    return win;
+  };
+
+  // Handler: itens-pet
+  ipcMain.on('itens-pet', (event, openOptions) => {
+    const currentPet = getCurrentPet();
+    if (!currentPet) {
+      logger.error('No pet selected to open items window');
+      return;
+    }
+
+    logger.debug(`Opening items window for pet: ${currentPet.name}`);
+    const storeWindow = openOptions?.fromStore ? getStoreWindow() : null;
+
+    const win = setupWindow(
+      createItemsWindow,
+      'Failed to create items window',
+      () => {
+        currentPet.coins = getCoins();
+        currentPet.items = getItems();
+        const win = getItemsWindow();
+        if (win) win.webContents.send('pet-data', currentPet);
+
+        // Posicionar após carregar os dados
+        if (storeWindow && !storeWindow.isDestroyed()) {
+          setTimeout(() => {
             try {
-                alignWindowsSideBySide(alignOptions.win1, alignOptions.win2, alignOptions.side, screen);
-                logger.debug(alignOptions.logMsg);
+              alignWindowsSideBySide(win, storeWindow);
+              logger.debug('Items window aligned with store window after load');
             } catch (err) {
-                logger.error(alignOptions.errMsg, err);
+              logger.error('Error positioning items window after load:', err);
             }
+          }, 100);
         }
-        return win;
-    };
+      },
+      null // Remover alinhamento inicial, será feito no callback
+    );
+  });
 
-    // Handler: itens-pet
-    ipcMain.on('itens-pet', (event, openOptions) => {
-        const currentPet = getCurrentPet();
-        if (!currentPet) {
-            logger.error('No pet selected to open items window');
-            return;
+  // Handler: store-pet
+  ipcMain.on('store-pet', (event, openOptions) => {
+    const currentPet = getCurrentPet();
+    if (!currentPet) {
+      logger.error('No pet selected to open store window');
+      return;
+    }
+
+    logger.debug(`Opening store window for pet: ${currentPet.name}`);
+    const itemsWindow = openOptions?.fromItems ? getItemsWindow() : null;
+
+    const win = setupWindow(
+      createStoreWindow,
+      'Failed to create store window',
+      () => {
+        currentPet.items = getItems();
+        const win = getStoreWindow();
+        if (win) win.webContents.send('pet-data', currentPet);
+
+        // Posicionar após carregar os dados
+        if (itemsWindow && !itemsWindow.isDestroyed()) {
+          setTimeout(() => {
+            try {
+              alignWindowsSideBySide(itemsWindow, win);
+              logger.debug('Store window aligned with items window after load');
+            } catch (err) {
+              logger.error('Error positioning store window after load:', err);
+            }
+          }, 100);
         }
+      },
+      null // Remover alinhamento inicial, será feito no callback
+    );
+  });
 
-        logger.debug(`Opening items window for pet: ${currentPet.name}`);
-        const storeWindow = openOptions?.fromStore ? getStoreWindow() : null;
-        
-        setupWindow(
-            createItemsWindow,
-            'Failed to create items window',
-            () => {
-                currentPet.coins = getCoins();
-                currentPet.items = getItems();
-                const win = getItemsWindow();
-                if (win) win.webContents.send('pet-data', currentPet);
-            },
-            storeWindow ? {
-                enabled: true,
-                otherWindow: storeWindow,
-                win1: getItemsWindow(),
-                win2: storeWindow,
-                side: 'left',
-                logMsg: 'Items window aligned with store window',
-                errMsg: 'Error positioning items window:'
-            } : null
-        );
-    });
+  // Handler: resize-journey-window
+  ipcMain.on('resize-journey-window', (event, size) => {
+    const journeyWindow = BrowserWindow.getAllWindows().find((w) =>
+      w.getTitle().includes('Journey')
+    );
+    if (journeyWindow && size && size.width && size.height) {
+      journeyWindow.setSize(Math.round(size.width), Math.round(size.height));
+      logger.debug(`Journey window resized to ${size.width}x${size.height}`);
+    }
+  });
 
-    // Handler: store-pet
-    ipcMain.on('store-pet', (event, openOptions) => {
-        const currentPet = getCurrentPet();
-        if (!currentPet) {
-            logger.error('No pet selected to open store window');
-            return;
-        }
+  // Handler: resize-pen-window
+  ipcMain.on('resize-pen-window', (event, size) => {
+    const penWindow = BrowserWindow.getAllWindows().find((w) => w.getTitle().includes('Pen'));
+    if (penWindow && size && size.width && size.height) {
+      penWindow.setSize(Math.round(size.width), Math.round(size.height));
+      logger.debug(`Pen window resized to ${size.width}x${size.height}`);
+      // Notify pen script to update nests position
+      penWindow.webContents.send('update-nests-position');
+    }
+  });
 
-        logger.debug(`Opening store window for pet: ${currentPet.name}`);
-        const itemsWindow = openOptions?.fromItems ? getItemsWindow() : null;
-        
-        setupWindow(
-            createStoreWindow,
-            'Failed to create store window',
-            () => {
-                currentPet.items = getItems();
-                const win = getStoreWindow();
-                if (win) win.webContents.send('pet-data', currentPet);
-            },
-            itemsWindow ? {
-                enabled: true,
-                otherWindow: itemsWindow,
-                win1: itemsWindow,
-                win2: getStoreWindow(),
-                side: 'left',
-                logMsg: 'Store window aligned with items window',
-                errMsg: 'Error positioning store window:'
-            } : null
-        );
-    });
+  // Handler: resize-lair-window
+  ipcMain.on('resize-lair-window', (event, size) => {
+    const lairWindow = BrowserWindow.getAllWindows().find((w) => w.getTitle().includes('Lair'));
+    if (lairWindow && size && size.width && size.height) {
+      lairWindow.setSize(Math.round(size.width), Math.round(size.height));
+      logger.debug(`Lair window resized to ${size.width}x${size.height}`);
+    }
+  });
 
-    // Handler: resize-journey-window
-    ipcMain.on('resize-journey-window', (event, size) => {
-        const journeyWindow = BrowserWindow.getAllWindows().find(w => w.getTitle().includes('Journey'));
-        if (journeyWindow && size && size.width && size.height) {
-            journeyWindow.setSize(Math.round(size.width), Math.round(size.height));
-            logger.debug(`Journey window resized to ${size.width}x${size.height}`);
-        }
-    });
-
-    // Handler: resize-pen-window
-    ipcMain.on('resize-pen-window', (event, size) => {
-        const penWindow = BrowserWindow.getAllWindows().find(w => w.getTitle().includes('Pen'));
-        if (penWindow && size && size.width && size.height) {
-            penWindow.setSize(Math.round(size.width), Math.round(size.height));
-            logger.debug(`Pen window resized to ${size.width}x${size.height}`);
-            // Notify pen script to update nests position
-            penWindow.webContents.send('update-nests-position');
-        }
-    });
-
-    // Handler: resize-lair-window
-    ipcMain.on('resize-lair-window', (event, size) => {
-        const lairWindow = BrowserWindow.getAllWindows().find(w => w.getTitle().includes('Lair'));
-        if (lairWindow && size && size.width && size.height) {
-            lairWindow.setSize(Math.round(size.width), Math.round(size.height));
-            logger.debug(`Lair window resized to ${size.width}x${size.height}`);
-        }
-    });
-
-    logger.info('Window positioning handlers registered successfully');
+  logger.info('Window positioning handlers registered successfully');
 }
 
 /**
  * Aligns two windows side by side, centered on screen
  * @param {BrowserWindow} leftWindow - Window to place on the left
  * @param {BrowserWindow} rightWindow - Window to place on the right
- * @param {string} anchorPosition - Which window is the anchor ('left' or 'right')
+ * (anchorPosition removido - não utilizado)
  */
-function alignWindowsSideBySide(leftWindow, rightWindow, anchorPosition = 'left', screen = electronScreen) {
-    const display = screen.getPrimaryDisplay();
-    const screenWidth = display.workAreaSize.width;
-    const screenHeight = display.workAreaSize.height;
+function alignWindowsSideBySide(leftWindow, rightWindow) {
+  const display = electronScreen.getPrimaryDisplay();
+  const screenWidth = display.workAreaSize.width;
+  const screenHeight = display.workAreaSize.height;
 
-    const leftBounds = leftWindow.getBounds();
-    const rightBounds = rightWindow.getBounds();
+  const leftBounds = leftWindow.getBounds();
+  const rightBounds = rightWindow.getBounds();
 
-    const totalWidth = leftBounds.width + rightBounds.width;
-    const maxHeight = Math.max(leftBounds.height, rightBounds.height);
+  const totalWidth = leftBounds.width + rightBounds.width;
+  const maxHeight = Math.max(leftBounds.height, rightBounds.height);
 
-    const startX = Math.round((screenWidth - totalWidth) / 2);
-    const startY = Math.round((screenHeight - maxHeight) / 2);
+  const startX = Math.round((screenWidth - totalWidth) / 2);
+  const startY = Math.round((screenHeight - maxHeight) / 2);
 
-    leftWindow.setPosition(startX, startY);
-    rightWindow.setPosition(startX + leftBounds.width, startY);
+  leftWindow.setPosition(startX, startY);
+  rightWindow.setPosition(startX + leftBounds.width, startY);
 }
 
 module.exports = { setupWindowPositioningHandlers };

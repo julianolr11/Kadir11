@@ -9,7 +9,10 @@
     "dev:electron": "wait-on http://localhost:5173 && electron .",
     "start": "electron .",
     "test": "mocha",
-    "coverage": "nyc --reporter=text --reporter=lcov mocha"
+    "coverage": "nyc --reporter=text --reporter=lcov mocha",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +24,14 @@
     "mocha": "^10.2.0",
     "nyc": "^17.1.0",
     "sinon": "^21.0.0",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.2.0",
+    "prettier": "^3.2.5",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3"
   },
   "nyc": {
     "extension": [

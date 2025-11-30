@@ -13,8 +13,8 @@ describe('learnMove logic', () => {
     assert.strictEqual(cost, 4);
     assert.strictEqual(learnedBefore, false);
     assert.strictEqual(updated.kadirPoints, 6);
-    assert.ok(updated.moves.some(m => m.name === 'Golpe A'));
-    assert.ok(updated.knownMoves.some(m => m.name === 'Golpe A'));
+    assert.ok(updated.moves.some((m) => m.name === 'Golpe A'));
+    assert.ok(updated.knownMoves.some((m) => m.name === 'Golpe A'));
   });
   it('re-learns existing move at half cost (ceil)', () => {
     const pet = basePet();
@@ -25,7 +25,7 @@ describe('learnMove logic', () => {
     assert.strictEqual(learnedBefore, true);
     assert.strictEqual(cost, Math.ceil(5 / 2));
     assert.strictEqual(updated.kadirPoints, 10 - cost);
-    const stored = updated.moves.find(m => m.name === 'Golpe A');
+    const stored = updated.moves.find((m) => m.name === 'Golpe A');
     assert.strictEqual(stored.power, 20);
   });
   it('returns error on insufficient points', () => {
@@ -40,10 +40,10 @@ describe('learnMove logic', () => {
   it('replaces first move if list full (>=4)', () => {
     const pet = basePet();
     pet.kadirPoints = 50;
-    ['M1','M2','M3','M4'].forEach((n,i)=> learnMove(pet,{name:n,cost:1,power:i}));
-    const res = learnMove(pet,{name:'Novo',cost:2,power:99});
+    ['M1', 'M2', 'M3', 'M4'].forEach((n, i) => learnMove(pet, { name: n, cost: 1, power: i }));
+    const res = learnMove(pet, { name: 'Novo', cost: 2, power: 99 });
     assert.ok(!res.error);
-    assert.strictEqual(pet.moves.length,4);
-    assert.strictEqual(pet.moves[0].name,'Novo');
+    assert.strictEqual(pet.moves.length, 4);
+    assert.strictEqual(pet.moves[0].name, 'Novo');
   });
 });

@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `scripts/state/storeState.js`: Encapsula acesso ao electron-store (moedas, itens, pen, nests, broadcasts)
 - `scripts/logic/petGeneration.js`: Inicialização de species e geração de pets/raridade isoladas
 - `scripts/windows/gameWindows.js`: Fábrica central de todas as BrowserWindows de jogo + getters e fechamento em lote
+- `scripts/bootstrap/registerHandlers.js`: Bootstrap único para registrar todos os handlers IPC
+- `scripts/handlers/handlersIndex.js`: Agregador das funções de registro de handlers (simplifica import em `main.js`)
 
 #### Changed
 - `main.js` agora importa módulos de estado, lógica e janelas em vez de definir tudo inline
@@ -21,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Centralizada lógica de posicionamento de `nestsWindow` via `updateNestsPosition()` do módulo de janelas
 - Mantida assinatura dos handlers através de proxies (`getStoreWindow`, `getItemsWindow`, `getHatchWindow`)
 - Unificado `currentPet` usando `stateManager` (eliminado estado duplicado local)
+- `registerAllHandlers` agora suporta assinatura agrupada (objetos por domínio) mantendo compatibilidade com formato legado
+- `main.js` atualizado para usar assinatura agrupada e agregador único de handlers
 
 #### Fixed
 - Conflito de shadowing: funções locais sobrescreviam exports de `gameWindows` (agora removidas)
@@ -30,9 +34,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Mantidos todos os 137 testes passando após cada etapa de extração
 
 #### Next Steps (Planejado)
-- Extrair gerenciamento de `currentPet` (get/set/broadcast/resetTimers) para `scripts/state/currentPet.js`
-- Criar `scripts/bootstrap/registerHandlers.js` para registrar todos os handlers em sequência única
-- Atualizar documentação (README + CHANGELOG) após conclusão da fase
+- Adicionar linting (ESLint + Prettier) e regras de import
+- Diagrama visual de arquitetura em `docs/`
+- Possível agrupamento adicional de funções de broadcast em sub-objeto dedicado
 
 ### 🎯 Phase 2: Modularization & Test Coverage (2025-11-29)
 

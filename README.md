@@ -84,3 +84,75 @@ Alguns golpes podem aplicar condições especiais durante as batalhas. Os efeito
 - **Paralisia**: 50% de chance de não agir por 1 a 2 turnos, reduzindo um pouco a velocidade.
 
 Os ícones desses efeitos estão em `Assets/Icons`.
+
+## Arquitetura (Fase 3)
+
+A aplicação passou por uma refatoração modular significativa na Fase 3 para reduzir o tamanho e acoplamento de `main.js`.
+
+### Principais Módulos
+- `scripts/windows/gameWindows.js`: Fábricas centralizadas de todas as janelas (battle, journey, lair, train, items, store, nests, hatch) + utilidades (`updateNestsPosition`, getters e fechamento em lote).
+- `scripts/managers/stateManager.js`: Fonte única de verdade para `currentPet` e registro de janelas (eliminou estado duplicado em `main.js`).
+- `scripts/state/storeState.js`: Encapsula `electron-store` (moedas, itens, pen, nests) e funções de broadcast.
+- `scripts/logic/petGeneration.js`: Inicialização de espécies e geração de pets / raridade.
+- `scripts/bootstrap/registerHandlers.js`: Bootstrap único que registra todos os handlers IPC de forma ordenada.
+- `scripts/handlers/*.js`: Cada concern isolado (store, pet, moves, battle mechanics, nests, positioning, lifecycle, assets, game).
+- `scripts/utils/idleAssets.js`: Resolução de assets (idle gifs) usada por handlers de jogo.
+
+### Fluxo de Inicialização
+1. Electron inicializa e cria `storeState` + `stateManager`.
+2. Carrega espécies via `initSpecies()`.
+3. Cria janelas base via `initGameWindows()`.
+4. Invoca `registerAllHandlers()` que orquestra o registro de todos os canais IPC.
+5. `stateManager` gerencia seleção de pet e dispara broadcasts de atualização.
+
+### Nova Assinatura de Bootstrap
+
+Exemplo da nova chamada agrupada em `main.js`:
+```js
+registerAllHandlers({
+	electron: { ipcMain, BrowserWindow },
+	managers: { windowManager, appState, petManager },
+	store: { store },
+	stateAccessors: { getCoins, setCoins, getItems, setItems, getPenInfo, getNestCount, getNestPrice, getNestsData, setNestsData, broadcastPenUpdate, broadcastNestUpdate, getDifficulty, setDifficulty },
+	petGeneration: { generateRarity, generatePetFromEgg, getSpeciesData, baseDir: __dirname },
+	cache: { journeyImagesCacheRef },
+	windows: { createBattleModeWindow, createJourneyModeWindow, createJourneySceneWindow, createLairModeWindow, createTrainWindow, createTrainMenuWindow, createTrainAttributesWindow, createTrainForceWindow, createTrainDefenseWindow, createItemsWindow, createStoreWindow, createNestsWindow, createHatchWindow, updateNestsPosition, getStoreWindow, getItemsWindow, getHatchWindow, closeAllGameWindows },
+	xp: { xpUtils: { calculateXpGain, getRequiredXpForNextLevel, increaseAttributesOnLevelUp } },
+	handlers: { /* requires dos handlers */ }
+});
+```
+
+### Benefícios da Refatoração
+- Redução substancial de linhas em `main.js`.
+- Facilidade para adicionar/remover handlers sem mexer no núcleo.
+- Testes permanecem 100% funcionais (137 passando) garantindo paridade comportamental.
+- Estrutura pronta para futura aplicação de ESLint/Prettier e divisão em pacotes.
+
+### Próximos Passos Sugeridos
+- Adicionar seção de arquitetura ao `docs/` com diagrama visual.
+- Introduzir ESLint + Prettier.
+- Consolidar objetos de configuração avançados (ex: agrupar funções de broadcast em um sub‑objeto `broadcast`).
+
+## Lint & Formatação
+
+O projeto agora inclui configuração de **ESLint** e **Prettier** para padronizar estilo e qualidade de código.
+
+### Scripts
+```bash
+npm run lint       # Analisa todo o projeto
+npm run lint:fix   # Tenta corrigir problemas automaticamente
+npm run format     # Aplica formatação Prettier
+```
+
+### Configurações
+- Arquivo `.eslintrc.json` com regras recomendadas + plugins: import, promise, node, prettier.
+- `.prettierrc` define estilo (singleQuote, trailingComma, printWidth=100).
+- Pastas ignoradas: `coverage/`, `Assets/`, `pets/`, `frontend/`.
+
+### Convenções Principais
+- `no-console` liberado (logs são úteis para depuração).
+- Suporte a `.mjs` com `sourceType: module`.
+- Regras de import relaxadas para permitir requires dinâmicos do Electron.
+
+Execute `npm install` se ainda não tiver as novas dependências instaladas.
+

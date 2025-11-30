@@ -4,9 +4,13 @@ const { setupBattleMechanicsHandlers } = require('../scripts/handlers/battleMech
 function mockIpc() {
   const handlers = {};
   return {
-    on: (ch, fn) => { handlers[ch] = fn; },
-    emit: async (ch, ...args) => { if (handlers[ch]) return handlers[ch]({}, ...args); },
-    _handlers: handlers
+    on: (ch, fn) => {
+      handlers[ch] = fn;
+    },
+    emit: async (ch, ...args) => {
+      if (handlers[ch]) return handlers[ch]({}, ...args);
+    },
+    _handlers: handlers,
   };
 }
 
@@ -24,16 +28,20 @@ describe('battleMechanicsHandlers', () => {
     let updatedEnergy = null;
     setupBattleMechanicsHandlers({
       getCurrentPet: () => pet,
-      petManager: { updatePet: async (_, data) => { updatedEnergy = data.energy; } },
+      petManager: {
+        updatePet: async (_, data) => {
+          updatedEnergy = data.energy;
+        },
+      },
       ipcMain: ipc,
-      BrowserWindow: BW
+      BrowserWindow: BW,
     });
     await ipc.emit('use-move', { name: 'Golpe', cost: 3 });
     assert.strictEqual(pet.energy, 2);
     assert.strictEqual(updatedEnergy, 2);
     await ipc.emit('use-move', { name: 'Exausto', cost: 10 });
     assert.strictEqual(pet.energy, 0);
-    assert.ok(BW._sends.some(s => s.ch === 'pet-data'));
+    assert.ok(BW._sends.some((s) => s.ch === 'pet-data'));
   });
 
   it('use-bravura reduces bravura and floors at 0', async () => {
@@ -43,9 +51,13 @@ describe('battleMechanicsHandlers', () => {
     let updatedBravura = null;
     setupBattleMechanicsHandlers({
       getCurrentPet: () => pet,
-      petManager: { updatePet: async (_, data) => { updatedBravura = data.bravura; } },
+      petManager: {
+        updatePet: async (_, data) => {
+          updatedBravura = data.bravura;
+        },
+      },
       ipcMain: ipc,
-      BrowserWindow: BW
+      BrowserWindow: BW,
     });
     await ipc.emit('use-bravura', 1);
     assert.strictEqual(pet.bravura, 1);
@@ -62,9 +74,13 @@ describe('battleMechanicsHandlers', () => {
     let updatedHealth = null;
     setupBattleMechanicsHandlers({
       getCurrentPet: () => pet,
-      petManager: { updatePet: async (_, data) => { updatedHealth = data.currentHealth; } },
+      petManager: {
+        updatePet: async (_, data) => {
+          updatedHealth = data.currentHealth;
+        },
+      },
       ipcMain: ipc,
-      BrowserWindow: BW
+      BrowserWindow: BW,
     });
     await ipc.emit('update-health', 40);
     assert.strictEqual(updatedHealth, 40);

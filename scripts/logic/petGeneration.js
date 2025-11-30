@@ -1,6 +1,7 @@
 // Pet generation & species loading abstraction - Fase 3 Refactor
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 let eggSpecieMap = {};
 let specieData = {};
@@ -19,7 +20,9 @@ function generateRarity() {
 }
 
 async function initSpecies(baseDir) {
-  const constants = await import(path.join(baseDir, 'scripts', 'constants.mjs'));
+  const constantsPath = path.join(baseDir, 'scripts', 'constants.mjs');
+  const constantsUrl = pathToFileURL(constantsPath).href;
+  const constants = await import(constantsUrl);
   eggSpecieMap = constants.eggSpecieMap;
   specieData = constants.specieData;
   specieImages = constants.specieImages;
@@ -37,7 +40,7 @@ function generatePetFromEgg(eggId, rarity) {
     defense: Math.floor(Math.random() * 5) + 1,
     speed: Math.floor(Math.random() * 5) + 1,
     magic: Math.floor(Math.random() * 5) + 1,
-    life: (Math.floor(Math.random() * 5) + 1) * 10
+    life: (Math.floor(Math.random() * 5) + 1) * 10,
   };
 
   let statusImage = '';
@@ -84,7 +87,7 @@ function generatePetFromEgg(eggId, rarity) {
     currentHealth: attributes.life,
     maxHealth: attributes.life,
     energy: 100,
-    kadirPoints: 10
+    kadirPoints: 10,
   };
 }
 

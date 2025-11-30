@@ -10,15 +10,15 @@ describe('logger disabled branch sides', () => {
     logger.group('G');
     logger.groupEnd();
     // just ensure enabled stayed false
-    assert.strictEqual(logger.enabled,false);
+    assert.strictEqual(logger.enabled, false);
   });
   it('time end executes when disabled in production (debug skipped)', () => {
-    process.env.NODE_ENV='production';
+    process.env.NODE_ENV = 'production';
     const logger = createLogger('Y');
     logger.disable();
     const end = logger.time('Perf');
     end(); // debug should be skipped (branch false)
-    assert.strictEqual(logger.enabled,false);
-    process.env.NODE_ENV='test';
+    assert.strictEqual(logger.enabled, false);
+    process.env.NODE_ENV = 'test';
   });
 });

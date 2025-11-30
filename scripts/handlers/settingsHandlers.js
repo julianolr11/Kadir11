@@ -6,7 +6,14 @@ const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('SettingsHandlers');
 
-function registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty }) {
+function registerSettingsHandlers({
+  getPenInfo,
+  getNestCount,
+  getNestPrice,
+  getNestsData,
+  getDifficulty,
+  setDifficulty,
+}) {
   logger.info('Registrando Settings Handlers');
 
   ipcMain.handle('get-pen-info', async () => {

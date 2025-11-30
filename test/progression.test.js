@@ -3,12 +3,25 @@ const { applyBattleProgress, applyJourneyRewards } = require('../scripts/logic/p
 
 describe('progression logic', () => {
   function makePet() {
-    return { petId: '000002', level: 1, experience: 0, rarity: 'Comum', kadirPoints: 0, attributes: { life: 10, attack: 5, defense:5, speed:5, magic:5 }, maxHealth: 10, currentHealth: 10 };
+    return {
+      petId: '000002',
+      level: 1,
+      experience: 0,
+      rarity: 'Comum',
+      kadirPoints: 0,
+      attributes: { life: 10, attack: 5, defense: 5, speed: 5, magic: 5 },
+      maxHealth: 10,
+      currentHealth: 10,
+    };
   }
   const mockXpUtils = {
     calculateXpGain: (base, rarity) => base, // ignore rarity for deterministic test
     getRequiredXpForNextLevel: (lvl) => 10 * lvl, // simple linear requirement
-    increaseAttributesOnLevelUp: (pet) => { pet.attributes.life += 1; pet.maxHealth = pet.attributes.life; pet.currentHealth = pet.maxHealth; }
+    increaseAttributesOnLevelUp: (pet) => {
+      pet.attributes.life += 1;
+      pet.maxHealth = pet.attributes.life;
+      pet.currentHealth = pet.maxHealth;
+    },
   };
   it('gains xp without leveling if below threshold', () => {
     const pet = makePet();
@@ -40,11 +53,19 @@ describe('progression logic', () => {
     const store = { items: {}, coins: 0 };
     const storeFns = {
       getItems: () => store.items,
-      setItems: (i) => { store.items = i; },
+      setItems: (i) => {
+        store.items = i;
+      },
       getCoins: () => store.coins,
-      setCoins: (c) => { store.coins = c; }
+      setCoins: (c) => {
+        store.coins = c;
+      },
     };
-    const res = applyJourneyRewards(pet, { eggId: 'eggAve', coins: 50, kadirPoints: 100 }, storeFns);
+    const res = applyJourneyRewards(
+      pet,
+      { eggId: 'eggAve', coins: 50, kadirPoints: 100 },
+      storeFns
+    );
     assert.strictEqual(store.items.eggAve, 1);
     assert.strictEqual(pet.items.eggAve, 1);
     assert.strictEqual(store.coins, 50);

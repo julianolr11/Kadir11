@@ -27,7 +27,18 @@ function buildDom(extra = {}) {
   global.window = dom.window;
   global.document = dom.window.document;
   // Stub fetch for loadQuestions when needed
-  global.fetch = () => Promise.resolve({ json: () => Promise.resolve([{ text: 'Q', options: [{ text: 'O', points: { attack:1, defense:1, speed:1, magic:1, life:1 } }] }]) });
+  global.fetch = () =>
+    Promise.resolve({
+      json: () =>
+        Promise.resolve([
+          {
+            text: 'Q',
+            options: [
+              { text: 'O', points: { attack: 1, defense: 1, speed: 1, magic: 1, life: 1 } },
+            ],
+          },
+        ]),
+    });
   // Basic electronAPI structure; handlers collected in maps
   const errorHandlers = {}; // eventName -> handler
   let petCreatedHandler = null;
@@ -35,12 +46,18 @@ function buildDom(extra = {}) {
     getSpeciesInfo: async () => ({
       specieData: { A: { dir: 'A', race: 'A', element: 'fogo' } },
       specieBioImages: {},
-      specieImages: { A: 'A/fogo/A/front.gif' }
+      specieImages: { A: 'A/fogo/A/front.gif' },
     }),
-    onPetCreated: (cb) => { petCreatedHandler = cb; },
-    on: (evt, cb) => { errorHandlers[evt] = cb; },
+    onPetCreated: (cb) => {
+      petCreatedHandler = cb;
+    },
+    on: (evt, cb) => {
+      errorHandlers[evt] = cb;
+    },
     createPet: () => {},
-    animationFinished: () => { window.__animationFinishedCalled = true; }
+    animationFinished: () => {
+      window.__animationFinishedCalled = true;
+    },
   };
   Object.assign(window, extra);
   return { errorHandlers, getPetCreatedHandler: () => petCreatedHandler };
@@ -49,13 +66,21 @@ function buildDom(extra = {}) {
 describe('create-pet.js branch coverage', () => {
   let clock;
   afterEach(() => {
-    if (clock) { clock.restore(); clock = null; }
-    delete global.window; delete global.document; delete global.fetch; delete global.__KADIR_TEST__;
+    if (clock) {
+      clock.restore();
+      clock = null;
+    }
+    delete global.window;
+    delete global.document;
+    delete global.fetch;
+    delete global.__KADIR_TEST__;
     // Clear module cache to allow re-require with different conditions
     delete require.cache[require.resolve('../scripts/create-pet.js')];
   });
 
-  async function flush() { return new Promise(r => setTimeout(r, 0)); }
+  async function flush() {
+    return new Promise((r) => setTimeout(r, 0));
+  }
 
   it('covers full animation chain (success play path + nested timeouts)', () => {
     buildDom();
@@ -70,8 +95,16 @@ describe('create-pet.js branch coverage', () => {
     mod.showFinalAnimation(pet);
     // Advance through all timers: 7000 + 100 + 1000 + 300 + 3000
     clock.tick(12000);
-    assert.strictEqual(window.__animationFinishedCalled, true, 'animationFinished should be called');
-    assert.strictEqual(document.getElementById('pet-reveal').style.display, 'none', 'pet reveal should be hidden after completion');
+    assert.strictEqual(
+      window.__animationFinishedCalled,
+      true,
+      'animationFinished should be called'
+    );
+    assert.strictEqual(
+      document.getElementById('pet-reveal').style.display,
+      'none',
+      'pet reveal should be hidden after completion'
+    );
   });
 
   it('covers onPetCreated listener path invoking showFinalAnimation', async () => {
@@ -99,7 +132,9 @@ describe('create-pet.js branch coverage', () => {
     const cb = errorHandlers['create-pet-error'];
     assert.ok(cb, 'error handler registered');
     let alerted = '';
-    global.alert = (msg) => { alerted = msg; };
+    global.alert = (msg) => {
+      alerted = msg;
+    };
     cb(null, 'Limite de 6 pets atingido');
     assert.ok(alerted.includes('6'), 'limit alert executed');
     assert.strictEqual(document.getElementById('create-pet-button').disabled, false);
@@ -116,7 +151,9 @@ describe('create-pet.js branch coverage', () => {
     const cb = errorHandlers['create-pet-error'];
     assert.ok(cb, 'error handler registered');
     let alerted = '';
-    global.alert = (msg) => { alerted = msg; };
+    global.alert = (msg) => {
+      alerted = msg;
+    };
     cb(null, 'Falha desconhecida');
     assert.ok(alerted.includes('Erro ao criar'), 'generic alert executed');
     assert.strictEqual(document.getElementById('name-selection').style.display, 'block');
@@ -135,18 +172,23 @@ describe('create-pet.js branch coverage', () => {
   it('covers error path in loadSpeciesData', async () => {
     buildDom({
       electronAPI: {
-        getSpeciesInfo: async () => { throw new Error('fail species'); }
-      }
+        getSpeciesInfo: async () => {
+          throw new Error('fail species');
+        },
+      },
     });
     global.__KADIR_TEST__ = true;
     const mod = require('../scripts/create-pet.js');
     await mod.loadSpeciesData(); // should catch error
     // specieData remains empty
-    assert.deepStrictEqual(Object.keys(Object.getOwnPropertyNames(global.window.electronAPI || {})).length >= 0, true);
+    assert.deepStrictEqual(
+      Object.keys(Object.getOwnPropertyNames(global.window.electronAPI || {})).length >= 0,
+      true
+    );
   });
 
   it('covers else branch when specie info missing (generateSpecie returns unknown)', () => {
-    const { } = buildDom();
+    const {} = buildDom();
     global.__KADIR_TEST__ = true;
     const mod = require('../scripts/create-pet.js');
     // Prepare minimal DOM for handleCreatePet
@@ -157,14 +199,20 @@ describe('create-pet.js branch coverage', () => {
     mod.generateSpecie = () => 'Fantasma';
     // Stub createPet to capture data
     let captured = null;
-    window.electronAPI.createPet = (data) => { captured = data; };
+    window.electronAPI.createPet = (data) => {
+      captured = data;
+    };
     mod.handleCreatePet();
     assert.ok(captured, 'pet should be created');
-    assert.strictEqual(captured.statusImage, 'eggsy.png', 'fallback image expected when info missing and no mapping');
+    assert.strictEqual(
+      captured.statusImage,
+      'eggsy.png',
+      'fallback image expected when info missing and no mapping'
+    );
   });
 
   it('covers branch building base path without element in specie info', () => {
-    const { } = buildDom();
+    const {} = buildDom();
     global.__KADIR_TEST__ = true;
     const mod = require('../scripts/create-pet.js');
     // Inject specieData with a race but no element
@@ -173,9 +221,15 @@ describe('create-pet.js branch coverage', () => {
     document.getElementById('pet-name').value = 'NoElem';
     mod.generateSpecie = () => 'SemElemento';
     let captured = null;
-    window.electronAPI.createPet = (data) => { captured = data; };
+    window.electronAPI.createPet = (data) => {
+      captured = data;
+    };
     mod.handleCreatePet();
     assert.ok(captured, 'pet should be created');
-    assert.strictEqual(captured.statusImage, 'DirZ/RZ/front.gif', 'path without element segment should be used');
+    assert.strictEqual(
+      captured.statusImage,
+      'DirZ/RZ/front.gif',
+      'path without element segment should be used'
+    );
   });
 });

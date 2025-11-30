@@ -8,7 +8,13 @@ const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('AssetsHandlers');
 
-function registerAssetsHandlers({ loadSpeciesData, getSpeciesData, getJourneyImagesCache, setJourneyImagesCache, baseDir }) {
+function registerAssetsHandlers({
+  loadSpeciesData,
+  getSpeciesData,
+  getJourneyImagesCache,
+  setJourneyImagesCache,
+  baseDir,
+}) {
   logger.info('Registrando Assets Handlers');
 
   ipcMain.handle('get-species-info', async () => {
@@ -23,8 +29,8 @@ function registerAssetsHandlers({ loadSpeciesData, getSpeciesData, getJourneyIma
       const dir = path.join(baseDir, 'Assets', 'Modes', 'Journeys');
       const files = await fs.promises.readdir(dir);
       const images = files
-        .filter(f => /\.(png|jpg|jpeg|gif)$/i.test(f))
-        .map(f => path.join('Assets', 'Modes', 'Journeys', f).replace(/\\/g, '/'));
+        .filter((f) => /\.(png|jpg|jpeg|gif)$/i.test(f))
+        .map((f) => path.join('Assets', 'Modes', 'Journeys', f).replace(/\\/g, '/'));
       setJourneyImagesCache(images);
       return images;
     } catch (err) {

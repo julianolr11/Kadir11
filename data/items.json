@@ -10,8 +10,8 @@
     "id": "meat",
     "name": "Carne",
     "icon": "Assets/Shop/meat1.png",
-    "description": "Sacia 20 pontos de fome e 10 de felicidade. Recupera 5% da vida.",
-    "effect": "Sacia 20 pontos de fome e 10 de felicidade. Recupera 5% da vida."
+    "description": "Sacia 30 pontos de fome, +10 felicidade e cura 15 de vida.",
+    "effect": "Sacia 30 fome, +10 felicidade, cura fixa 15 vida."
   },
   {
     "id": "staminaPotion",

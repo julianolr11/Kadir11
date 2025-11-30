@@ -4,10 +4,14 @@ const { setupWindowPositioningHandlers } = require('../scripts/handlers/windowPo
 describe('windowPositioningHandlers extra branches', () => {
   function build(opts) {
     const handlers = {};
-    const ipcMain = { on: (evt, cb) => { handlers[evt] = cb; } };
+    const ipcMain = {
+      on: (evt, cb) => {
+        handlers[evt] = cb;
+      },
+    };
     const wins = [];
     const BrowserWindow = {
-      getAllWindows: () => wins
+      getAllWindows: () => wins,
     };
     const storeWindow = {
       getBounds: () => ({ width: 300, height: 200 }),
@@ -16,7 +20,7 @@ describe('windowPositioningHandlers extra branches', () => {
       webContents: {
         on: () => {},
         send: () => {},
-      }
+      },
     };
     const itemsWindow = {
       getBounds: () => ({ width: 250, height: 180 }),
@@ -25,27 +29,32 @@ describe('windowPositioningHandlers extra branches', () => {
       webContents: {
         on: () => {},
         send: () => {},
-      }
+      },
     };
-    const screen = opts.screen || { getPrimaryDisplay: () => ({ workAreaSize: { width: 1200, height: 800 } }) };
+    const screen = opts.screen || {
+      getPrimaryDisplay: () => ({ workAreaSize: { width: 1200, height: 800 } }),
+    };
     const state = { pet: { name: 'PetX', items: {}, coins: 0 } };
     setupWindowPositioningHandlers({
       createItemsWindow: opts.createItemsWindow,
       createStoreWindow: opts.createStoreWindow,
       getStoreWindow: () => storeWindow,
       getItemsWindow: () => itemsWindow,
-      getCurrentPet: () => opts.hasPet ? state.pet : null,
+      getCurrentPet: () => (opts.hasPet ? state.pet : null),
       getCoins: () => 15,
       getItems: () => ({ a: 1 }),
       ipcMain,
       BrowserWindow,
-      screen
+      screen,
     });
     return { handlers, wins, storeWindow, itemsWindow };
   }
 
   it('handles missing pet for store-pet', () => {
-    const { handlers } = build({ hasPet: false, createStoreWindow: () => ({ webContents: { on: () => {} } }) });
+    const { handlers } = build({
+      hasPet: false,
+      createStoreWindow: () => ({ webContents: { on: () => {} } }),
+    });
     handlers['store-pet']({}, {}); // should early return without throwing
   });
 
@@ -55,21 +64,29 @@ describe('windowPositioningHandlers extra branches', () => {
   });
 
   it('catches alignment error for items window', () => {
-    const errScreen = { getPrimaryDisplay: () => { throw new Error('screen fail'); } };
+    const errScreen = {
+      getPrimaryDisplay: () => {
+        throw new Error('screen fail');
+      },
+    };
     const { handlers } = build({
       hasPet: true,
       createItemsWindow: () => ({ webContents: { on: () => {} } }),
-      screen: errScreen
+      screen: errScreen,
     });
     handlers['itens-pet']({}, { fromStore: true });
   });
 
   it('catches alignment error for store window', () => {
-    const errScreen = { getPrimaryDisplay: () => { throw new Error('screen fail'); } };
+    const errScreen = {
+      getPrimaryDisplay: () => {
+        throw new Error('screen fail');
+      },
+    };
     const { handlers } = build({
       hasPet: true,
       createStoreWindow: () => ({ webContents: { on: () => {} } }),
-      screen: errScreen
+      screen: errScreen,
     });
     handlers['store-pet']({}, { fromItems: true });
   });
@@ -77,10 +94,20 @@ describe('windowPositioningHandlers extra branches', () => {
   it('invokes did-finish-load callbacks for items and store windows', () => {
     let itemsLoadCb, storeLoadCb;
     const createItemsWindow = () => ({
-      webContents: { on: (evt, cb) => { if (evt === 'did-finish-load') itemsLoadCb = cb; }, send: () => {} }
+      webContents: {
+        on: (evt, cb) => {
+          if (evt === 'did-finish-load') itemsLoadCb = cb;
+        },
+        send: () => {},
+      },
     });
     const createStoreWindow = () => ({
-      webContents: { on: (evt, cb) => { if (evt === 'did-finish-load') storeLoadCb = cb; }, send: () => {} }
+      webContents: {
+        on: (evt, cb) => {
+          if (evt === 'did-finish-load') storeLoadCb = cb;
+        },
+        send: () => {},
+      },
     });
     const { handlers } = build({ hasPet: true, createItemsWindow, createStoreWindow });
     handlers['itens-pet']({}, {});

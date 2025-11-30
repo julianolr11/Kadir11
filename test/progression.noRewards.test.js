@@ -3,12 +3,14 @@ const { applyJourneyRewards } = require('../scripts/logic/progression');
 
 describe('progression no rewards branch coverage', () => {
   it('applyJourneyRewards with no egg/coins/kadirPoints leaves pet unchanged', () => {
-    const pet = { petId:'1', items:{}, kadirPoints:5 };
+    const pet = { petId: '1', items: {}, kadirPoints: 5 };
     const storeFns = {
       getItems: () => ({}),
-      setItems: (v) => { pet.items = v; },
+      setItems: (v) => {
+        pet.items = v;
+      },
       getCoins: () => 0,
-      setCoins: () => {}
+      setCoins: () => {},
     };
     const res = applyJourneyRewards(pet, {}, storeFns);
     assert.strictEqual(res.eggId, undefined);

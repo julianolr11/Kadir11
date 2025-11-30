@@ -5,14 +5,21 @@ const logger = createLogger('IdleAssets');
 
 let idleGifsCache = null;
 
-async function loadIdleGifs(baseDir = __dirname) {
+// Base do projeto (subindo de scripts/utils para a raiz)
+const DEFAULT_BASE_DIR = path.join(__dirname, '..', '..');
+
+async function loadIdleGifs(baseDir = DEFAULT_BASE_DIR) {
   if (idleGifsCache) return idleGifsCache;
   const dir = path.join(baseDir, 'Assets', 'Mons');
   const result = [];
   async function walk(folder) {
     let entries = [];
-    try { entries = await fs.promises.readdir(folder, { withFileTypes: true }); }
-    catch (err) { logger.error('Erro ao ler diretório idle', err); return; }
+    try {
+      entries = await fs.promises.readdir(folder, { withFileTypes: true });
+    } catch (err) {
+      logger.error('Erro ao ler diretório idle', err);
+      return;
+    }
     for (const entry of entries) {
       const full = path.join(folder, entry.name);
       if (entry.isDirectory()) {
@@ -30,11 +37,9 @@ async function loadIdleGifs(baseDir = __dirname) {
   return idleGifsCache;
 }
 
-function resolveIdleGif(relativePath, baseDir = __dirname) {
+function resolveIdleGif(relativePath, baseDir = DEFAULT_BASE_DIR) {
   if (!relativePath) return null;
-  const cleaned = relativePath
-    .replace(/^[Aa]ssets[\\/][Mm]ons[\\/]/, '')
-    .replace(/\\/g, '/');
+  const cleaned = relativePath.replace(/^[Aa]ssets[\\/][Mm]ons[\\/]/, '').replace(/\\/g, '/');
   const monsBase = path.join(baseDir, 'Assets', 'Mons');
   const directGif = cleaned.replace(/front\.(gif|png)$/i, 'idle.gif');
   if (fs.existsSync(path.join(monsBase, directGif))) return directGif;
@@ -47,12 +52,12 @@ function resolveIdleGif(relativePath, baseDir = __dirname) {
   return cleaned;
 }
 
-async function getRandomEnemyIdle(exclude, baseDir = __dirname) {
+async function getRandomEnemyIdle(exclude, baseDir = DEFAULT_BASE_DIR) {
   const list = await loadIdleGifs(baseDir);
   let filtered = list;
   if (exclude) {
     const normalized = exclude.replace(/\\/g, '/');
-    filtered = list.filter(p => !p.endsWith(normalized));
+    filtered = list.filter((p) => !p.endsWith(normalized));
   }
   if (filtered.length === 0) filtered = list;
   if (filtered.length === 0) return null;
