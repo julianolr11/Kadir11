@@ -1,4 +1,4 @@
-const { ipcMain, BrowserWindow } = require('electron');
+const { ipcMain: electronIpcMain, BrowserWindow: ElectronBrowserWindow } = require('electron');
 const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('NestHandlers');
@@ -15,28 +15,36 @@ function setupNestHandlers(options = {}) {
         generatePetFromEgg,
         petManager,
         broadcastPenUpdate,
-        getHatchWindow
+        getHatchWindow,
+        ipcMain = electronIpcMain,
+        BrowserWindow = ElectronBrowserWindow
     } = options;
 
     logger.info('Setting up nest handlers...');
 
+    // Helper: broadcast to all windows with webContents
+    const broadcastToWindows = (callback) => {
+        BrowserWindow.getAllWindows().forEach(w => {
+            if (w.webContents) callback(w.webContents);
+        });
+    };
+
     // Handler: place-egg-in-nest
     ipcMain.on('place-egg-in-nest', async (event, eggId) => {
         const currentPet = getCurrentPet();
+        const items = getItems();
+        const nestCount = getNestCount();
+        let nests = getNestsData();
+        
+        // Consolidated validation guards
         if (!currentPet) {
             logger.error('No pet selected for placing egg in nest');
             return;
         }
-
-        const items = getItems();
         if (!items[eggId] || items[eggId] <= 0) {
             logger.error(`Insufficient eggs: ${eggId}`);
             return;
         }
-
-        const nestCount = getNestCount();
-        let nests = getNestsData();
-        
         if (nests.length >= nestCount) {
             logger.error(`Maximum nest capacity reached: ${nestCount}`);
             return;
@@ -56,11 +64,9 @@ function setupNestHandlers(options = {}) {
             logger.info(`Egg ${eggId} placed in nest with rarity ${rarity}`);
 
             // Broadcast updates to all windows
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) {
-                    w.webContents.send('pet-data', currentPet);
-                    w.webContents.send('nests-data-updated', nests);
-                }
+            broadcastToWindows(wc => {
+                wc.send('pet-data', currentPet);
+                wc.send('nests-data-updated', nests);
             });
         } catch (err) {
             logger.error('Error placing egg in nest:', err);
@@ -91,19 +97,16 @@ function setupNestHandlers(options = {}) {
             const hatchWindow = getHatchWindow();
 
             // Broadcast nest update and new pet to all windows
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) {
-                    w.webContents.send('nests-data-updated', nests);
-                    
-                    // Don't send pet-created to hatch window (handled separately)
-                    if (w !== hatchWindow) {
-                        w.webContents.send('pet-created', newPet);
-                    }
+            broadcastToWindows(wc => {
+                wc.send('nests-data-updated', nests);
+                // Don't send pet-created to hatch window (handled separately)
+                if (wc !== hatchWindow?.webContents) {
+                    wc.send('pet-created', newPet);
                 }
             });
 
             // Send new pet to hatch window (may be loading)
-            if (hatchWindow && hatchWindow.webContents) {
+            if (hatchWindow?.webContents) {
                 const sendPet = () => {
                     hatchWindow.webContents.send('pet-created', newPet);
                     logger.debug('New pet sent to hatch window');
@@ -125,11 +128,7 @@ function setupNestHandlers(options = {}) {
             nests.splice(index, 0, egg);
             setNestsData(nests);
             
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) {
-                    w.webContents.send('nests-data-updated', nests);
-                }
-            });
+            broadcastToWindows(wc => wc.send('nests-data-updated', nests));
         }
     });
 

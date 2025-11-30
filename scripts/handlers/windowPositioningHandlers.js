@@ -1,4 +1,4 @@
-const { ipcMain, screen, BrowserWindow } = require('electron');
+const { ipcMain: electronIpcMain, screen: electronScreen, BrowserWindow: ElectronBrowserWindow } = require('electron');
 const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('WindowPositioningHandlers');
@@ -11,10 +11,32 @@ function setupWindowPositioningHandlers(options = {}) {
         getItemsWindow,
         getCurrentPet,
         getCoins,
-        getItems
+        getItems,
+        ipcMain = electronIpcMain,
+        BrowserWindow = ElectronBrowserWindow,
+        screen = electronScreen
     } = options;
 
     logger.info('Setting up window positioning handlers...');
+
+    // Helper: validate and setup window with alignment
+    const setupWindow = (createFn, failMsg, sendDataFn, alignOptions = null) => {
+        const win = createFn();
+        if (!win) {
+            logger.error(failMsg);
+            return null;
+        }
+        win.webContents.on('did-finish-load', sendDataFn);
+        if (alignOptions?.enabled && alignOptions.otherWindow) {
+            try {
+                alignWindowsSideBySide(alignOptions.win1, alignOptions.win2, alignOptions.side, screen);
+                logger.debug(alignOptions.logMsg);
+            } catch (err) {
+                logger.error(alignOptions.errMsg, err);
+            }
+        }
+        return win;
+    };
 
     // Handler: itens-pet
     ipcMain.on('itens-pet', (event, openOptions) => {
@@ -25,31 +47,27 @@ function setupWindowPositioningHandlers(options = {}) {
         }
 
         logger.debug(`Opening items window for pet: ${currentPet.name}`);
-        const win = createItemsWindow();
+        const storeWindow = openOptions?.fromStore ? getStoreWindow() : null;
         
-        if (!win) {
-            logger.error('Failed to create items window');
-            return;
-        }
-
-        win.webContents.on('did-finish-load', () => {
-            currentPet.coins = getCoins();
-            currentPet.items = getItems();
-            win.webContents.send('pet-data', currentPet);
-        });
-
-        // Align windows side-by-side if opened from store
-        if (openOptions && openOptions.fromStore) {
-            const storeWindow = getStoreWindow();
-            if (storeWindow) {
-                try {
-                    alignWindowsSideBySide(win, storeWindow, 'left');
-                    logger.debug('Items window aligned with store window');
-                } catch (err) {
-                    logger.error('Error positioning items window:', err);
-                }
-            }
-        }
+        setupWindow(
+            createItemsWindow,
+            'Failed to create items window',
+            () => {
+                currentPet.coins = getCoins();
+                currentPet.items = getItems();
+                const win = getItemsWindow();
+                if (win) win.webContents.send('pet-data', currentPet);
+            },
+            storeWindow ? {
+                enabled: true,
+                otherWindow: storeWindow,
+                win1: getItemsWindow(),
+                win2: storeWindow,
+                side: 'left',
+                logMsg: 'Items window aligned with store window',
+                errMsg: 'Error positioning items window:'
+            } : null
+        );
     });
 
     // Handler: store-pet
@@ -61,30 +79,26 @@ function setupWindowPositioningHandlers(options = {}) {
         }
 
         logger.debug(`Opening store window for pet: ${currentPet.name}`);
-        const win = createStoreWindow();
+        const itemsWindow = openOptions?.fromItems ? getItemsWindow() : null;
         
-        if (!win) {
-            logger.error('Failed to create store window');
-            return;
-        }
-
-        win.webContents.on('did-finish-load', () => {
-            currentPet.items = getItems();
-            win.webContents.send('pet-data', currentPet);
-        });
-
-        // Align windows side-by-side if opened from items
-        if (openOptions && openOptions.fromItems) {
-            const itemsWindow = getItemsWindow();
-            if (itemsWindow) {
-                try {
-                    alignWindowsSideBySide(itemsWindow, win, 'left');
-                    logger.debug('Store window aligned with items window');
-                } catch (err) {
-                    logger.error('Error positioning store window:', err);
-                }
-            }
-        }
+        setupWindow(
+            createStoreWindow,
+            'Failed to create store window',
+            () => {
+                currentPet.items = getItems();
+                const win = getStoreWindow();
+                if (win) win.webContents.send('pet-data', currentPet);
+            },
+            itemsWindow ? {
+                enabled: true,
+                otherWindow: itemsWindow,
+                win1: itemsWindow,
+                win2: getStoreWindow(),
+                side: 'left',
+                logMsg: 'Store window aligned with items window',
+                errMsg: 'Error positioning store window:'
+            } : null
+        );
     });
 
     // Handler: resize-journey-window
@@ -125,7 +139,7 @@ function setupWindowPositioningHandlers(options = {}) {
  * @param {BrowserWindow} rightWindow - Window to place on the right
  * @param {string} anchorPosition - Which window is the anchor ('left' or 'right')
  */
-function alignWindowsSideBySide(leftWindow, rightWindow, anchorPosition = 'left') {
+function alignWindowsSideBySide(leftWindow, rightWindow, anchorPosition = 'left', screen = electronScreen) {
     const display = screen.getPrimaryDisplay();
     const screenWidth = display.workAreaSize.width;
     const screenHeight = display.workAreaSize.height;

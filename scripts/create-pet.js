@@ -343,46 +343,70 @@ function initQuiz() {
     showQuestion();
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadSpeciesData();
-    const startButton = document.getElementById('start-quiz-button');
-    const introContainer = document.getElementById('intro-container');
-    const quizContainer = document.getElementById('create-pet-container');
+function _initDomListeners() {
+    const init = async () => {
+        const startButton = document.getElementById('start-quiz-button');
+        const introContainer = document.getElementById('intro-container');
+        const quizContainer = document.getElementById('create-pet-container');
 
-    startButton.addEventListener('click', () => {
-        introContainer.style.display = 'none';
-        quizContainer.style.display = 'flex';
-        loadQuestions();
-    });
-    
-    // Registrar listener para quando o pet for criado com sucesso
-    if (window.electronAPI && window.electronAPI.onPetCreated) {
-        window.electronAPI.onPetCreated((newPet) => {
-            console.log('Pet criado com sucesso no renderer:', newPet);
-            showFinalAnimation(newPet);
-        });
-    }
+        if (startButton) {
+            startButton.addEventListener('click', () => {
+                if (introContainer) introContainer.style.display = 'none';
+                if (quizContainer) quizContainer.style.display = 'flex';
+                loadQuestions();
+            });
+        }
 
-    // Registrar listener para erros de criação
-    if (window.electronAPI && window.electronAPI.on) {
-        window.electronAPI.on('create-pet-error', (event, error) => {
-            console.error('Erro ao criar o pet:', error);
-            const match = /Limite de (\d+) pets/.exec(error);
-            if (match) {
-                alert(`Você já possui ${match[1]} pets. Exclua um pet para criar outro.`);
-            } else {
-                alert('Erro ao criar o pet. Tente novamente.');
-            }
-            document.getElementById('create-pet-button').disabled = false;
-            document.getElementById('name-selection').style.display = 'block';
-        });
-    }
-});
+        // Carrega dados após garantir que listeners principais já estejam ativos
+        await loadSpeciesData();
+
+        if (window.electronAPI && window.electronAPI.onPetCreated) {
+            window.electronAPI.onPetCreated((newPet) => {
+                console.log('Pet criado com sucesso no renderer:', newPet);
+                showFinalAnimation(newPet);
+            });
+        }
+
+        if (window.electronAPI && window.electronAPI.on) {
+            window.electronAPI.on('create-pet-error', (event, error) => {
+                console.error('Erro ao criar o pet:', error);
+                const match = /Limite de (\d+) pets/.exec(error);
+                if (match) {
+                    alert(`Você já possui ${match[1]} pets. Exclua um pet para criar outro.`);
+                } else {
+                    alert('Erro ao criar o pet. Tente novamente.');
+                }
+                document.getElementById('create-pet-button').disabled = false;
+                document.getElementById('name-selection').style.display = 'block';
+            });
+        }
+    };
+
+    // Executa imediatamente para evitar perder DOMContentLoaded quando script é carregado após o DOM
+    // Elementos ausentes são ignorados com verificações condicionais
+    init();
+}
+
+// Iniciar listeners automaticamente apenas se ambiente tiver document real
+if (typeof document !== 'undefined' && !global.__KADIR_TEST__) {
+    _initDomListeners();
+}
 
 // Permite utilizar a função em testes Node.js
 if (typeof module !== 'undefined') {
     module.exports = {
         generateSpecie,
+        loadSpeciesData,
+        loadQuestions,
+        generateRarity,
+        showQuestion,
+        selectOption,
+        showElementSelection,
+        handleCreatePet,
+        showFinalAnimation,
+        _initDomListeners,
+        resetQuiz,
+        initQuiz,
         _setSpecieData: data => { specieData = data; }
     };
 }

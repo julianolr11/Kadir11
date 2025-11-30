@@ -1,4 +1,4 @@
-const { ipcMain, BrowserWindow } = require('electron');
+const { ipcMain: electronIpcMain, BrowserWindow: ElectronBrowserWindow } = require('electron');
 const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('BattleMechanicsHandlers');
@@ -6,93 +6,63 @@ const logger = createLogger('BattleMechanicsHandlers');
 function setupBattleMechanicsHandlers(options = {}) {
     const {
         getCurrentPet,
-        petManager
+        petManager,
+        ipcMain = electronIpcMain,
+        BrowserWindow = ElectronBrowserWindow
     } = options;
 
     logger.info('Setting up battle mechanics handlers...');
 
+    // Helper: broadcast pet to all windows
+    const broadcastPetData = (pet) => {
+        BrowserWindow.getAllWindows().forEach(w => {
+            if (w.webContents) w.webContents.send('pet-data', pet);
+        });
+    };
+
     // Handler: use-move
     ipcMain.on('use-move', async (event, move) => {
         const currentPet = getCurrentPet();
-        
-        if (!currentPet) {
-            logger.error('No pet selected for using move');
-            return;
-        }
-
-        if (!move) {
-            logger.error('No move provided');
+        if (!currentPet || !move) {
+            logger.error(currentPet ? 'No move provided' : 'No pet selected for using move');
             return;
         }
 
         const cost = move.cost || 0;
         const previousEnergy = currentPet.energy || 0;
         currentPet.energy = Math.max(previousEnergy - cost, 0);
-
         logger.debug(`Move ${move.name || 'unknown'} used. Energy: ${previousEnergy} → ${currentPet.energy} (cost: ${cost})`);
-
         try {
-            await petManager.updatePet(currentPet.petId, {
-                energy: currentPet.energy
-            });
+            await petManager.updatePet(currentPet.petId, { energy: currentPet.energy });
+            broadcastPetData(currentPet);
+            logger.info(`Move cost applied successfully for pet ${currentPet.name}`);
+        } catch (err) {
+            logger.error('Error applying move cost:', err);
+            currentPet.energy = previousEnergy; // rollback
+        }
+    });
 
     // Handler: update-health
     ipcMain.on('update-health', async (event, newHealth) => {
         const currentPet = getCurrentPet();
-        
-        if (!currentPet) {
-            logger.error('No pet selected for updating health');
-            return;
-        }
-
+        if (!currentPet) { logger.error('No pet selected for updating health'); return; }
         const previousHealth = currentPet.currentHealth;
         currentPet.currentHealth = Math.max(0, Math.min(currentPet.maxHealth, newHealth));
-
         logger.debug(`Health updated: ${previousHealth} → ${currentPet.currentHealth} (max: ${currentPet.maxHealth})`);
-
         try {
-            await petManager.updatePet(currentPet.petId, {
-                currentHealth: currentPet.currentHealth
-            });
-
-            // Broadcast updated pet data to all windows
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) {
-                    w.webContents.send('pet-data', currentPet);
-                }
-            });
-
+            await petManager.updatePet(currentPet.petId, { currentHealth: currentPet.currentHealth });
+            broadcastPetData(currentPet);
             logger.info(`Health updated successfully for pet ${currentPet.name}`);
         } catch (err) {
             logger.error('Error updating health:', err);
-            // Rollback on error
-            currentPet.currentHealth = previousHealth;
-        }
-    });
-
-            // Broadcast updated pet data to all windows
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) {
-                    w.webContents.send('pet-data', currentPet);
-                }
-            });
-
-            logger.info(`Move cost applied successfully for pet ${currentPet.name}`);
-        } catch (err) {
-            logger.error('Error applying move cost:', err);
-            // Rollback on error
-            currentPet.energy = previousEnergy;
+            currentPet.currentHealth = previousHealth; // rollback
         }
     });
 
     // Handler: use-bravura
     ipcMain.on('use-bravura', async (event, amount) => {
         const currentPet = getCurrentPet();
-        
-        if (!currentPet) {
-            logger.error('No pet selected for using bravura');
-            return;
-        }
+        if (!currentPet) { logger.error('No pet selected for using bravura'); return; }
 
         const cost = amount || 1;
         const previousBravura = currentPet.bravura || 0;
@@ -101,22 +71,12 @@ function setupBattleMechanicsHandlers(options = {}) {
         logger.debug(`Bravura used. Bravura: ${previousBravura} → ${currentPet.bravura} (cost: ${cost})`);
 
         try {
-            await petManager.updatePet(currentPet.petId, {
-                bravura: currentPet.bravura
-            });
-
-            // Broadcast updated pet data to all windows
-            BrowserWindow.getAllWindows().forEach(w => {
-                if (w.webContents) {
-                    w.webContents.send('pet-data', currentPet);
-                }
-            });
-
+            await petManager.updatePet(currentPet.petId, { bravura: currentPet.bravura });
+            broadcastPetData(currentPet);
             logger.info(`Bravura cost applied successfully for pet ${currentPet.name}`);
         } catch (err) {
             logger.error('Error updating bravura:', err);
-            // Rollback on error
-            currentPet.bravura = previousBravura;
+            currentPet.bravura = previousBravura; // rollback
         }
     });
 

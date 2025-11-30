@@ -11,6 +11,7 @@ const { registerLifecycleHandlers } = require('./scripts/handlers/lifecycleHandl
 const { setupWindowPositioningHandlers } = require('./scripts/handlers/windowPositioningHandlers');
 const { setupNestHandlers } = require('./scripts/handlers/nestHandlers');
 const { setupBattleMechanicsHandlers } = require('./scripts/handlers/battleMechanicsHandlers');
+const { resolveIdleGif, getRandomEnemyIdle, extractElementFromPath } = require('./scripts/utils/idleAssets');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
 const fs = require('fs');
@@ -243,193 +244,21 @@ app.whenReady().then(() => {
         closeAllGameWindows
     );
 
-    // ---- Fase 2: Wrapper funções de loja/gifts para modularização ----
-    function handleBuyItem(event, itemKey) {
-        if (!currentPet) return;
-        const prices = {
-            healthPotion: 10,
-            meat: 5,
-            staminaPotion: 8,
-            chocolate: 2,
-            finger: 35,
-            turtleShell: 35,
-            feather: 35,
-            orbe: 35,
-            terrainMedium: 100,
-            terrainLarge: 200,
-            nest: getNestPrice()
-        };
-        const price = prices[itemKey];
-        if (price === undefined) return;
-        if (getCoins() < price) {
-            BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('show-store-error', 'Moedas insuficientes!'); });
-            return;
-        }
-        if (itemKey === 'nest') {
-            if (getNestCount() >= 3) {
-                BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('show-store-error', 'Limite de ninhos atingido!'); });
-                return;
-            }
-        }
-        setCoins(getCoins() - price);
-        currentPet.coins = getCoins();
-        if (itemKey === 'terrainMedium' || itemKey === 'terrainLarge') {
-            const current = store.get('penSize', 'small');
-            if (itemKey === 'terrainMedium' && current === 'small') {
-                store.set('penSize', 'medium');
-                broadcastPenUpdate();
-            } else if (itemKey === 'terrainLarge' && current !== 'large') {
-                store.set('penSize', 'large');
-                broadcastPenUpdate();
-            }
-        } else if (itemKey === 'nest') {
-            store.set('nestCount', getNestCount() + 1);
-            broadcastNestUpdate();
-        } else {
-            const items = getItems();
-            items[itemKey] = (items[itemKey] || 0) + 1;
-            setItems(items);
-            currentPet.items = items;
-        }
-        BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
-    }
-
-    async function handleUseItem(event, itemKey) {
-        if (!currentPet) return;
-        const items = getItems();
-        if (!items[itemKey] || items[itemKey] <= 0) return;
-        switch (itemKey) {
-            case 'healthPotion':
-                currentPet.currentHealth = Math.min(currentPet.currentHealth + 20, currentPet.maxHealth);
-                break;
-            case 'meat':
-                currentPet.hunger = Math.min((currentPet.hunger || 0) + 20, 100);
-                currentPet.happiness = Math.min((currentPet.happiness || 0) + 10, 100);
-                currentPet.currentHealth = Math.min(currentPet.currentHealth + Math.round(currentPet.maxHealth * 0.05), currentPet.maxHealth);
-                break;
-            case 'staminaPotion':
-                currentPet.energy = Math.min((currentPet.energy || 0) + 20, 100);
-                break;
-            case 'chocolate':
-                currentPet.happiness = Math.min((currentPet.happiness || 0) + 20, 100);
-                currentPet.energy = Math.min((currentPet.energy || 0) + 10, 100);
-                currentPet.hunger = Math.min((currentPet.hunger || 0) + 3, 100);
-                break;
-            case 'finger':
-            case 'turtleShell':
-            case 'feather':
-            case 'orbe':
-                if (currentPet.equippedItem === itemKey) return;
-                if (currentPet.equippedItem) {
-                    items[currentPet.equippedItem] = (items[currentPet.equippedItem] || 0) + 1;
-                }
-                currentPet.equippedItem = itemKey;
-                break;
-        }
-        items[itemKey] -= 1;
-        setItems(items);
-        currentPet.items = items;
-        try {
-            await petManager.updatePet(currentPet.petId, {
-                currentHealth: currentPet.currentHealth,
-                hunger: currentPet.hunger,
-                happiness: currentPet.happiness,
-                energy: currentPet.energy,
-                equippedItem: currentPet.equippedItem
-            });
-        } catch (err) {
-            console.error('Erro ao usar item (modularizado):', err);
-        }
-        BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
-        return currentPet.currentHealth;
-    }
-
-    const giftCodes = {
-        'KADIR5': { type: 'kadirPoints', amount: 5, name: '5 Kadir Points', icon: 'Assets/Icons/dna-kadir.png' },
-        'KADIR2025': { type: 'kadirPoints', amount: 50, name: '50 Kadir Points', icon: 'Assets/Icons/dna-kadir.png' },
-        'WELCOME': { type: 'coins', amount: 100, name: '100 Moedas', icon: 'Assets/Icons/coin.png' },
-        'STARTER': { type: 'item', item: 'healthPotion', qty: 5, name: '5x Poção de Vida', icon: 'Assets/Shop/health-potion.png' },
-        'ENERGY': { type: 'item', item: 'staminaPotion', qty: 3, name: '3x Poção de Energia', icon: 'Assets/Shop/stamina-potion.png' },
-        'RARE': { type: 'item', item: 'finger', qty: 1, name: 'Garra do Predador', icon: 'Assets/Shop/finger.png' },
-        'NEWPET': { type: 'pet', egg: 'eggFera', name: 'Ovo de Fera', icon: 'Assets/Shop/eggFera.png' },
-        'STARTERPACK': { 
-            type: 'multi', 
-            name: 'Starter Pack',
-            icon: 'Assets/Shop/health-potion.png',
-            items: [
-                { item: 'healthPotion', qty: 2 },
-                { item: 'staminaPotion', qty: 2 },
-                { item: 'meat', qty: 2 }
-            ]
-        }
-    };
-
-    function handleRedeemGift(event, code) {
-        const giftWindow = windowManager.getGiftWindow && windowManager.getGiftWindow();
-        if (!code || typeof code !== 'string') { if (giftWindow) giftWindow.webContents.send('gift-error', 'Código inválido.'); return; }
-        const upperCode = code.toUpperCase().trim();
-        const usedCodes = store.get('usedGiftCodes', []);
-        if (usedCodes.includes(upperCode)) { if (giftWindow) giftWindow.webContents.send('gift-error', 'Este código já foi usado.'); return; }
-        const gift = giftCodes[upperCode];
-        if (!gift) { if (giftWindow) giftWindow.webContents.send('gift-error', 'Código não encontrado.'); return; }
-        try {
-            if (gift.type === 'kadirPoints' && currentPet) {
-                currentPet.kadirPoints = (currentPet.kadirPoints || 0) + gift.amount;
-                petManager.updatePet(currentPet.petId, { kadirPoints: currentPet.kadirPoints }).catch(()=>{});
-            } else if (gift.type === 'coins') {
-                setCoins(getCoins() + gift.amount);
-                if (currentPet) currentPet.coins = getCoins();
-            } else if (gift.type === 'item') {
-                const items = getItems();
-                items[gift.item] = (items[gift.item] || 0) + gift.qty;
-                setItems(items); if (currentPet) currentPet.items = items;
-            } else if (gift.type === 'pet') {
-                const items = getItems();
-                items[gift.egg] = (items[gift.egg] || 0) + 1;
-                setItems(items); if (currentPet) currentPet.items = items;
-            } else if (gift.type === 'multi') {
-                const items = getItems();
-                gift.items.forEach(it => { items[it.item] = (items[it.item] || 0) + it.qty; });
-                setItems(items); if (currentPet) currentPet.items = items;
-            }
-            if (currentPet) BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
-            const history = store.get('giftHistory', []);
-            history.unshift({
-                code: upperCode,
-                name: gift.name,
-                icon: gift.icon,
-                date: new Date().toISOString(),
-                description: gift.type === 'multi' ? gift.items.map(i => `${i.qty}x ${i.item}`).join(', ') : gift.name
-            });
-            if (history.length > 20) history.pop();
-            store.set('giftHistory', history);
-            usedCodes.push(upperCode); store.set('usedGiftCodes', usedCodes);
-            if (giftWindow) giftWindow.webContents.send('gift-redeemed', gift.name);
-        } catch (err) {
-            console.error('Erro ao processar presente (modularizado):', err);
-            if (giftWindow) giftWindow.webContents.send('gift-error', 'Erro ao processar presente.');
-        }
-    }
-
-    function getGiftHistory() { return store.get('giftHistory', []); }
-
-    async function handleUnequipItem() {
-        if (!currentPet || !currentPet.equippedItem) return;
-        const items = getItems();
-        const eq = currentPet.equippedItem;
-        items[eq] = (items[eq] || 0) + 1;
-        currentPet.equippedItem = null;
-        setItems(items);
-        currentPet.items = items;
-        try {
-            await petManager.updatePet(currentPet.petId, { equippedItem: null });
-        } catch (err) {
-            console.error('Erro ao remover item (modularizado):', err);
-        }
-        BrowserWindow.getAllWindows().forEach(w => { if (w.webContents) w.webContents.send('pet-data', currentPet); });
-    }
-
-    registerStoreHandlers(getCoins, setCoins, getItems, setItems, handleBuyItem, handleUseItem, handleRedeemGift, getGiftHistory, handleUnequipItem);
+    // ---- Fase 2: Store handlers migrados (buy/use/redeem/unequip) ----
+    registerStoreHandlers({
+        getCurrentPet: () => currentPet,
+        getCoins,
+        setCoins,
+        getItems,
+        setItems,
+        getNestPrice,
+        getNestCount,
+        broadcastPenUpdate,
+        broadcastNestUpdate,
+        petManager,
+        store,
+        windowManager
+    });
 
     // Registro dos handlers de jogo (batalha/jornada/treino/lair)
     registerGameHandlers({
@@ -1133,78 +962,5 @@ function closeAllGameWindows() {
 // (movido para settingsHandlers) ipcMain.handle('get-pen-info', 'get-nest-count', 'get-nests-data', 'get-nest-price', 'get-difficulty', 'set-difficulty' ... )
 
 // (movido para assetsHandlers) ipcMain.handle('get-species-info', 'get-journey-images' ... )
-
-let idleGifsCache = null;
-
-async function loadIdleGifs() {
-    if (idleGifsCache) return idleGifsCache;
-    const dir = path.join(__dirname, 'Assets', 'Mons');
-    const result = [];
-    async function walk(folder) {
-        const entries = await fs.promises.readdir(folder, { withFileTypes: true });
-        for (const entry of entries) {
-            const full = path.join(folder, entry.name);
-            if (entry.isDirectory()) {
-                await walk(full);
-            } else if (entry.isFile()) {
-                const name = entry.name.toLowerCase();
-                if (name === 'idle.gif' || name === 'idle.png') {
-                    result.push(full.replace(/\\/g, '/'));
-                }
-            }
-        }
-    }
-    await walk(dir);
-    idleGifsCache = result;
-    return idleGifsCache;
-}
-
-function resolveIdleGif(relativePath) {
-    if (!relativePath) return null;
-    const cleaned = relativePath
-        .replace(/^[Aa]ssets[\\/][Mm]ons[\\/]/, '')
-        .replace(/\\/g, '/');
-    const baseDir = path.join(__dirname, 'Assets', 'Mons');
-    const directGif = cleaned.replace(/front\.(gif|png)$/i, 'idle.gif');
-    if (fs.existsSync(path.join(baseDir, directGif))) {
-        return directGif;
-    }
-    const altGif = path.posix.join(path.posix.dirname(cleaned), 'idle.gif');
-    if (fs.existsSync(path.join(baseDir, altGif))) {
-        return altGif;
-    }
-    const directPng = cleaned.replace(/front\.(gif|png)$/i, 'idle.png');
-    if (fs.existsSync(path.join(baseDir, directPng))) {
-        return directPng;
-    }
-    const altPng = path.posix.join(path.posix.dirname(cleaned), 'idle.png');
-    if (fs.existsSync(path.join(baseDir, altPng))) {
-        return altPng;
-    }
-    return cleaned;
-}
-
-async function getRandomEnemyIdle(exclude) {
-    const list = await loadIdleGifs();
-    let filtered = list;
-    if (exclude) {
-        const normalized = exclude.replace(/\\/g, '/');
-        filtered = list.filter(p => !p.endsWith(normalized));
-    }
-    if (filtered.length === 0) filtered = list;
-    if (filtered.length === 0) return null;
-    const choice = filtered[Math.floor(Math.random() * filtered.length)];
-    return path.relative(__dirname, choice).replace(/\\/g, '/');
-}
-
-function extractElementFromPath(p) {
-    if (!p) return null;
-    const parts = p.replace(/\\/g, '/').split('/');
-    const monsIdx = parts.indexOf('Mons');
-    if (monsIdx >= 0 && parts.length > monsIdx + 2) {
-        return parts[monsIdx + 2].toLowerCase();
-    }
-    return null;
-}
 
 module.exports = { app, ipcMain, globalShortcut, windowManager, petManager };

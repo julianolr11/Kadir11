@@ -2,23 +2,40 @@
   "name": "kadir11",
   "version": "1.0.0",
   "description": "Tamagotchi RPG",
-  
   "main": "main.js",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:vite\" \"npm:dev:electron\"",
     "dev:vite": "cd frontend && npm run dev",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
     "start": "electron .",
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "nyc --reporter=text --reporter=lcov mocha"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^35.0.1",
-    "mocha": "^10.2.0",
     "concurrently": "^8.2.2",
+    "electron": "^35.0.1",
+    "jsdom": "^27.2.0",
+    "mocha": "^10.2.0",
+    "nyc": "^17.1.0",
+    "sinon": "^21.0.0",
     "wait-on": "^7.0.1"
+  },
+  "nyc": {
+    "extension": [
+      ".js"
+    ],
+    "exclude": [
+      "test/**",
+      "frontend/**"
+    ],
+    "reporter": [
+      "text",
+      "lcov"
+    ],
+    "all": false
   },
   "dependencies": {
     "electron-store": "^8.1.0"
