@@ -36,7 +36,35 @@ pet.
 
 - `npm install` – instalação das dependências.
 - `npm start` – inicia a aplicação.
+- `npm test` – executa os testes automatizados.
+- `npm run coverage` – gera relatório de cobertura de testes.
 
+## 🧪 Testes e Qualidade
+
+O projeto possui **137 testes automatizados** cobrindo handlers IPC, lógica de progressão, criação de pets, e sistema de batalha.
+
+### Métricas de Cobertura Atual
+
+```
+Statements  : 99.7%  
+Branches    : 87.42%
+Functions   : 99.04%
+Lines       : 100%
+```
+
+### Guia de Testes
+
+Para informações detalhadas sobre a suite de testes, padrões de teste, e como escrever novos casos, consulte:
+
+- **[docs/TESTING.md](docs/TESTING.md)** - Guia completo de testes e cobertura
+- **[docs/API.md](docs/API.md)** - Documentação dos handlers e helpers
+
+**Executar testes:**
+```bash
+npm test                    # Executa todos os testes
+npm run coverage            # Gera relatório HTML em coverage/lcov-report/
+npm test -- --grep "battle" # Executa apenas testes de batalha
+```
 
 ## Efeitos de Status
 

@@ -3,6 +3,20 @@ const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('WindowPositioningHandlers');
 
+/**
+ * Sets up IPC handlers for window creation, positioning, and resizing
+ * @param {Object} options - Configuration options
+ * @param {Function} options.createItemsWindow - Creates items window
+ * @param {Function} options.createStoreWindow - Creates store window
+ * @param {Function} options.getStoreWindow - Returns store window instance
+ * @param {Function} options.getItemsWindow - Returns items window instance
+ * @param {Function} options.getCurrentPet - Returns currently selected pet
+ * @param {Function} options.getCoins - Returns current coin count
+ * @param {Function} options.getItems - Returns items inventory
+ * @param {Object} [options.ipcMain] - Electron IPC main instance
+ * @param {Object} [options.BrowserWindow] - Electron BrowserWindow class
+ * @param {Object} [options.screen] - Electron screen module
+ */
 function setupWindowPositioningHandlers(options = {}) {
     const {
         createItemsWindow,
@@ -19,7 +33,22 @@ function setupWindowPositioningHandlers(options = {}) {
 
     logger.info('Setting up window positioning handlers...');
 
-    // Helper: validate and setup window with alignment
+    /**
+     * Creates a window and sets up its event handlers with optional alignment
+     * @param {Function} createFn - Function that creates and returns a BrowserWindow
+     * @param {string} failMsg - Error message if window creation fails
+     * @param {Function} sendDataFn - Callback invoked on did-finish-load to send initial data
+     * @param {Object} [alignOptions] - Optional alignment configuration
+     * @param {boolean} alignOptions.enabled - Whether to align the window
+     * @param {BrowserWindow} alignOptions.otherWindow - Window to align with
+     * @param {BrowserWindow} alignOptions.win1 - First window for alignment
+     * @param {BrowserWindow} alignOptions.win2 - Second window for alignment
+     * @param {string} alignOptions.side - Which side to align ('left' or 'right')
+     * @param {string} alignOptions.logMsg - Success log message
+     * @param {string} alignOptions.errMsg - Error log message
+     * @returns {BrowserWindow|null} The created window or null if creation failed
+     * @private
+     */
     const setupWindow = (createFn, failMsg, sendDataFn, alignOptions = null) => {
         const win = createFn();
         if (!win) {

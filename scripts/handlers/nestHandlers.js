@@ -3,6 +3,23 @@ const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('NestHandlers');
 
+/**
+ * Sets up IPC handlers for nest management (placing eggs, hatching)
+ * @param {Object} options - Configuration options
+ * @param {Function} options.getCurrentPet - Returns the currently selected pet
+ * @param {Function} options.getItems - Returns current items inventory
+ * @param {Function} options.setItems - Sets items inventory
+ * @param {Function} options.getNestCount - Returns maximum nest capacity
+ * @param {Function} options.getNestsData - Returns array of current nests
+ * @param {Function} options.setNestsData - Sets nests array
+ * @param {Function} options.generateRarity - Generates random rarity for egg
+ * @param {Function} options.generatePetFromEgg - Creates pet data from egg and rarity
+ * @param {Object} options.petManager - Pet manager instance with createPet method
+ * @param {Function} options.broadcastPenUpdate - Updates pen display
+ * @param {Function} options.getHatchWindow - Returns hatch window instance
+ * @param {Object} [options.ipcMain] - Electron IPC main instance
+ * @param {Object} [options.BrowserWindow] - Electron BrowserWindow class
+ */
 function setupNestHandlers(options = {}) {
     const {
         getCurrentPet,
@@ -22,7 +39,13 @@ function setupNestHandlers(options = {}) {
 
     logger.info('Setting up nest handlers...');
 
-    // Helper: broadcast to all windows with webContents
+    /**
+     * Executes a callback for all windows with valid webContents
+     * @param {Function} callback - Function receiving webContents as argument
+     * @example
+     * broadcastToWindows(wc => wc.send('event', data));
+     * @private
+     */
     const broadcastToWindows = (callback) => {
         BrowserWindow.getAllWindows().forEach(w => {
             if (w.webContents) callback(w.webContents);

@@ -3,6 +3,19 @@ const { createLogger } = require('../utils/logger');
 
 const logger = createLogger('BattleMechanicsHandlers');
 
+/**
+ * Sets up IPC handlers for battle mechanics (energy, health, bravura)
+ * @param {Object} options - Configuration options
+ * @param {Function} options.getCurrentPet - Returns the currently selected pet
+ * @param {Object} options.petManager - Pet manager instance with updatePet method
+ * @param {Object} [options.ipcMain] - Electron IPC main instance (defaults to electron.ipcMain)
+ * @param {Object} [options.BrowserWindow] - Electron BrowserWindow class (defaults to electron.BrowserWindow)
+ * @example
+ * setupBattleMechanicsHandlers({
+ *   getCurrentPet: () => currentPet,
+ *   petManager: petManagerInstance
+ * });
+ */
 function setupBattleMechanicsHandlers(options = {}) {
     const {
         getCurrentPet,
@@ -13,7 +26,11 @@ function setupBattleMechanicsHandlers(options = {}) {
 
     logger.info('Setting up battle mechanics handlers...');
 
-    // Helper: broadcast pet to all windows
+    /**
+     * Broadcasts pet data to all open BrowserWindows
+     * @param {Object} pet - The pet object with updated stats
+     * @private
+     */
     const broadcastPetData = (pet) => {
         BrowserWindow.getAllWindows().forEach(w => {
             if (w.webContents) w.webContents.send('pet-data', pet);
