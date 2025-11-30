@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Removidas ~300+ linhas de funções duplicadas de criação de janelas (shadowing evitava uso do módulo)
 - Centralizada lógica de posicionamento de `nestsWindow` via `updateNestsPosition()` do módulo de janelas
 - Mantida assinatura dos handlers através de proxies (`getStoreWindow`, `getItemsWindow`, `getHatchWindow`)
+- Unificado `currentPet` usando `stateManager` (eliminado estado duplicado local)
 
 #### Fixed
 - Conflito de shadowing: funções locais sobrescreviam exports de `gameWindows` (agora removidas)

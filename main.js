@@ -14,6 +14,7 @@ const { setupBattleMechanicsHandlers } = require('./scripts/handlers/battleMecha
 const { resolveIdleGif, getRandomEnemyIdle, extractElementFromPath } = require('./scripts/utils/idleAssets');
 const petManager = require('./scripts/petManager');
 const { getRequiredXpForNextLevel, calculateXpGain, increaseAttributesOnLevelUp } = require('./scripts/petExperience');
+const appState = require('./scripts/managers/stateManager');
 const { createStoreState } = require('./scripts/state/storeState');
 const { initSpecies, generatePetFromEgg, generateRarity, getSpeciesData } = require('./scripts/logic/petGeneration');
 
@@ -30,7 +31,8 @@ try {
 const store = new Store();
 const state = createStoreState(store);
 
-let currentPet = null;
+// currentPet agora gerenciado exclusivamente via stateManager (appState)
+// Removido estado duplicado local
 let lastUpdate = Date.now();
 let journeyImagesCache = null;
 
@@ -137,7 +139,7 @@ app.whenReady().then(() => {
 
     // Registro dos handlers de jogo (batalha/jornada/treino/lair)
     registerGameHandlers({
-        getCurrentPet: () => currentPet,
+        getCurrentPet: () => appState.currentPet,
         petManager,
         windowManager,
         createBattleModeWindow,
@@ -156,7 +158,7 @@ app.whenReady().then(() => {
         storeFns: { getItems, setItems, getCoins, setCoins }
     });
 
-    registerMovesHandlers({ getCurrentPet: () => currentPet, petManager });
+    registerMovesHandlers({ getCurrentPet: () => appState.currentPet, petManager });
 
     registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty });
 
@@ -171,7 +173,7 @@ app.whenReady().then(() => {
     // Registrar lifecycle (timers e battle handler)
     const { resetTimers } = registerLifecycleHandlers({
         ipcMain,
-        getCurrentPet: () => currentPet,
+        getCurrentPet: () => appState.currentPet,
         petManager,
         BrowserWindow
     });
@@ -185,14 +187,14 @@ app.whenReady().then(() => {
         createStoreWindow,
         getStoreWindow,
         getItemsWindow,
-        getCurrentPet: () => currentPet,
+        getCurrentPet: () => appState.currentPet,
         getCoins,
         getItems
     });
 
     // Registrar nest handlers (place-egg-in-nest, hatch-egg)
     setupNestHandlers({
-        getCurrentPet: () => currentPet,
+        getCurrentPet: () => appState.currentPet,
         getItems,
         setItems,
         getNestCount,
@@ -207,7 +209,7 @@ app.whenReady().then(() => {
 
     // Registrar battle mechanics handlers (use-move, use-bravura)
     setupBattleMechanicsHandlers({
-        getCurrentPet: () => currentPet,
+        getCurrentPet: () => appState.currentPet,
         petManager
     });
 
@@ -232,9 +234,10 @@ app.on('will-quit', () => {
 
 // Handler para obter o pet atual
 ipcMain.handle('get-current-pet', async () => {
-    if (currentPet) {
-        currentPet.items = getItems();
-        return currentPet;
+    const pet = appState.currentPet;
+    if (pet) {
+        pet.items = getItems();
+        return pet;
     }
     return null;
 });
