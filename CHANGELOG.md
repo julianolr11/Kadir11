@@ -8,6 +8,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### 🚧 Phase 3: Main.js Modularization (2025-11-30)
+
+#### Added
+- `scripts/state/storeState.js`: Encapsula acesso ao electron-store (moedas, itens, pen, nests, broadcasts)
+- `scripts/logic/petGeneration.js`: Inicialização de species e geração de pets/raridade isoladas
+- `scripts/windows/gameWindows.js`: Fábrica central de todas as BrowserWindows de jogo + getters e fechamento em lote
+
+#### Changed
+- `main.js` agora importa módulos de estado, lógica e janelas em vez de definir tudo inline
+- Removidas ~300+ linhas de funções duplicadas de criação de janelas (shadowing evitava uso do módulo)
+- Centralizada lógica de posicionamento de `nestsWindow` via `updateNestsPosition()` do módulo de janelas
+- Mantida assinatura dos handlers através de proxies (`getStoreWindow`, `getItemsWindow`, `getHatchWindow`)
+
+#### Fixed
+- Conflito de shadowing: funções locais sobrescreviam exports de `gameWindows` (agora removidas)
+
+#### Impact
+- Redução do tamanho e complexidade de `main.js`, preparando extração do estado do `currentPet` e bootstrap único de handlers
+- Mantidos todos os 137 testes passando após cada etapa de extração
+
+#### Next Steps (Planejado)
+- Extrair gerenciamento de `currentPet` (get/set/broadcast/resetTimers) para `scripts/state/currentPet.js`
+- Criar `scripts/bootstrap/registerHandlers.js` para registrar todos os handlers em sequência única
+- Atualizar documentação (README + CHANGELOG) após conclusão da fase
+
 ### 🎯 Phase 2: Modularization & Test Coverage (2025-11-29)
 
 #### Added
