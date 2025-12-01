@@ -17,6 +17,7 @@ function initGameWindows({ windowManager }) {
   let journeySceneWindow = null;
   let nestsWindow = null;
   let hatchWindow = null;
+  let bestiaryWindow = null;
 
   function preloadPath() {
     return path.join(__dirname, '..', '..', 'preload.js');
@@ -348,6 +349,29 @@ function initGameWindows({ windowManager }) {
     }
   }
 
+  function createBestiaryWindow() {
+    if (bestiaryWindow) {
+      bestiaryWindow.show();
+      bestiaryWindow.focus();
+      return bestiaryWindow;
+    }
+    bestiaryWindow = new BrowserWindow({
+      width: 950,
+      height: 700,
+      frame: false,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: { preload: preloadPath(), nodeIntegration: false, contextIsolation: true },
+    });
+    bestiaryWindow.loadFile(path.join('views', 'management', 'bestiary.html'));
+    windowManager.attachFadeHandlers(bestiaryWindow);
+    bestiaryWindow.on('closed', () => {
+      bestiaryWindow = null;
+    });
+    return bestiaryWindow;
+  }
+
   function closeNestsWindow() {
     if (nestsWindow && !nestsWindow.isDestroyed()) {
       nestsWindow.close();
@@ -358,6 +382,7 @@ function initGameWindows({ windowManager }) {
   const getStoreWindow = () => storeWindow;
   const getItemsWindow = () => itemsWindow;
   const getHatchWindow = () => hatchWindow;
+  const getBestiaryWindow = () => bestiaryWindow;
 
   function closeAllGameWindows() {
     [
@@ -374,6 +399,7 @@ function initGameWindows({ windowManager }) {
       storeWindow,
       nestsWindow,
       hatchWindow,
+      bestiaryWindow,
     ].forEach((w) => {
       if (w) w.close();
     });
@@ -393,11 +419,13 @@ function initGameWindows({ windowManager }) {
     createStoreWindow,
     createNestsWindow,
     createHatchWindow,
+    createBestiaryWindow,
     updateNestsPosition,
     closeNestsWindow,
     getStoreWindow,
     getItemsWindow,
     getHatchWindow,
+    getBestiaryWindow,
     closeAllGameWindows,
   };
 }

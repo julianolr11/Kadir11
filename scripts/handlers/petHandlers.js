@@ -24,6 +24,8 @@ function resolveIdleGif(basePath) {
  * Handler para criar novo pet
  */
 function setupCreatePetHandler(windowManager, getItems, getCoins, broadcastPenUpdate) {
+  const bestiaryManager = require('../managers/bestiaryManager');
+  
   ipcMain.on('create-pet', async (event, petData) => {
     const endTimer = logger.time('create-pet');
     logger.info('Criando pet:', petData.name);
@@ -32,6 +34,12 @@ function setupCreatePetHandler(windowManager, getItems, getCoins, broadcastPenUp
       // Criar pet
       const newPet = await petManager.createPet(petData);
       logger.info(`Pet criado com sucesso: ${newPet.name} (${newPet.petId})`);
+
+      // Marcar criatura como capturada no bestiário
+      if (newPet.specie) {
+        bestiaryManager.markAsOwned(newPet.specie);
+        logger.debug(`Criatura ${newPet.specie} marcada como capturada no bestiário`);
+      }
 
       // Atualizar estado
       state.currentPet = newPet;

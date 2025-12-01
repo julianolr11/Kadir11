@@ -3,353 +3,1305 @@
     "name": "Arranhão",
     "description": "Ataque básico que causa dano leve ao inimigo.",
     "rarity": "Comum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Draconídeo", "Drazraq", "Ave", "Fera", "Pidgly", "Ignis", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Draconídeo",
+      "Drazraq",
+      "Ave",
+      "Fera",
+      "Pidgly",
+      "Ignis",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "physical"
   },
   {
     "name": "Mordida",
     "description": "Crava os dentes no alvo para causar dano moderado.",
     "rarity": "Comum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Draconídeo", "Drazraq", "Fera", "Reptilóide", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Draconídeo",
+      "Drazraq",
+      "Fera",
+      "Reptilóide",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "physical"
   },
   {
     "name": "Empurrar",
     "description": "Empurra o adversário para afastá-lo causando leve dano.",
     "rarity": "Comum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Ave", "Reptilóide", "Monstro", "Pidgly", "Ignis", "Mawthorn"],
-    "power": 10,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Ave",
+      "Reptilóide",
+      "Monstro",
+      "Pidgly",
+      "Ignis",
+      "Mawthorn"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "physical"
   },
   {
     "name": "Pulso",
     "description": "Emite um pulso de energia que causa dano padrao.",
     "rarity": "Comum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Criatura Mística", "Criatura Sombria", "Monstro", "Digitama", "Owlberoth", "Mawthorn"],
-    "power": 10,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Monstro",
+      "Digitama",
+      "Owlberoth",
+      "Mawthorn"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "special"
   },
   {
     "name": "Olhar",
     "description": "Lanca um olhar intimidador causando dano minimo.",
     "rarity": "Comum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Criatura Mística", "Criatura Sombria", "Digitama", "Owlberoth"],
-    "power": 10,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Digitama",
+      "Owlberoth"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "physical"
   },
   {
     "name": "Asas de Brasa",
     "description": "Investida com asas em chamas que pode queimar o alvo.",
     "rarity": "Raro",
-    "elements": ["fogo"],
-    "species": ["Ave"],
-    "power": 25,
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 108,
     "effect": "queimado",
     "cost": 20,
-    "level": 5
+    "level": 5,
+    "type": "physical"
   },
   {
     "name": "Mordida Sombria",
     "description": "Mordida impregnada de energia sombria que pode envenenar.",
     "rarity": "Incomum",
-    "elements": ["terra"],
-    "species": ["Fera", "Monstro", "Criatura Sombria"],
-    "power": 18,
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Fera",
+      "Monstro",
+      "Criatura Sombria"
+    ],
+    "power": 72,
     "effect": "envenenamento",
     "cost": 10,
-    "level": 3
+    "level": 3,
+    "type": "physical"
   },
   {
     "name": "Toxina Ácida",
     "description": "Dispara um jato de veneno corrosivo com chance de envenenar o alvo.",
     "rarity": "Incomum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Reptilóide"],
-    "power": 15,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Reptilóide"
+    ],
+    "power": 59,
     "effect": "envenenamento",
     "cost": 7,
-    "level": 2
+    "level": 2,
+    "type": "special"
   },
   {
     "name": "Corte Celeste",
     "description": "Golpe aéreo preciso que pode causar sangramento.",
     "rarity": "Incomum",
-    "elements": ["ar"],
-    "species": ["Ave"],
-    "power": 15,
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 59,
     "effect": "sangramento",
     "cost": 7,
-    "level": 2
+    "level": 2,
+    "type": "physical"
+  },
+  {
+    "name": "Chama Vibrante",
+    "description": "Rajada de fogo moderada que aquece o campo de batalha.",
+    "rarity": "Comum",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Ave"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 7,
+    "level": 2,
+    "type": "special"
+  },
+  {
+    "name": "Pedrada Firme",
+    "description": "Lança uma rocha sólida contra o adversário.",
+    "rarity": "Comum",
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Monstro",
+      "Fera",
+      "Reptilóide"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 7,
+    "level": 2,
+    "type": "physical"
+  },
+  {
+    "name": "Vendaval Cortante",
+    "description": "Vento afiado que corta o oponente.",
+    "rarity": "Comum",
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Ave",
+      "Criatura Mística"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 7,
+    "level": 2,
+    "type": "special"
+  },
+  {
+    "name": "Onda Aquática",
+    "description": "Jato d'água pressurizado que atinge com força moderada.",
+    "rarity": "Comum",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Reptilóide",
+      "Fera"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 7,
+    "level": 2,
+    "type": "special"
+  },
+  {
+    "name": "Brilho Ofuscante",
+    "description": "Luz intensa que cega temporariamente e causa dano.",
+    "rarity": "Comum",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Ave"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 7,
+    "level": 2,
+    "type": "special"
+  },
+  {
+    "name": "Investida Selvagem",
+    "description": "Carga brutal que atropela o inimigo.",
+    "rarity": "Comum",
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Fera",
+      "Monstro"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 8,
+    "level": 2,
+    "type": "physical"
+  },
+  {
+    "name": "Escamas Afiadas",
+    "description": "Dispara escamas pontiagudas contra o oponente.",
+    "rarity": "Comum",
+    "elements": [
+      "agua",
+      "terra"
+    ],
+    "species": [
+      "Reptilóide",
+      "Draconídeo"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 8,
+    "level": 2,
+    "type": "physical"
   },
   {
     "name": "Toque da Névoa",
     "description": "Contato espectral envolto em névoa com chance de paralisar.",
     "rarity": "Incomum",
-    "elements": ["puro", "ar"],
-    "species": ["Criatura Sombria", "Criatura Mística"],
-    "power": 15,
+    "elements": [
+      "puro",
+      "ar"
+    ],
+    "species": [
+      "Criatura Sombria",
+      "Criatura Mística"
+    ],
+    "power": 59,
     "effect": "paralisia",
     "cost": 7,
-    "level": 2
+    "level": 2,
+    "type": "physical"
   },
   {
     "name": "Fôlego Puro",
     "description": "Sopro de energia purificada que causa grande dano ao inimigo.",
     "rarity": "Incomum",
-    "elements": ["puro"],
-    "species": ["Ave", "Fera", "Draconídeo"],
-    "power": 18,
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Ave",
+      "Fera",
+      "Draconídeo"
+    ],
+    "power": 80,
     "effect": "nenhum",
     "cost": 10,
-    "level": 3
-  }
-,
+    "level": 3,
+    "type": "special"
+  },
   {
     "name": "Bruma Sonífera",
     "description": "Libera névoa adormecedora que pode deixar o inimigo sonolento.",
     "rarity": "Incomum",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Reptilóide", "Criatura Mística", "Criatura Sombria"],
-    "power": 18,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Reptilóide",
+      "Criatura Mística",
+      "Criatura Sombria"
+    ],
+    "power": 72,
     "effect": "dormencia",
     "cost": 10,
-    "level": 3
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Garra Flamejante",
+    "description": "Ataque corpo a corpo com garras envoltas em fogo.",
+    "rarity": "Incomum",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Fera",
+      "Draconídeo"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 10,
+    "level": 3,
+    "type": "physical"
+  },
+  {
+    "name": "Cauda de Aço",
+    "description": "Chicoteia o adversário com força esmagadora.",
+    "rarity": "Incomum",
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Monstro"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 10,
+    "level": 3,
+    "type": "physical"
+  },
+  {
+    "name": "Mergulho Aquático",
+    "description": "Ataque rápido mergulhando em águas turbulentas.",
+    "rarity": "Incomum",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Ave",
+      "Reptilóide"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 9,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Tornado Veloz",
+    "description": "Gira rapidamente criando um pequeno tornado.",
+    "rarity": "Incomum",
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Ave",
+      "Criatura Mística"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 9,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Esmagamento Brutal",
+    "description": "Golpe devastador que esmaga o oponente.",
+    "rarity": "Incomum",
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Monstro"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 12,
+    "level": 3,
+    "type": "physical"
+  },
+  {
+    "name": "Prisão de Sombras",
+    "description": "Envolve o inimigo em trevas que causam dano constante.",
+    "rarity": "Incomum",
+    "elements": [
+      "puro",
+      "terra"
+    ],
+    "species": [
+      "Criatura Sombria"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 11,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Bênção Curativa",
+    "description": "Invoca luz restauradora que cura ferimentos leves.",
+    "rarity": "Incomum",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Ave"
+    ],
+    "power": 0,
+    "effect": "cura",
+    "cost": 12,
+    "level": 3,
+    "type": "special"
   },
   {
     "name": "Corte Profundo",
     "description": "Ataque feroz que rasga a carne do alvo causando sangramento.",
     "rarity": "Raro",
-    "elements": ["fogo", "agua", "terra", "ar", "puro"],
-    "species": ["Monstro", "Fera"],
-    "power": 22,
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Monstro",
+      "Fera"
+    ],
+    "power": 95,
     "effect": "sangramento",
     "cost": 15,
-    "level": 4
+    "level": 4,
+    "type": "physical"
   },
   {
     "name": "Explosão Ígnea",
     "description": "Uma grande labareda que atinge todos à frente.",
     "rarity": "Raro",
-    "elements": ["fogo"],
-    "species": ["Draconídeo", "Reptilóide", "Ave", "Criatura Mística", "Criatura Sombria", "Monstro", "Fera"],
-    "power": 22,
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Ave",
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Monstro",
+      "Fera"
+    ],
+    "power": 105,
     "effect": "nenhum",
     "cost": 15,
-    "level": 4
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Chama Arcana",
+    "description": "Magia ígnea básica canalizada por runas místicas.",
+    "rarity": "Comum",
+    "elements": [
+      "fogo",
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Digitama"
+    ],
+    "power": 55,
+    "effect": "nenhum",
+    "cost": 7,
+    "level": 2,
+    "type": "special"
+  },
+  {
+    "name": "Símbolo Ígneo",
+    "description": "Marca ardente que inflige queimadura ao alvo.",
+    "rarity": "Incomum",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Criatura Mística"
+    ],
+    "power": 72,
+    "effect": "queimado",
+    "cost": 10,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Orbe Incandescente",
+    "description": "Projétil de fogo concentrado guiado por energia arcana.",
+    "rarity": "Incomum",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Digitama"
+    ],
+    "power": 80,
+    "effect": "nenhum",
+    "cost": 10,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Ritual de Brasas",
+    "description": "Conjuração rúnica que envolve o inimigo em brasas.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo",
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Digitama"
+    ],
+    "power": 95,
+    "effect": "queimado",
+    "cost": 15,
+    "level": 4,
+    "type": "physical"
+  },
+  {
+    "name": "Círculo de Fogo",
+    "description": "Anel de chamas que reduz rotas de fuga do alvo.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Criatura Mística"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 16,
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Espiral Ígnea",
+    "description": "Vórtice de fogo que incendeia o campo de batalha.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Criatura Mística"
+    ],
+    "power": 108,
+    "effect": "queimado",
+    "cost": 19,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Runas Flamíferas",
+    "description": "Runas ancestrais liberam chamas focadas em sequência.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo",
+      "puro"
+    ],
+    "species": [
+      "Digitama"
+    ],
+    "power": 120,
+    "effect": "nenhum",
+    "cost": 19,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Choque Elétrico",
+    "description": "Descarga de energia estática que pode paralisar o oponente.",
+    "rarity": "Raro",
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Ave",
+      "Draconídeo"
+    ],
+    "power": 95,
+    "effect": "paralisia",
+    "cost": 14,
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Lâmina Rochosa",
+    "description": "Cria uma lâmina de pedra que corta o adversário.",
+    "rarity": "Raro",
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Monstro",
+      "Reptilóide"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 15,
+    "level": 4,
+    "type": "physical"
+  },
+  {
+    "name": "Hidroimpacto",
+    "description": "Colisão violenta usando água pressurizada.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Reptilóide",
+      "Fera"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 14,
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Fúria Ancestral",
+    "description": "Libera toda a força ancestral em um ataque devastador.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Draconídeo"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 17,
+    "level": 4,
+    "type": "physical"
+  },
+  {
+    "name": "Espinho Venenoso",
+    "description": "Dispara espinhos tóxicos que envenenam o alvo.",
+    "rarity": "Raro",
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Reptilóide",
+      "Monstro"
+    ],
+    "power": 95,
+    "effect": "envenenamento",
+    "cost": 13,
+    "level": 4,
+    "type": "physical"
+  },
+  {
+    "name": "Rasante Perfurante",
+    "description": "Voo em alta velocidade que perfura o inimigo.",
+    "rarity": "Raro",
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 95,
+    "effect": "sangramento",
+    "cost": 15,
+    "level": 4,
+    "type": "physical"
+  },
+  {
+    "name": "Pulso Sombrio",
+    "description": "Onda de energia das trevas que debilita o adversário.",
+    "rarity": "Raro",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Criatura Sombria"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 16,
+    "level": 4,
+    "type": "special"
   },
   {
     "name": "Terremoto",
     "description": "Sacode o solo violentamente atingindo todos ao redor.",
     "rarity": "Raro",
-    "elements": ["terra"],
-    "species": ["Draconídeo", "Reptilóide", "Ave", "Criatura Mística", "Criatura Sombria", "Monstro", "Fera"],
-    "power": 25,
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Ave",
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Monstro",
+      "Fera"
+    ],
+    "power": 120,
     "effect": "nenhum",
     "cost": 20,
-    "level": 5
-  },
-  {
-    "name": "Torrente Furiosa",
-    "description": "Inunda o campo de batalha com uma onda devastadora.",
-    "rarity": "Raro",
-    "elements": ["agua"],
-    "species": ["Draconídeo", "Reptilóide", "Ave", "Criatura Mística", "Criatura Sombria", "Monstro", "Fera"],
-    "power": 22,
-    "effect": "nenhum",
-    "cost": 15,
-    "level": 4
+    "level": 5,
+    "type": "physical"
   },
   {
     "name": "Furacão Devastador",
     "description": "Rajadas de vento formam um ciclone que varre os inimigos.",
     "rarity": "Raro",
-    "elements": ["ar"],
-    "species": ["Draconídeo", "Reptilóide", "Ave", "Criatura Mística", "Criatura Sombria", "Monstro", "Fera"],
-    "power": 25,
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Ave",
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Monstro",
+      "Fera"
+    ],
+    "power": 120,
     "effect": "nenhum",
     "cost": 20,
-    "level": 5
+    "level": 5,
+    "type": "special"
   },
   {
-    "name": "Luz Purificadora",
-    "description": "Raio de energia pura que fere adversários com grande intensidade.",
+    "name": "Asas de Brasa",
+    "description": "Investida com asas em chamas que pode queimar o alvo.",
     "rarity": "Raro",
-    "elements": ["puro"],
-    "species": ["Draconídeo", "Reptilóide", "Ave", "Criatura Mística", "Criatura Sombria", "Monstro", "Fera"],
-    "power": 22,
-    "effect": "nenhum",
-    "cost": 15,
-    "level": 4
-  },
-  {
-    "name": "Toque Restaurador",
-    "description": "Encanto radiante que restaura parte da vitalidade do usuário.",
-    "rarity": "Incomum",
-    "elements": ["puro"],
-    "species": ["Criatura Mística"],
-    "power": 0,
-    "effect": "cura",
-    "cost": 10,
-    "level": 3
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 108,
+    "effect": "queimado",
+    "cost": 20,
+    "level": 5,
+    "type": "physical"
   },
   {
     "name": "Rajada Ígnea",
     "description": "Jato de chamas intensas que pode queimar o inimigo.",
     "rarity": "Raro",
-    "elements": ["fogo"],
-    "species": ["Draconídeo", "Ave"],
-    "power": 25,
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Draconídeo",
+      "Ave"
+    ],
+    "power": 108,
     "effect": "queimado",
     "cost": 20,
-    "level": 5
+    "level": 5,
+    "type": "special"
   },
   {
     "name": "Explosão Magmática",
     "description": "Ondas de magma que envolvem o adversário causando queimaduras.",
     "rarity": "Raro",
-    "elements": ["fogo", "terra"],
-    "species": ["Monstro"],
-    "power": 24,
+    "elements": [
+      "fogo",
+      "terra"
+    ],
+    "species": [
+      "Monstro"
+    ],
+    "power": 108,
     "effect": "queimado",
     "cost": 20,
-    "level": 5
-  },
-  {
-    "name": "Sombra Imobilizante",
-    "description": "Energia sombria que paralisa o alvo temporariamente.",
-    "rarity": "Incomum",
-    "elements": ["puro", "ar"],
-    "species": ["Criatura Sombria"],
-    "power": 18,
-    "effect": "paralisia",
-    "cost": 7,
-    "level": 3
-  },
-  {
-    "name": "Garras Dilacerantes",
-    "description": "Ataque feroz que causa cortes profundos e sangramento.",
-    "rarity": "Incomum",
-    "elements": ["ar", "terra"],
-    "species": ["Ave", "Fera"],
-    "power": 18,
-    "effect": "sangramento",
-    "cost": 10,
-    "level": 3
-  },
-  {
-    "name": "Maré Funesta",
-    "description": "Onda de águas gélidas que congela os inimigos.",
-    "rarity": "Raro",
-    "elements": ["agua"],
-    "species": ["Criatura Sombria"],
-    "power": 22,
-    "effect": "congelamento",
-    "cost": 15,
-    "level": 4
-  },
-  {
-    "name": "Aura Cristalina",
-    "description": "Lâminas de gelo que deixam o alvo parcialmente congelado.",
-    "rarity": "Incomum",
-    "elements": ["agua"],
-    "species": ["Criatura Mística"],
-    "power": 18,
-    "effect": "congelamento",
-    "cost": 10,
-    "level": 3
-  },
-  {
-    "name": "Presa Gélida",
-    "description": "Mordida congelante que inflige cortes e imobiliza o oponente.",
-    "rarity": "Raro",
-    "elements": ["agua"],
-    "species": ["Fera"],
-    "power": 26,
-    "effect": "congelamento e sangramento",
-    "cost": 25,
-    "level": 7
+    "level": 5,
+    "type": "special"
   },
   {
     "name": "Chamas da Fênix",
     "description": "Explosão de fogo renascente típica das aves de fogo que deixa o inimigo queimado.",
     "rarity": "Raro",
-    "elements": ["fogo"],
-    "species": ["Ave"],
-    "power": 26,
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 108,
     "effect": "queimado",
     "cost": 20,
-    "level": 5
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Avalanche Glacial",
+    "description": "Massas de gelo e neve despencam sobre o adversário.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Draconídeo",
+      "Fera"
+    ],
+    "power": 108,
+    "effect": "congelamento",
+    "cost": 19,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Lança de Cristal",
+    "description": "Projétil de gelo puro que perfura e congela o oponente.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Criatura Mística",
+      "Reptilóide"
+    ],
+    "power": 108,
+    "effect": "congelamento",
+    "cost": 18,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Revoada Cortante",
+    "description": "Múltiplos ataques aéreos em sequência rápida.",
+    "rarity": "Raro",
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 108,
+    "effect": "sangramento",
+    "cost": 19,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Presas da Terra",
+    "description": "Estacas de pedra emergem do solo aprisionando o inimigo.",
+    "rarity": "Raro",
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Monstro",
+      "Reptilóide"
+    ],
+    "power": 120,
+    "effect": "nenhum",
+    "cost": 18,
+    "level": 5,
+    "type": "physical"
+  },
+  {
+    "name": "Devastação Aquática",
+    "description": "Torrente massiva de água que arrasta tudo pelo caminho.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Draconídeo",
+      "Fera"
+    ],
+    "power": 120,
+    "effect": "nenhum",
+    "cost": 20,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Rugido Bestial",
+    "description": "Urro ensurdecedor que intimida e fere os oponentes.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo",
+      "agua",
+      "terra",
+      "ar",
+      "puro"
+    ],
+    "species": [
+      "Fera"
+    ],
+    "power": 120,
+    "effect": "nenhum",
+    "cost": 19,
+    "level": 5,
+    "type": "physical"
+  },
+  {
+    "name": "Eclipse Sombrio",
+    "description": "Trevas totais envolvem o campo causando dano massivo.",
+    "rarity": "Raro",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Criatura Sombria"
+    ],
+    "power": 120,
+    "effect": "nenhum",
+    "cost": 21,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Raio Divino",
+    "description": "Coluna de luz celestial que purifica e destrói.",
+    "rarity": "Raro",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística"
+    ],
+    "power": 120,
+    "effect": "nenhum",
+    "cost": 21,
+    "level": 5,
+    "type": "special"
+  },
+  {
+    "name": "Torrente Furiosa",
+    "description": "Inunda o campo de batalha com uma onda devastadora.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Ave",
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Monstro",
+      "Fera"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 15,
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Luz Purificadora",
+    "description": "Raio de energia pura que fere adversários com grande intensidade.",
+    "rarity": "Raro",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Draconídeo",
+      "Reptilóide",
+      "Ave",
+      "Criatura Mística",
+      "Criatura Sombria",
+      "Monstro",
+      "Fera"
+    ],
+    "power": 105,
+    "effect": "nenhum",
+    "cost": 15,
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Toque Restaurador",
+    "description": "Encanto radiante que restaura parte da vitalidade do usuário.",
+    "rarity": "Incomum",
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Criatura Mística"
+    ],
+    "power": 0,
+    "effect": "cura",
+    "cost": 10,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Sombra Imobilizante",
+    "description": "Energia sombria que paralisa o alvo temporariamente.",
+    "rarity": "Incomum",
+    "elements": [
+      "puro",
+      "ar"
+    ],
+    "species": [
+      "Criatura Sombria"
+    ],
+    "power": 72,
+    "effect": "paralisia",
+    "cost": 7,
+    "level": 3,
+    "type": "physical"
+  },
+  {
+    "name": "Garras Dilacerantes",
+    "description": "Ataque feroz que causa cortes profundos e sangramento.",
+    "rarity": "Incomum",
+    "elements": [
+      "ar",
+      "terra"
+    ],
+    "species": [
+      "Ave",
+      "Fera"
+    ],
+    "power": 72,
+    "effect": "sangramento",
+    "cost": 10,
+    "level": 3,
+    "type": "physical"
+  },
+  {
+    "name": "Maré Funesta",
+    "description": "Onda de águas gélidas que congela os inimigos.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Criatura Sombria"
+    ],
+    "power": 95,
+    "effect": "congelamento",
+    "cost": 15,
+    "level": 4,
+    "type": "special"
+  },
+  {
+    "name": "Aura Cristalina",
+    "description": "Lâminas de gelo que deixam o alvo parcialmente congelado.",
+    "rarity": "Incomum",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Criatura Mística"
+    ],
+    "power": 72,
+    "effect": "congelamento",
+    "cost": 10,
+    "level": 3,
+    "type": "special"
+  },
+  {
+    "name": "Presa Gélida",
+    "description": "Mordida congelante que inflige cortes e imobiliza o oponente.",
+    "rarity": "Raro",
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Fera"
+    ],
+    "power": 135,
+    "effect": "congelamento e sangramento",
+    "cost": 25,
+    "level": 7,
+    "type": "physical"
+  },
+  {
+    "name": "Chamas da Fênix",
+    "description": "Explosão de fogo renascente típica das aves de fogo que deixa o inimigo queimado.",
+    "rarity": "Raro",
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Ave"
+    ],
+    "power": 108,
+    "effect": "queimado",
+    "cost": 20,
+    "level": 5,
+    "type": "special"
   },
   {
     "name": "Faísca",
     "description": "Golpe simples de fogo que causa dano leve.",
     "rarity": "Comum",
-    "elements": ["fogo"],
-    "species": ["Draconídeo", "Ave", "Fera", "Pidgly", "Ignis", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "fogo"
+    ],
+    "species": [
+      "Draconídeo",
+      "Ave",
+      "Fera",
+      "Pidgly",
+      "Ignis",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "physical"
   },
   {
     "name": "Pedregulho",
     "description": "Arremessa uma pedra para causar dano leve.",
     "rarity": "Comum",
-    "elements": ["terra"],
-    "species": ["Draconídeo", "Ave", "Fera", "Pidgly", "Ignis", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "terra"
+    ],
+    "species": [
+      "Draconídeo",
+      "Ave",
+      "Fera",
+      "Pidgly",
+      "Ignis",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "physical"
   },
   {
     "name": "Rajada de Vento",
     "description": "Jato de ar que causa leve dano ao adversário.",
     "rarity": "Comum",
-    "elements": ["ar"],
-    "species": ["Draconídeo", "Ave", "Fera", "Pidgly", "Ignis", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "ar"
+    ],
+    "species": [
+      "Draconídeo",
+      "Ave",
+      "Fera",
+      "Pidgly",
+      "Ignis",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "special"
   },
   {
     "name": "Jato D'água",
     "description": "Disparo de água que acerta o inimigo com leve força.",
     "rarity": "Comum",
-    "elements": ["agua"],
-    "species": ["Draconídeo", "Ave", "Fera", "Pidgly", "Ignis", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "agua"
+    ],
+    "species": [
+      "Draconídeo",
+      "Ave",
+      "Fera",
+      "Pidgly",
+      "Ignis",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "special"
   },
   {
     "name": "Luz Singela",
     "description": "Luz pura que fere o inimigo com intensidade moderada.",
     "rarity": "Comum",
-    "elements": ["puro"],
-    "species": ["Draconídeo", "Ave", "Fera", "Pidgly", "Ignis", "Ashfang", "Kael", "Leoracal"],
-    "power": 10,
+    "elements": [
+      "puro"
+    ],
+    "species": [
+      "Draconídeo",
+      "Ave",
+      "Fera",
+      "Pidgly",
+      "Ignis",
+      "Ashfang",
+      "Kael",
+      "Leoracal"
+    ],
+    "power": 40,
     "effect": "nenhum",
     "cost": 5,
-    "level": 1
+    "level": 1,
+    "type": "special"
   }
 ]

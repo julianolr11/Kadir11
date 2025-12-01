@@ -399,10 +399,13 @@ document.querySelectorAll('.menu-item').forEach((item) => {
       window.electronAPI.send('open-battle-mode-window'); // Alterado pra abrir a nova janela
     } else if (action === 'itens-pet') {
       console.log('Abrir Itens');
-      window.electronAPI.send('itens-pet');
+      window.electronAPI.send('open-items-window');
     } else if (action === 'store-pet') {
       console.log('Abrir Loja');
       window.electronAPI.send('store-pet');
+    } else if (action === 'bestiary-pet') {
+      console.log('Abrir Bestiário');
+      window.electronAPI.send('open-bestiary-window');
     }
   });
 });

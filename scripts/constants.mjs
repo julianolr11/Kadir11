@@ -45,27 +45,23 @@ export const specieBioImages = {
 export let specieImages = {};
 
 export const specieData = {
-  Draconídeo: { dir: 'Draconideo', race: 'draak', element: 'puro' },
-  Reptiloide: { dir: 'Reptiloide', race: 'viborom', element: 'puro' },
-  Besta: { dir: 'Besta', race: 'besta', element: 'puro' },
-  Pidgly: { dir: 'Ave', race: 'Pidgly', element: 'terra' },
-  Ashfang: { dir: 'Fera', race: 'Ashfang', element: 'fogo' },
-  Ignis: { dir: 'Ave', race: 'ignis', element: 'fogo' },
-  Mawthorn: { dir: 'Monstro', race: 'Mawthorn', element: 'agua' },
-  Owlberoth: { dir: 'CriaturaMistica', race: 'Owlberoth', element: 'terra' },
-  Digitama: { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo' },
-  Kael: { dir: 'Fera', race: 'Kael', element: 'agua' },
-  Leoracal: { dir: 'Fera', race: 'Kael', element: 'terra' },
-  Drazraq: { dir: 'Draconideo', race: 'drazraq', element: 'puro' },
-  Foxyl: { dir: 'Fera/Foxyl', race: 'foxyl', element: 'ar' },
+  Draconídeo: { dir: 'Draconideo', race: 'draak', element: 'puro', attackType: 'Híbrido', dexNumber: 1, description: 'Senhor ancestral das montanhas, combina força bruta com energia arcana inata.' },
+  Drazraq: { dir: 'Draconideo', race: 'drazraq', element: 'puro', attackType: 'Físico', dexNumber: 2, description: 'Guerreiro dracônico de reflexos rápidos e investidas cortantes.' },
+  Reptiloide: { dir: 'Reptiloide', race: 'viborom', element: 'puro', attackType: 'Físico', dexNumber: 3, description: 'Predador rastejante que observa silencioso antes de atacar.' },
+  Pidgly: { dir: 'Ave', race: 'Pidgly', element: 'terra', attackType: 'Físico', dexNumber: 4, description: 'Ave territorial que defende seu ninho com bicadas certeiras.' },
+  Ignis: { dir: 'Ave', race: 'ignis', element: 'fogo', attackType: 'Mágico', dexNumber: 5, description: 'Espírito ígneo emplumado; suas chamas nunca se apagam.' },
+  Mawthorn: { dir: 'Monstro', race: 'Mawthorn', element: 'agua', attackType: 'Físico', dexNumber: 6, description: 'Criatura lacustre coberta por placas e espinhos orgânicos.' },
+  Owlberoth: { dir: 'CriaturaMistica', race: 'Owlberoth', element: 'terra', attackType: 'Mágico', dexNumber: 7, description: 'Guardião da clareira; olhos que enxergam através da névoa.' },
+  Digitama: { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo', attackType: 'Mágico', dexNumber: 8, description: 'Essência incubada de fogo puro em forma de casulo vivo.' },
+  Kael: { dir: 'Fera', race: 'Kael', element: 'agua', attackType: 'Mágico', dexNumber: 9, description: 'Ser fluido e sereno, domina correntes e névoas profundas.' },
+  Leoracal: { dir: 'Fera', race: 'Kael', element: 'terra', attackType: 'Físico', dexNumber: 10, description: 'Felino oracular que ruge antes de qualquer mudança climática.' },
 };
 
 export const eggSpecieMap = {
   eggAve: ['Pidgly', 'Ignis'],
   eggCriaturaMistica: ['Owlberoth', 'Digitama'],
-  eggCriaturaSombria: ['Criatura Sombria'],
   eggDraconideo: ['Draconídeo', 'Drazraq'],
-  eggFera: ['Ashfang', 'Kael', 'Leoracal', 'Foxyl'],
+  eggFera: ['Kael', 'Leoracal'],
   eggMonstro: ['Mawthorn'],
   eggReptiloide: ['Reptiloide'],
 };

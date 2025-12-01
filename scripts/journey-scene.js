@@ -1,5 +1,6 @@
 console.log('journey-scene.js carregado');
 import { getElementMultiplier } from './elements.js';
+import { computeDisplayPower, computeBattlePower } from './moveEffectiveness.js';
 import { calculateXpGain } from './xpUtils.js';
 
 function closeWindow() {
@@ -220,7 +221,7 @@ function updateMoves() {
     btn.className = 'button small-button';
     btn.title = move.description || move.name;
     const cost = move.cost || 0;
-    const power = move.power || 0;
+    const power = computeDisplayPower(move, pet);
 
     const moveElement = Array.isArray(move.elements)
       ? move.elements.includes(pet.element)
@@ -526,11 +527,18 @@ function initializeBattle() {
   battleInitialized = true;
   const lvl = pet.level || 1;
 
-  // Scale enemy health with level
-  enemyMaxHealth = 20 + lvl * 10;
-  // Multiplicador de vida do boss
-  if (window.__BOSS_MULTIPLIERS__ && window.__BOSS_MULTIPLIERS__.hp) {
-    enemyMaxHealth = Math.round(enemyMaxHealth * window.__BOSS_MULTIPLIERS__.hp);
+  // Escala de vida do inimigo
+  // Para encontros normais: curva leve por nível
+  // Para boss: basear na vida do jogador para evitar "one-shot"
+  if (window.__BOSS_MULTIPLIERS__) {
+    const playerRefHp = Math.max(pet.maxHealth || (lvl * 10 + 20), 80);
+    // Boss tem ~2.2x a vida do jogador, com pequeno ganho por nível
+    enemyMaxHealth = Math.round(playerRefHp * 2.2 + lvl * 8);
+    if (window.__BOSS_MULTIPLIERS__.hp) {
+      enemyMaxHealth = Math.round(enemyMaxHealth * window.__BOSS_MULTIPLIERS__.hp);
+    }
+  } else {
+    enemyMaxHealth = 20 + lvl * 10;
   }
   enemyHealth = enemyMaxHealth;
 
@@ -540,9 +548,13 @@ function initializeBattle() {
     magic: lvl * 2,
     speed: lvl * 1.5,
   };
-  // Multiplicador de defesa do boss
-  if (window.__BOSS_MULTIPLIERS__ && window.__BOSS_MULTIPLIERS__.defense) {
-    enemyAttributes.defense = Math.round(enemyAttributes.defense * window.__BOSS_MULTIPLIERS__.defense);
+  // Ajuste de defesa do boss: considera defesa do jogador para escalar
+  if (window.__BOSS_MULTIPLIERS__) {
+    const baseDef = Math.round(lvl * 1.5 + (pet.attributes?.defense || 0) * 0.6);
+    enemyAttributes.defense = baseDef;
+    if (window.__BOSS_MULTIPLIERS__.defense) {
+      enemyAttributes.defense = Math.round(enemyAttributes.defense * window.__BOSS_MULTIPLIERS__.defense);
+    }
   }
   if ((pet.attributes?.speed || 0) < enemyAttributes.speed) {
     currentTurn = 'enemy';
@@ -587,6 +599,28 @@ function generateReward() {
   return { item: id, qty: 1 };
 }
 
+function generateBossReward() {
+  // Recompensa diferenciada: mais XP + item raro + moedas/kadirPoints
+  const xp = 40 + Math.floor(Math.random() * 20); // 40-60 XP
+  // Priorizar itens de raridade alta se existirem
+  const rareItems = Object.keys(itemsInfo).filter((id) => {
+    const info = itemsInfo[id];
+    return info && /epic|legend|lendario|raro/i.test(info.rarity || info.id || '');
+  });
+  let itemId = null;
+  if (rareItems.length) {
+    itemId = rareItems[Math.floor(Math.random() * rareItems.length)];
+  } else {
+    const ids = Object.keys(itemsInfo);
+    itemId = ids.length ? ids[Math.floor(Math.random() * ids.length)] : null;
+  }
+  const coins = 10 + Math.floor(Math.random() * 11); // 10-20 moedas
+  const kadirPoints = 5 + Math.floor(Math.random() * 6); // 5-10 kadir points
+  const reward = { experience: xp, coins, kadirPoints };
+  if (itemId) reward.item = itemId;
+  return reward;
+}
+
 function showVictoryModal(reward, xp) {
   const modal = document.getElementById('victory-modal');
   const rewardBox = document.getElementById('victory-reward');
@@ -629,14 +663,21 @@ function concludeBattle(playerWon) {
   window.electronAPI.send('battle-result', { win: playerWon });
   localStorage.setItem(getJourneyKey('journeyBattleWin'), playerWon ? '1' : '0');
   if (playerWon) {
-    const baseXp = 10;
-    const xpGained = calculateXpGain(baseXp, pet?.rarity);
-    const reward = generateReward();
-    const additionalReward = reward.experience ? null : reward;
-    const totalXp = xpGained + (reward.experience || 0);
-    window.electronAPI.send('reward-pet', { experience: totalXp });
-    if (additionalReward) window.electronAPI.send('reward-pet', additionalReward);
-    showVictoryModal(additionalReward, totalXp);
+    if (window.__BOSS_MULTIPLIERS__) {
+      const bossReward = generateBossReward();
+      window.electronAPI.send('reward-pet', bossReward);
+      showVictoryModal(bossReward, bossReward.experience);
+      window.electronAPI.send('boss-defeated', bossReward);
+    } else {
+      const baseXp = 10;
+      const xpGained = calculateXpGain(baseXp, pet?.rarity);
+      const reward = generateReward();
+      const additionalReward = reward.experience ? null : reward;
+      const totalXp = xpGained + (reward.experience || 0);
+      window.electronAPI.send('reward-pet', { experience: totalXp });
+      if (additionalReward) window.electronAPI.send('reward-pet', additionalReward);
+      showVictoryModal(additionalReward, totalXp);
+    }
   } else {
     showDefeatModal();
   }
@@ -678,7 +719,7 @@ function performPlayerMove(move) {
   hideMenus();
   const playerImg = document.getElementById('player-pet');
   playAttackAnimation(playerImg, playerIdleSrc, playerAttackSrc, () => {
-    const base = move.power || 10;
+    const base = computeBattlePower(move, pet);
     const moveElement = Array.isArray(move.elements)
       ? move.elements.includes(pet.element)
         ? pet.element
@@ -699,7 +740,15 @@ function performPlayerMove(move) {
     const atkStat = isSpecial ? pet.attributes?.magic || 0 : pet.attributes?.attack || 0;
     const defStat = enemyAttributes.defense || 0;
     const scaled = (base + atkStat * 0.5) * mult * (100 / (100 + defStat));
-    const dmg = Math.max(1, Math.round(scaled));
+    let dmg = Math.max(1, Math.round(scaled));
+    // Limite de dano por golpe em boss para evitar one-shot
+    if (window.__BOSS_MULTIPLIERS__) {
+      const mitigation = 0.85; // redução global de 15% no dano recebido
+      dmg = Math.round(dmg * mitigation);
+      const capFrac = typeof window.__BOSS_MULTIPLIERS__.dmgCap === 'number' ? window.__BOSS_MULTIPLIERS__.dmgCap : 0.30;
+      const cap = Math.max(1, Math.ceil(enemyMaxHealth * capFrac));
+      dmg = Math.min(dmg, cap);
+    }
     enemyHealth = Math.max(0, enemyHealth - dmg);
     showHitEffect('enemy');
     updateHealthBars();
@@ -744,7 +793,15 @@ function enemyAction() {
       showMessage(`Inimigo usou ${moveName}!`);
     }
 
-    const base = movePower + enemyAttributes.attack * 0.5;
+    const enemyPetStub = { level: (window.__ENEMY_LEVEL || (pet?.level || 1)), element: enemyElement };
+    const enemyMove = {
+      power: movePower,
+      elements: [enemyElement],
+      rarity: roll < 0.2 ? 'Comum' : roll > 0.8 ? 'Raro' : 'Incomum',
+      effect: 'nenhum',
+      species: [],
+    };
+    const base = computeBattlePower(enemyMove, enemyPetStub) + enemyAttributes.attack * 0.5;
     const mult = getElementMultiplier(enemyElement, pet.element || 'puro');
     const defStat = pet.attributes?.defense || 0;
     const dmgMult = (window.__BOSS_MULTIPLIERS__ && window.__BOSS_MULTIPLIERS__.dmgOut) ? window.__BOSS_MULTIPLIERS__.dmgOut : 1;
@@ -876,6 +933,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (data.enemyName && enemyName) enemyName.textContent = data.enemyName;
+    
+    // Marca inimigo como visto no bestiário
+    if (data.enemyName && data.enemyName !== 'Inimigo') {
+      window.electronAPI.send('mark-creature-seen', data.enemyName);
+    }
+    
     // Preset de dificuldade para boss
     if (data.boss === true && data.difficultyPreset && typeof data.difficultyPreset === 'object') {
       const m = data.difficultyPreset.multipliers || {};
@@ -884,12 +947,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (enemyLevelTxt && pet && typeof pet.level === 'number') {
         enemyLevelTxt.textContent = `Lvl ${pet.level + levelOffset}`;
       }
+      // Guardar nível efetivo do inimigo para cálculo de poder
+      window.__ENEMY_LEVEL = (pet && typeof pet.level === 'number') ? (pet.level + levelOffset) : (data.level || 1);
       // Guardar multiplicadores para uso em inicialização e dano
       window.__BOSS_MULTIPLIERS__ = {
         hp: typeof m.hp === 'number' ? m.hp : 1,
         defense: typeof m.defense === 'number' ? m.defense : 1,
         dmgOut: typeof m.dmgOut === 'number' ? m.dmgOut : 1,
         statusDur: typeof m.statusDur === 'number' ? m.statusDur : 1,
+        dmgCap: typeof m.dmgCap === 'number' ? m.dmgCap : undefined,
       };
       window.__BOSS_IMMUNITIES__ = Array.isArray(data.difficultyPreset.immunities)
         ? data.difficultyPreset.immunities
@@ -913,6 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (playerLevelTxt) playerLevelTxt.textContent = `Lvl ${data.level || 1}`;
     if (enemyLevelTxt) enemyLevelTxt.textContent = `Lvl ${data.level || 1}`;
+    window.__ENEMY_LEVEL = data.level || (pet?.level || 1);
     playerHealth = data.currentHealth ?? playerHealth;
     playerMaxHealth = data.maxHealth ?? playerMaxHealth;
     const healthFill = document.getElementById('player-health-fill');

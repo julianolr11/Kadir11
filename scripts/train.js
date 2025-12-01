@@ -1,5 +1,5 @@
-import { rarityGradients } from './constants.mjs';
-import { calculateMovePower } from './moveEffectiveness.js';
+import { rarityGradients, specieData } from './constants.mjs';
+import { computeDisplayPower } from './moveEffectiveness.js';
 
 const statusIcons = {
   queimado: '../../Assets/Icons/burn.png',
@@ -68,6 +68,67 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+function resolveSpeciesTags(currentPet) {
+  const tags = new Set();
+  if (currentPet?.specie) tags.add(currentPet.specie);
+  if (currentPet?.race) tags.add(currentPet.race);
+
+  // Aliases para variações de nomenclatura e acentuação
+  const speciesAliasMap = {
+    'Draconídeo': ['Draconídeo', 'Draconideo'],
+    Reptiloide: ['Reptiloide', 'Reptilóide'],
+    'Criatura Mística': ['Criatura Mística', 'CriaturaMistica'],
+    'Criatura Sombria': ['Criatura Sombria', 'CriaturaSombria'],
+    Fera: ['Fera', 'Besta'],
+    Besta: ['Besta', 'Fera'],
+    Ave: ['Ave'],
+    Monstro: ['Monstro'],
+  };
+
+  const dirGroupMap = {
+    Draconideo: 'Draconídeo',
+    Reptiloide: 'Reptiloide',
+    Ave: 'Ave',
+    Fera: 'Fera',
+    Monstro: 'Monstro',
+    CriaturaMistica: 'Criatura Mística',
+    CriaturaSombria: 'Criatura Sombria',
+    Besta: 'Besta',
+  };
+
+  try {
+    const petRaceLc = (currentPet?.race || '').toLowerCase();
+    const petSpecie = currentPet?.specie || '';
+
+    for (const [name, info] of Object.entries(specieData)) {
+      // Se a entrada do specieData corresponde diretamente à espécie do pet
+      if (name === petSpecie) {
+        tags.add(name);
+        const groupName = dirGroupMap[info.dir];
+        if (groupName) tags.add(groupName);
+        const aliases = speciesAliasMap[name];
+        if (aliases) aliases.forEach((a) => tags.add(a));
+      }
+
+      // Se a raça do pet casa com alguma entrada do specieData
+      if (info.race && info.race.toLowerCase() === petRaceLc) {
+        tags.add(name);
+        const groupName = dirGroupMap[info.dir];
+        if (groupName) tags.add(groupName);
+        const aliases = speciesAliasMap[name];
+        if (aliases) aliases.forEach((a) => tags.add(a));
+      }
+    }
+
+    // Expandir aliases para a espécie atual diretamente
+    const directAliases = speciesAliasMap[petSpecie];
+    if (directAliases) directAliases.forEach((a) => tags.add(a));
+  } catch (e) {
+    console.warn('resolveSpeciesTags falhou:', e);
+  }
+  return Array.from(tags);
+}
+
 async function loadMoves() {
   try {
     const response = await fetch('../../data/moves.json');
@@ -81,10 +142,25 @@ async function loadMoves() {
 function renderMoves(moves) {
   const tbody = document.querySelector('#moves-table tbody');
   tbody.innerHTML = '';
-  moves.forEach((move) => {
-    if (!move.elements.includes(pet.element) || !move.species.includes(pet.specie)) {
-      return;
-    }
+  const speciesTags = resolveSpeciesTags(pet);
+  let matched = 0;
+  // Filtrar golpes compatíveis e ordenar por nível
+  const compatibleMoves = moves
+    .filter((move) => {
+      const elementMatch = Array.isArray(move.elements) && move.elements.includes(pet.element);
+      const speciesMatch = Array.isArray(move.species) && move.species.some((s) => speciesTags.includes(s));
+      return elementMatch && speciesMatch;
+    })
+    .sort((a, b) => {
+      const la = a.level ?? 0;
+      const lb = b.level ?? 0;
+      if (la !== lb) return la - lb;
+      return String(a.name || '').localeCompare(String(b.name || ''));
+    });
+
+  matched = compatibleMoves.length;
+
+  compatibleMoves.forEach((move) => {
     const tr = document.createElement('tr');
     tr.addEventListener('mouseenter', (e) => {
       showDescription(move.description || '', e);
@@ -149,7 +225,6 @@ function renderMoves(moves) {
             <td>${move.name}</td>
             <td><span style="padding: 5px; background: ${rarityStyle}; border-radius: 5px;">${move.rarity}</span></td>
             <td>${elementIcons}</td>
-            <td>${calculateMovePower(move.power, pet.level, pet.maxHealth)}</td>
             <td>${effectHtml}</td>
             <td><img src="../../Assets/Icons/dna-kadir.png" alt="KP" style="height:16px; vertical-align:middle; image-rendering:pixelated;"> ${displayCost}</td>
             <td>${move.level}</td>
@@ -166,4 +241,7 @@ function renderMoves(moves) {
     }
     tbody.appendChild(tr);
   });
+  try {
+    console.log('[train] moves compatíveis:', matched, 'de', moves.length, 'tags:', speciesTags);
+  } catch {}
 }

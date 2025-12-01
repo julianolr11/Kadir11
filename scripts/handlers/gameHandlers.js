@@ -34,6 +34,7 @@ function registerGameHandlers(deps) {
     createTrainForceWindow,
     createTrainDefenseWindow,
     createJourneySceneWindow,
+    createBestiaryWindow,
     getRandomEnemyIdle,
     resolveIdleGif,
     extractElementFromPath,
@@ -266,6 +267,10 @@ function registerGameHandlers(deps) {
     const win = createTrainDefenseWindow();
     if (win) win.webContents.on('did-finish-load', () => win.webContents.send('pet-data', pet));
   });
+  ipcMain.on('open-bestiary-window', () => {
+    logger.debug('Opening bestiary window');
+    createBestiaryWindow();
+  });
 
   // Handler: open-journey-scene-window (abre janela de cena de jornada)
   ipcMain.on('open-journey-scene-window', async (event, data) => {
@@ -309,10 +314,11 @@ function registerGameHandlers(deps) {
           ? {
               name: 'hard',
               multipliers: {
-                hp: 1.6,
-                defense: 1.35,
+                hp: 1.8,
+                defense: 1.45,
                 dmgOut: 1.4,
                 statusDur: 0.6,
+                dmgCap: 0.35,
               },
               levelOffset: 2,
               immunities: ['paralyze'],
@@ -448,6 +454,31 @@ function registerGameHandlers(deps) {
       logger.info(`Rewards applied successfully for pet ${pet.name}`);
     } catch (err) {
       logger.error('Error applying rewards:', err);
+    }
+  });
+
+  // Handler: boss-defeated (registrar vitória única, aplicar bônus adicional se primeira vez)
+  ipcMain.on('boss-defeated', async (event, reward) => {
+    try {
+      const already = store.get('bossDefeated') === true;
+      if (!already) {
+        store.set('bossDefeated', true);
+        logger.info('Boss derrotado pela primeira vez. Aplicando bônus único.');
+        const pet = getCurrentPet();
+        if (pet) {
+          pet.bravura = (pet.bravura || 0) + 25;
+          pet.kadirPoints = (pet.kadirPoints || 0) + 15;
+          await petManager.updatePet(pet.petId, {
+            bravura: pet.bravura,
+            kadirPoints: pet.kadirPoints,
+          });
+          broadcastPet(pet);
+        }
+      } else {
+        logger.info('Boss derrotado novamente. Sem bônus único adicional.');
+      }
+    } catch (err) {
+      logger.error('Erro ao processar boss-defeated:', err);
     }
   });
 

@@ -45,11 +45,13 @@ function registerAllHandlers(config) {
     createStoreWindow,
     createNestsWindow,
     createHatchWindow,
+    createBestiaryWindow,
     updateNestsPosition,
     closeNestsWindow,
     getStoreWindow,
     getItemsWindow,
     getHatchWindow,
+    getBestiaryWindow,
     closeAllGameWindows;
   let xpUtils;
   let registerWindowHandlers,
@@ -60,6 +62,7 @@ function registerAllHandlers(config) {
     registerSettingsHandlers,
     registerAssetsHandlers,
     registerLifecycleHandlers,
+    registerBestiaryHandlers,
     setupWindowPositioningHandlers,
     setupNestHandlers,
     setupBattleMechanicsHandlers;
@@ -99,11 +102,13 @@ function registerAllHandlers(config) {
       createStoreWindow,
       createNestsWindow,
       createHatchWindow,
+      createBestiaryWindow,
       updateNestsPosition,
       closeNestsWindow,
       getStoreWindow,
       getItemsWindow,
       getHatchWindow,
+      getBestiaryWindow,
       closeAllGameWindows,
     } = config.windows);
     ({ xpUtils } = config.xp);
@@ -116,6 +121,7 @@ function registerAllHandlers(config) {
       registerSettingsHandlers,
       registerAssetsHandlers,
       registerLifecycleHandlers,
+      registerBestiaryHandlers,
       setupWindowPositioningHandlers,
       setupNestHandlers,
       setupBattleMechanicsHandlers,
@@ -225,6 +231,7 @@ function registerAllHandlers(config) {
     createTrainAttributesWindow,
     createTrainForceWindow,
     createTrainDefenseWindow,
+    createBestiaryWindow,
     getRandomEnemyIdle: require('../utils/idleAssets').getRandomEnemyIdle,
     resolveIdleGif: require('../utils/idleAssets').resolveIdleGif,
     extractElementFromPath: require('../utils/idleAssets').extractElementFromPath,
@@ -295,7 +302,10 @@ function registerAllHandlers(config) {
   // 11. Battle mechanics (stats em combate)
   setupBattleMechanicsHandlers({ getCurrentPet: () => appState.currentPet, petManager });
 
+  // 12. Bestiário (descoberta de criaturas)
+  registerBestiaryHandlers(windowManager);
+
   return { resetTimers };
 }
 
-module.exports = { registerAllHandlers }; // Fase 3 Refactor: Bootstrap único de registro de handlers\n\nfunction registerAllHandlers({\n  windowManager,\n  state,\n  appState,\n  store,\n  petManager,\n  ipcMain,\n  BrowserWindow,\n  // state accessors\n  getCoins, setCoins, getItems, setItems, getPenInfo, getNestCount, getNestPrice, getNestsData, setNestsData,\n  broadcastPenUpdate, broadcastNestUpdate, getDifficulty, setDifficulty,\n  // species / pet generation\n  generateRarity, generatePetFromEgg, getSpeciesData, journeyImagesCacheRef, baseDir,\n  // game windows api\n  createBattleModeWindow, createJourneyModeWindow, createJourneySceneWindow, createLairModeWindow,\n  createTrainWindow, createTrainMenuWindow, createTrainAttributesWindow, createTrainForceWindow, createTrainDefenseWindow,\n  createItemsWindow, createStoreWindow, createNestsWindow, createHatchWindow, updateNestsPosition, getStoreWindow, getItemsWindow, getHatchWindow, closeAllGameWindows,\n  // xp utils\n  xpUtils,\n  // handlers modules\n  registerWindowHandlers, registerPetHandlers, registerStoreHandlers, registerGameHandlers, registerMovesHandlers, registerSettingsHandlers, registerAssetsHandlers, registerLifecycleHandlers, setupWindowPositioningHandlers, setupNestHandlers, setupBattleMechanicsHandlers\n}) {\n  // 1. Handlers de janela básicos\n  registerWindowHandlers(\n    windowManager,\n    getPenInfo,\n    getNestCount,\n    getItems,\n    createNestsWindow,\n    () => {},\n    createHatchWindow,\n    () => {},\n    updateNestsPosition\n  );\n\n  // 2. Pet handlers (seleção/criação/rename/delete)\n  registerPetHandlers(\n    windowManager,\n    getItems,\n    getCoins,\n    broadcastPenUpdate,\n    closeAllGameWindows\n  );\n\n  // 3. Store / economia / itens / gift codes\n  registerStoreHandlers({\n    getCurrentPet: () => appState.currentPet,\n    getCoins, setCoins, getItems, setItems, getNestPrice, getNestCount, broadcastPenUpdate, broadcastNestUpdate, petManager, store, windowManager\n  });\n\n  // 4. Jogo (batalha / jornada / treino / lair)\n  registerGameHandlers({\n    getCurrentPet: () => appState.currentPet,\n    petManager,\n    windowManager,\n    createBattleModeWindow,\n    createJourneyModeWindow,\n    createJourneySceneWindow,\n    createLairModeWindow,\n    createTrainWindow,\n    createTrainMenuWindow,\n    createTrainAttributesWindow,\n    createTrainForceWindow,\n    createTrainDefenseWindow,\n    getRandomEnemyIdle: require('../utils/idleAssets').getRandomEnemyIdle,\n    resolveIdleGif: require('../utils/idleAssets').resolveIdleGif,\n    extractElementFromPath: require('../utils/idleAssets').extractElementFromPath,\n    xpUtils,\n    storeFns: { getItems, setItems, getCoins, setCoins }\n  });\n\n  // 5. Moves (aprender golpes)\n  registerMovesHandlers({ getCurrentPet: () => appState.currentPet, petManager });\n\n  // 6. Settings / dificuldade / pen / nests\n  registerSettingsHandlers({ store, getPenInfo, getNestCount, getNestPrice, getNestsData, getDifficulty, setDifficulty });\n\n  // 7. Assets (species info + journey images cache)\n  registerAssetsHandlers({\n    loadSpeciesData: () => {},\n    getSpeciesData: () => getSpeciesData(),\n    getJourneyImagesCache: () => journeyImagesCacheRef.value,\n    setJourneyImagesCache: (cache) => { journeyImagesCacheRef.value = cache; },\n    baseDir\n  });\n\n  // 8. Lifecycle (timers)\n  const { resetTimers } = registerLifecycleHandlers({\n    ipcMain,\n    getCurrentPet: () => appState.currentPet,\n    petManager,\n    BrowserWindow\n  });\n  global.resetTimers = resetTimers;\n\n  // 9. Window positioning (alinhamento / resize / abrir items/store)\n  setupWindowPositioningHandlers({\n    createItemsWindow,\n    createStoreWindow,\n    getStoreWindow,\n    getItemsWindow,\n    getCurrentPet: () => appState.currentPet,\n    getCoins,\n    getItems\n  });\n\n  // 10. Nests / hatching\n  setupNestHandlers({\n    getCurrentPet: () => appState.currentPet,\n    getItems, setItems, getNestCount, getNestsData, setNestsData, generateRarity, generatePetFromEgg, petManager, broadcastPenUpdate, getHatchWindow\n  });\n\n  // 11. Battle mechanics (stats em combate)\n  setupBattleMechanicsHandlers({ getCurrentPet: () => appState.currentPet, petManager });\n\n  return { resetTimers };\n}\n\nmodule.exports = { registerAllHandlers };\n
+module.exports = { registerAllHandlers };

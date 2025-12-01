@@ -50,10 +50,12 @@ const {
   createStoreWindow,
   createNestsWindow,
   createHatchWindow,
+    createBestiaryWindow,
   updateNestsPosition,
   getStoreWindow,
   getItemsWindow,
   getHatchWindow,
+    getBestiaryWindow,
   closeAllGameWindows,
   closeNestsWindow,
 } = initGameWindows({ windowManager });
@@ -122,6 +124,8 @@ app.whenReady().then(() => {
     petGeneration: { generateRarity, generatePetFromEgg, getSpeciesData, baseDir: __dirname },
     cache: { journeyImagesCacheRef },
     windows: {
+        createBestiaryWindow,
+        getBestiaryWindow,
       createBattleModeWindow,
       createJourneyModeWindow,
       createJourneySceneWindow,

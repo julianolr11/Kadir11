@@ -8,6 +8,7 @@ module.exports = {
   registerSettingsHandlers: require('./settingsHandlers').registerSettingsHandlers,
   registerAssetsHandlers: require('./assetsHandlers').registerAssetsHandlers,
   registerLifecycleHandlers: require('./lifecycleHandlers').registerLifecycleHandlers,
+  registerBestiaryHandlers: require('./bestiaryHandlers').registerBestiaryHandlers,
   setupWindowPositioningHandlers: require('./windowPositioningHandlers')
     .setupWindowPositioningHandlers,
   setupNestHandlers: require('./nestHandlers').setupNestHandlers,

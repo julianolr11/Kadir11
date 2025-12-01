@@ -72,6 +72,7 @@ function generatePetFromEgg(eggId, rarity) {
     name: 'Eggsy',
     element: info.element || 'puro',
     attributes,
+    attackType: info.attackType || 'Híbrido',
     specie,
     rarity: rarity || generateRarity(),
     level: 1,

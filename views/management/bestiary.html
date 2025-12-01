@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Bestiário Kadir</title>
+  <!-- Corrigido caminho relativo para CSS (subiu 2 níveis até a raiz) -->
+  <link rel="stylesheet" href="../../styles/main.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .bestiary-container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    .bestiary-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .bestiary-header h1 {
+      font-size: 2.3em;
+      color: #ffffff;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.8);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .bestiary-header p {
+      color: #d0d0d0;
+      margin-top: 8px;
+    }
+
+    .bestiary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+      justify-items: center;
+    }
+
+    .creature-card {
+      background: rgba(30, 30, 50, 0.8);
+      border: 2px solid #444;
+      border-radius: 12px;
+      padding: 10px 10px 8px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 160px;
+      height: 160px;
+      box-sizing: border-box;
+    }
+
+    .creature-card:hover {
+      transform: translateY(-5px);
+      border-color: #ffffff;
+      box-shadow: 0 8px 20px rgba(255,255,255,0.25);
+    }
+
+    .creature-number {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 0.9em;
+      color: #888;
+      font-weight: bold;
+    }
+
+    .creature-image {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin: 0 0 6px 0;
+    }
+
+    .creature-unknown {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      color: #555;
+      margin: 0 0 6px 0;
+    }
+
+    .creature-seen {
+      opacity: 0.5;
+    }
+
+    .creature-name {
+      font-size: 0.90em;
+      color: #e0e0e0;
+      font-weight: bold;
+      margin: 2px 0 0 0;
+      min-height: 16px; /* reserva espaço mesmo oculto */
+    }
+
+    .creature-type {
+      font-size: 0.7em;
+      color: #ffffff;
+      opacity: 0.7;
+      margin: 2px 0 0 0;
+      min-height: 14px; /* reserva espaço */
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85);
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #121224 0%, #1f1f3a 100%);
+      margin: 5% auto;
+      padding: 28px;
+      border: 2px solid #ffffff;
+      border-radius: 14px;
+      width: 80%;
+      max-width: 580px;
+      box-shadow: 0 10px 34px rgba(255,255,255,0.22);
+      animation: slideDown 0.3s;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-modal:hover {
+      color: #ffffff;
+    }
+
+    .modal-creature-image {
+      width: 100%;
+      max-width: 250px;
+      height: auto;
+      margin: 20px auto 10px auto;
+      display: block;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.05);
+      padding: 6px;
+    }
+
+    .modal-creature-info {
+      text-align: center;
+    }
+
+    .modal-creature-name {
+      font-size: 1.9em;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .modal-creature-number {
+      font-size: 1.2em;
+      color: #888;
+      margin-bottom: 15px;
+    }
+
+    .modal-creature-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .stat-item {
+      background: rgba(255,255,255,0.07);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .stat-label {
+      color: #ffffff;
+      font-size: 0.85em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      color: #e0e0e0;
+      font-size: 1.1em;
+      margin-top: 5px;
+    }
+
+    .back-button {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.15);
+      color: #ffffff;
+      padding: 10px 26px;
+      border: 1px solid #ffffff;
+      border-radius: 22px;
+      font-size: 0.95em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(255,255,255,0.25);
+      backdrop-filter: blur(4px);
+      transition: all 0.3s;
+    }
+
+    .back-button:hover {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="bestiary-container">
+    <div class="bestiary-header">
+      <h1><img src="../../Assets/Icons/kadircoin.png" alt="moeda" style="height:38px;image-rendering:pixelated;filter:drop-shadow(0 0 4px rgba(255,255,255,0.3))" /> Bestiário Kadir <img src="../../Assets/Icons/kadircoin.png" alt="moeda" style="height:38px;image-rendering:pixelated;filter:drop-shadow(0 0 4px rgba(255,255,255,0.3))" /></h1>
+      <p>Descubra todas as criaturas do mundo Kadir</p>
+      <p id="bestiary-progress" style="margin-top:8px; font-weight:bold; color:#ffffff;">Progresso: 0/10 vistos | 0/10 capturados (0%)</p>
+    </div>
+
+    <div class="bestiary-grid" id="bestiary-grid">
+      <!-- Grid preenchido via JS -->
+    </div>
+  </div>
+
+  <button class="back-button" id="back-button">Voltar ao Menu</button>
+
+  <!-- Modal -->
+  <div id="creature-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="close-modal">&times;</span>
+      <div class="modal-creature-info">
+        <div class="modal-creature-number" id="modal-number">#001</div>
+        <div class="modal-creature-name" id="modal-name">???</div>
+        <img id="modal-image" class="modal-creature-image" src="" alt="Criatura">
+        <div id="modal-description" style="max-width:480px;margin:4px auto 0 auto;font-size:0.85em;line-height:1.3;color:#cfcfcf;text-align:center;white-space:pre-line;">Descrição não disponível.</div>
+        <div class="modal-creature-stats">
+          <div class="stat-item">
+            <div class="stat-label">Elemento</div>
+            <div class="stat-value" id="modal-element">???</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Tipo de Ataque</div>
+            <div class="stat-value" id="modal-attack-type">???</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Status</div>
+            <div class="stat-value" id="modal-status">Não descoberto</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Descoberto em</div>
+            <div class="stat-value" id="modal-date">---</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Corrigido caminho relativo para script (subiu 2 níveis) -->
+  <script src="../../scripts/bestiary.js"></script>
+</body>
+</html>

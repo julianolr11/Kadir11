@@ -54,6 +54,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'open-train-attributes-window',
       'open-train-force-window',
       'open-train-defense-window',
+      'open-bestiary-window',
+      'mark-creature-seen',
+      'mark-creature-owned',
+      'open-items-window', // adicionado para corrigir erro de canal não permitido
       'use-move',
       'use-bravura',
       'update-health',
@@ -88,9 +92,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'pen-updated',
       'nest-updated',
       'nests-data-updated',
+      'bestiary-updated',
       'activate-status-tab',
       'gift-redeemed', // Presente resgatado com sucesso
       'gift-error', // Erro ao resgatar presente
+      'boss-defeated', // Evento de recompensa especial do boss
     ];
     if (validChannels.includes(channel)) {
       console.log(`Registrando listener para o canal: ${channel}`);
@@ -191,6 +197,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get-difficulty',
       'set-difficulty',
       'get-species-info',
+      'get-bestiary',
       'get-gift-history',
     ];
     if (validChannels.includes(channel)) {

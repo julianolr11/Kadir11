@@ -1,4 +1,4 @@
-import { rarityGradients, rarityColors, specieBioImages, specieDirs } from './constants.mjs';
+import { rarityGradients, rarityColors, specieBioImages, specieDirs, specieData } from './constants.mjs';
 
 const raceNames = {
   viborom: 'Viborom',
@@ -232,6 +232,17 @@ function formatRarity(rarity) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Probabilidades de cada raridade conforme lógica de generateRarity()
+// Comum: 40%, Incomum: 30%, Raro: 15%, MuitoRaro: 10%, Epico: 4%, Lendario: 1%
+const rarityChances = {
+  Comum: 40,
+  Incomum: 30,
+  Raro: 15,
+  MuitoRaro: 10,
+  Epico: 4,
+  Lendario: 1,
+};
+
 function loadPet(petData) {
   if (petData) {
     pet = petData;
@@ -272,6 +283,7 @@ function updateStatus() {
   const specieText = document.getElementById('specie-text');
   const raceText = document.getElementById('race-text');
   const elementText = document.getElementById('element-text');
+  const rarityText = document.getElementById('rarity-text');
   const titleBarElement = document.getElementById('title-bar-element');
   const titleBarPetName = document.getElementById('title-bar-pet-name');
   const statusPetImageGradient = document.getElementById('status-pet-image-gradient');
@@ -305,6 +317,7 @@ function updateStatus() {
     !specieText ||
     !raceText ||
     !elementText ||
+    !rarityText ||
     !statusEquipImg
   ) {
     console.error('Um ou mais elementos do status-container ou title-bar não encontrados', {
@@ -334,6 +347,7 @@ function updateStatus() {
       specieText: !!specieText,
       raceText: !!raceText,
       elementText: !!elementText,
+      rarityText: !!rarityText,
       statusEquipImg: !!statusEquipImg,
     });
     return;
@@ -428,7 +442,18 @@ function updateStatus() {
 
   // Atualizar bio
   if (bioText) {
-    bioText.textContent = pet.bio || '';
+    const specieInfo = pet.specie ? specieData[pet.specie] : null;
+    const fallbackDesc = specieInfo?.description || '';
+    const baseDesc = pet.bio || fallbackDesc || '';
+    bioText.innerHTML = baseDesc ? `<strong>Descrição:</strong> ${baseDesc}` : '';
+  }
+
+  // Atualizar raridade na aba Sobre
+  if (rarityText) {
+    const rarityChance = rarityChances[pet.rarity] || null;
+    rarityText.innerHTML = rarityChance
+      ? `<strong>Raridade:</strong> ${formatRarity(pet.rarity)} (${rarityChance}% de chance ao nascer)`
+      : `<strong>Raridade:</strong> ${formatRarity(pet.rarity)}`;
   }
 
   if (xpBarFill && xpText) {
@@ -439,16 +464,16 @@ function updateStatus() {
   }
   if (specieText) {
     const specieCategory = getSpecieCategory(pet);
-    specieText.textContent = `Espécie: ${specieCategory}`;
+    specieText.innerHTML = `<strong>Espécie:</strong> ${specieCategory}`;
   }
   if (raceText) {
     const raceName = raceNames[pet.race] || pet.race || '';
-    raceText.textContent = raceName ? `Raça: ${raceName}` : '';
+    raceText.innerHTML = raceName ? `<strong>Raça:</strong> ${raceName}` : '';
   }
   if (elementText) {
     const imgSrc = elementImages[pet.element?.toLowerCase()] || '../../Assets/Elements/default.png';
     const elementName = pet.element || 'Desconhecido';
-    elementText.innerHTML = `Elemento: <img src="${imgSrc}" alt="${elementName}" style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> ${elementName}`;
+    elementText.innerHTML = `<strong>Elemento:</strong> <img src="${imgSrc}" alt="${elementName}" style="height: 16px; vertical-align: middle; image-rendering: pixelated;"> ${elementName}`;
   }
 
   const healthPercentage = ((pet.currentHealth || 0) / (pet.maxHealth || 1)) * 100;
