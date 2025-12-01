@@ -51,7 +51,8 @@ function ensureStatusImage(pet) {
 
   if (relativeDir && relativeDir !== '.') {
     const baseDir = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir);
-    const candidates = ['front.gif', 'front.png', 'idle.gif', 'idle.png'];
+    // Ordem de prioridade expandida: front.gif > idle.gif > front.png > idle.png
+    const candidates = ['front.gif', 'idle.gif', 'front.png', 'idle.png'];
     for (const file of candidates) {
       const full = path.join(baseDir, file);
       if (fsSync.existsSync(full)) {
@@ -70,11 +71,16 @@ function ensureStatusImage(pet) {
   }
 
   if (!pet.bioImage) {
-    // Usa portrait se existir; fallback para eggsy
-    const portraitPath = relativeDir
-      ? path.join(__dirname, '..', 'Assets', 'Mons', relativeDir, `${pet.name}.png`)
-      : null;
-    pet.bioImage = fsSync.existsSync(portraitPath) ? `${pet.name}.png` : 'eggsy.png';
+    // Tenta encontrar {race}.png na pasta, fallback para eggsy
+    if (relativeDir && pet.race) {
+      const racePath = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir, `${pet.race}.png`);
+      if (fsSync.existsSync(racePath)) {
+        pet.bioImage = path.posix.join(relativeDir, `${pet.race}.png`);
+      }
+    }
+    if (!pet.bioImage) {
+      pet.bioImage = 'eggsy.png';
+    }
   }
 }
 
