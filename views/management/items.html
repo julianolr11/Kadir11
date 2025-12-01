@@ -75,7 +75,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
-                flex-shrink: 0;
+                /* flex-shrink removido, não necessário */
         }
 
         #coin-icon {
@@ -89,10 +89,8 @@
             flex-direction: column;
             gap: 0;
             padding: 0px;
-            flex: 1;
-            min-height: 0;
-            overflow-y: scroll;
-                flex-shrink: 1;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         /* Aplicar estilo de scrollbar ao items-list */
@@ -333,6 +331,44 @@
                 z-index: 10;
         }
 
+        /* Abas de categorias */
+        #items-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 10px 10px 0 10px;
+            border-bottom: 2px solid #4a5868;
+            padding-bottom: 0;
+        }
+
+        .items-tab {
+            padding: 8px 16px;
+            background: rgba(58, 68, 80, 0.5);
+            border: 2px solid #4a5868;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            font-family: 'PixelOperator', sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .items-tab:hover {
+            background: rgba(68, 78, 90, 0.7);
+            color: #fff;
+            border-color: #5a6878;
+        }
+
+        .items-tab.active {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+            border-color: #4a9eff;
+            border-bottom: 2px solid #2a323e;
+        }
+
         /* Modal de Essências */
         #essence-modal {
             display: none;
@@ -483,6 +519,13 @@
         <div id="items-container">
             <img id="coin-icon" src="../../Assets/Icons/kadircoin.png" alt="Moedas" />
             <span id="coin-count">0</span>
+        </div>
+        <div id="items-tabs" style="display: flex; gap: 8px; margin: 10px 0 0 10px;">
+            <button class="items-tab" data-tab="equipments">Equipamentos</button>
+            <button class="items-tab" data-tab="consumables">Consumíveis</button>
+            <button class="items-tab" data-tab="essences">Essências</button>
+            <button class="items-tab" data-tab="eggs">Ovos</button>
+            <button class="items-tab" data-tab="others">Outros</button>
         </div>
         <div id="items-list" class="scroll-container"></div>
         <button class="button small-button" id="open-store-button">Loja</button>

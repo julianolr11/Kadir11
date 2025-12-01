@@ -1,5 +1,6 @@
 let pet = null;
 let itemsInfo = {};
+let currentTab = 'consumables';
 let swapModal = null;
 let swapConfirmBtn = null;
 let swapCancelBtn = null;
@@ -161,6 +162,18 @@ function closeWindow() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Abas de categorias
+    const tabs = document.querySelectorAll('.items-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentTab = tab.dataset.tab;
+        updateItems();
+      });
+    });
+    // Ativa aba padrão
+    if (tabs.length) tabs[1].classList.add('active');
   document.getElementById('close-items-window')?.addEventListener('click', closeWindow);
   document.getElementById('back-items-window')?.addEventListener('click', () => {
     window.electronAPI.send('open-status-window');
@@ -275,28 +288,47 @@ function updateItems() {
 
   // Combinar itens normais e essências
   const allItems = { ...items };
-  
-  // Adicionar essências ao objeto de itens
   Object.keys(essences).forEach(rarity => {
     const essenceId = `essence_${rarity}`;
     allItems[essenceId] = essences[rarity] || 0;
   });
 
-  // Verificar se há itens disponíveis
-  const hasItems = Object.keys(allItems).some((id) => allItems[id] > 0);
+  // Categorizar itens
+  const categories = {
+    equipments: [],
+    consumables: [],
+    essences: [],
+    eggs: [],
+    others: []
+  };
+  Object.keys(allItems).forEach(id => {
+    const info = itemsInfo[id];
+    if (!info || allItems[id] <= 0) return;
+    if (info.type === 'equipment') {
+      categories.equipments.push(id);
+    } else if (info.type === 'essence') {
+      categories.essences.push(id);
+    } else if (id.startsWith('egg')) {
+      categories.eggs.push(id);
+    } else if (info.type === 'consumable' || (!info.type && (id.includes('Potion') || id === 'meat' || id === 'chocolate'))) {
+      categories.consumables.push(id);
+    } else {
+      categories.others.push(id);
+    }
+  });
 
-  if (!hasItems) {
+  const itemKeys = categories[currentTab];
+  if (!itemKeys || itemKeys.length === 0) {
     const emptyMsg = document.createElement('div');
     emptyMsg.style.padding = '20px';
     emptyMsg.style.textAlign = 'center';
     emptyMsg.style.color = '#888';
     emptyMsg.style.fontFamily = 'PixelOperator, sans-serif';
-    emptyMsg.textContent = 'Sem itens disponíveis';
+    emptyMsg.textContent = 'Sem itens nesta categoria';
     listEl.appendChild(emptyMsg);
     return;
   }
 
-  const itemKeys = Object.keys(allItems).filter((id) => allItems[id] > 0);
   itemKeys.forEach((id, index) => {
     const qty = allItems[id];
     const info = itemsInfo[id];
@@ -311,7 +343,6 @@ function updateItems() {
     itemHeader.className = 'item-header';
 
     const img = document.createElement('img');
-    // Ajusta o caminho do JSON (Assets/Shop/...) para o contexto de views/management/ (../../Assets/Shop/...)
     img.src = info.icon.startsWith('Assets/') ? '../../' + info.icon : info.icon;
     img.alt = info.name;
     img.className = 'item-icon';
@@ -329,7 +360,6 @@ function updateItems() {
     label.textContent = info.name;
     label.className = 'item-name';
     
-    // Adicionar classe de raridade se o item tiver
     if (info.rarity) {
       label.classList.add(`rarity-${info.rarity}`);
     }
@@ -341,7 +371,6 @@ function updateItems() {
 
     const qtyLabel = document.createElement('span');
     
-    // Para essências, mostrar X/10
     if (info.type === 'essence') {
       qtyLabel.textContent = `${qty}/10`;
       qtyLabel.className = 'item-qty essence-progress';
@@ -364,31 +393,47 @@ function updateItems() {
     arrow.className = 'accordion-arrow';
     arrow.textContent = '▼';
 
-    // Criar área clicável do header (ícone, info, seta)
     const headerClickable = document.createElement('div');
     headerClickable.className = 'item-header-clickable';
     headerClickable.appendChild(img);
     headerClickable.appendChild(itemInfo);
 
-    // Criar área de ações (botão usar + seta)
     const headerActions = document.createElement('div');
     headerActions.className = 'item-header-actions';
 
-    // Botão de usar/equipar/chocar/essência
     const useBtn = document.createElement('button');
     useBtn.className = 'button small-button use-item-btn';
 
     if (info.type === 'essence') {
-      // Essências: só pode usar quando tiver 10/10
       if (qty >= 10) {
         useBtn.textContent = 'Usar';
         useBtn.disabled = false;
         useBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          // Abrir modal para selecionar o pet
           const essenceRarity = id.replace('essence_', '');
           openEssenceModal(essenceRarity);
         });
+
+        const convertBtn = document.createElement('button');
+        convertBtn.className = 'button small-button use-item-btn';
+        convertBtn.textContent = 'Converter';
+        convertBtn.style.marginLeft = '8px';
+        convertBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const essenceRarity = id.replace('essence_', '');
+          try {
+            const result = await window.electronAPI.invoke('craft-essence', { rarity: essenceRarity });
+            if (result.success) {
+              alert('Essências convertidas com sucesso!');
+              window.electronAPI.send('request-pet-data');
+            } else {
+              alert(result.error || 'Erro ao converter essência');
+            }
+          } catch (err) {
+            alert('Erro ao converter essência');
+          }
+        });
+        headerActions.insertBefore(convertBtn, useBtn);
       } else {
         useBtn.textContent = `${qty}/10`;
         useBtn.disabled = true;
@@ -424,7 +469,6 @@ function updateItems() {
     itemHeader.appendChild(headerClickable);
     itemHeader.appendChild(headerActions);
 
-    // Conteúdo do accordion (descrição)
     const itemContent = document.createElement('div');
     itemContent.className = 'item-content';
 
@@ -433,14 +477,11 @@ function updateItems() {
     description.textContent = info.description || info.effect || 'Sem descrição';
     itemContent.appendChild(description);
 
-    // Toggle accordion ao clicar na área clicável ou na seta
     const toggleAccordion = () => {
       const isOpen = itemContainer.classList.contains('open');
-      // Fechar todos os outros itens
       document.querySelectorAll('.item-container').forEach((container) => {
         container.classList.remove('open');
       });
-      // Toggle do item atual
       if (!isOpen) {
         itemContainer.classList.add('open');
       }
@@ -455,7 +496,6 @@ function updateItems() {
     itemContainer.appendChild(itemHeader);
     itemContainer.appendChild(itemContent);
 
-    // Adicionar divisória se não for o último item
     if (index < itemKeys.length - 1) {
       const divider = document.createElement('div');
       divider.className = 'item-divider';
