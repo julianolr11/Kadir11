@@ -137,7 +137,10 @@ function selectRandomQuestions() {
 
 // Exibir a pergunta atual
 function showQuestion() {
-  const question = selectedQuestions[currentQuestionIndex];
+  // Fallback seguro caso perguntas ainda não tenham sido carregadas em ambiente de teste
+  const question =
+    selectedQuestions[currentQuestionIndex] ||
+    { text: '', options: [] };
 
   // Garantir que os elementos do quiz estejam visíveis
   document.getElementById('question-title').style.display = 'block';
@@ -151,7 +154,7 @@ function showQuestion() {
   const optionsContainer = document.getElementById('options-container');
   optionsContainer.innerHTML = '';
 
-  question.options.forEach((option) => {
+  (question.options || []).forEach((option) => {
     const button = document.createElement('button');
     button.className = 'button option-button';
     button.textContent = option.text;

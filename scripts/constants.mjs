@@ -55,6 +55,7 @@ export const specieData = {
   Digitama: { dir: 'CriaturaMistica', race: 'Digitama', element: 'fogo', attackType: 'Mágico', dexNumber: 8, description: 'Essência incubada de fogo puro em forma de casulo vivo.' },
   Kael: { dir: 'Fera', race: 'Kael', element: 'agua', attackType: 'Mágico', dexNumber: 9, description: 'Ser fluido e sereno, domina correntes e névoas profundas.' },
   Leoracal: { dir: 'Fera', race: 'Kael', element: 'terra', attackType: 'Físico', dexNumber: 10, description: 'Felino oracular que ruge antes de qualquer mudança climática.' },
+  Besta: { dir: 'Besta', race: 'Besta', element: 'terra', attackType: 'Físico', dexNumber: 11, description: 'Criatura selvagem de força bruta, habitante de vales e florestas.' },
 };
 
 export const eggSpecieMap = {

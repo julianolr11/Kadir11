@@ -62,7 +62,14 @@ function setupWindowPositioningHandlers(options = {}) {
     win.webContents.on('did-finish-load', sendDataFn);
     if (alignOptions?.enabled && alignOptions.otherWindow) {
       try {
-        alignWindowsSideBySide(alignOptions.win1, alignOptions.win2);
+        const other = alignOptions.otherWindow;
+        if (alignOptions.side === 'left') {
+          alignWindowsSideBySide(win, other, screen);
+        } else if (alignOptions.side === 'right') {
+          alignWindowsSideBySide(other, win, screen);
+        } else {
+          alignWindowsSideBySide(win, other, screen);
+        }
         logger.debug(alignOptions.logMsg);
       } catch (err) {
         logger.error(alignOptions.errMsg, err);
@@ -95,7 +102,7 @@ function setupWindowPositioningHandlers(options = {}) {
         if (storeWindow && !storeWindow.isDestroyed()) {
           setTimeout(() => {
             try {
-              alignWindowsSideBySide(win, storeWindow);
+              alignWindowsSideBySide(win, storeWindow, screen);
               logger.debug('Items window aligned with store window after load');
             } catch (err) {
               logger.error('Error positioning items window after load:', err);
@@ -103,7 +110,16 @@ function setupWindowPositioningHandlers(options = {}) {
           }, 100);
         }
       },
-      null // Remover alinhamento inicial, será feito no callback
+      // Alinhar também imediatamente para facilitar testes e UX mais responsiva
+      storeWindow
+        ? {
+            enabled: true,
+            otherWindow: storeWindow,
+            side: 'left',
+            logMsg: 'Items window aligned with store window (immediate)',
+            errMsg: 'Error positioning items window (immediate):',
+          }
+        : null
     );
   };
   ipcMain.on('itens-pet', (e, opts) => openItems(opts));
@@ -132,7 +148,7 @@ function setupWindowPositioningHandlers(options = {}) {
         if (itemsWindow && !itemsWindow.isDestroyed()) {
           setTimeout(() => {
             try {
-              alignWindowsSideBySide(itemsWindow, win);
+              alignWindowsSideBySide(itemsWindow, win, screen);
               logger.debug('Store window aligned with items window after load');
             } catch (err) {
               logger.error('Error positioning store window after load:', err);
@@ -140,7 +156,16 @@ function setupWindowPositioningHandlers(options = {}) {
           }, 100);
         }
       },
-      null // Remover alinhamento inicial, será feito no callback
+      // Alinhar também imediatamente para facilitar testes e UX mais responsiva
+      itemsWindow
+        ? {
+            enabled: true,
+            otherWindow: itemsWindow,
+            side: 'right',
+            logMsg: 'Store window aligned with items window (immediate)',
+            errMsg: 'Error positioning store window (immediate):',
+          }
+        : null
     );
   });
 
@@ -182,10 +207,11 @@ function setupWindowPositioningHandlers(options = {}) {
  * Aligns two windows side by side, centered on screen
  * @param {BrowserWindow} leftWindow - Window to place on the left
  * @param {BrowserWindow} rightWindow - Window to place on the right
+ * @param {Object} screenModule - Electron screen module to query display
  * (anchorPosition removido - não utilizado)
  */
-function alignWindowsSideBySide(leftWindow, rightWindow) {
-  const display = electronScreen.getPrimaryDisplay();
+function alignWindowsSideBySide(leftWindow, rightWindow, screenModule = electronScreen) {
+  const display = screenModule.getPrimaryDisplay();
   const screenWidth = display.workAreaSize.width;
   const screenHeight = display.workAreaSize.height;
 
