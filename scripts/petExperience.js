@@ -8,9 +8,12 @@ const rarityMultipliers = {
 };
 
 function getRequiredXpForNextLevel(level) {
-  const baseXp = 100;
-  const scale = 1.2;
-  return Math.round(baseXp * Math.pow(level, 1.5) * scale);
+  // Nova curva: crescimento mais suave início e acelera após nível 20
+  const lvl = Math.max(level, 1);
+  const base = 60; // base inicial menor
+  const scaling = 90 * Math.pow(lvl, 1.35); // expo reduzido (1.35) vs 1.5 anterior
+  const midBonus = lvl > 20 ? (lvl - 20) * 25 : 0; // aceleração após nível 20
+  return Math.round(base + scaling + midBonus);
 }
 
 function calculateXpGain(baseXp, rarity) {

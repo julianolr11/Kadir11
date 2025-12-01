@@ -23,9 +23,11 @@ const elementImages = {
 };
 
 function getRequiredXpForNextLevel(level) {
-  const baseXp = 100;
-  const scale = 1.2;
-  return Math.round(baseXp * Math.pow(level, 1.5) * scale);
+  const lvl = Math.max(level, 1);
+  const base = 60;
+  const scaling = 90 * Math.pow(lvl, 1.35);
+  const midBonus = lvl > 20 ? (lvl - 20) * 25 : 0;
+  return Math.round(base + scaling + midBonus);
 }
 console.log('status.js carregado com sucesso');
 

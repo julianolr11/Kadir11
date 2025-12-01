@@ -71,8 +71,8 @@ function setupWindowPositioningHandlers(options = {}) {
     return win;
   };
 
-  // Handler: itens-pet
-  ipcMain.on('itens-pet', (event, openOptions) => {
+  // Handler: itens-pet (menu principal) e alias: open-items-window (compatibilidade)
+  const openItems = (openOptions) => {
     const currentPet = getCurrentPet();
     if (!currentPet) {
       logger.error('No pet selected to open items window');
@@ -105,7 +105,9 @@ function setupWindowPositioningHandlers(options = {}) {
       },
       null // Remover alinhamento inicial, será feito no callback
     );
-  });
+  };
+  ipcMain.on('itens-pet', (e, opts) => openItems(opts));
+  ipcMain.on('open-items-window', (e, opts) => openItems(opts));
 
   // Handler: store-pet
   ipcMain.on('store-pet', (event, openOptions) => {

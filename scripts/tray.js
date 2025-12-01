@@ -399,7 +399,8 @@ document.querySelectorAll('.menu-item').forEach((item) => {
       window.electronAPI.send('open-battle-mode-window'); // Alterado pra abrir a nova janela
     } else if (action === 'itens-pet') {
       console.log('Abrir Itens');
-      window.electronAPI.send('open-items-window');
+      // Usar canal oficial 'itens-pet' para acionar handler de criação
+      window.electronAPI.send('itens-pet');
     } else if (action === 'store-pet') {
       console.log('Abrir Loja');
       window.electronAPI.send('store-pet');
