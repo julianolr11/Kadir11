@@ -510,9 +510,6 @@
                             <p><img class="currency-icon" src="../../Assets/Icons/dna-kadir.png" alt="KP"> ${pet.kadirPoints ?? 0}</p>
                         </div>
                         <div class="action-buttons">
-                            <button class="essence-button generate-essence" data-pet-id="${pet.petId}" title="Gerar Essência">
-                                <img src="../../Assets/Icons/soul-essence.png" alt="Gerar Essência" />
-                            </button>
                             ${validEssence ? `
                             <button class="essence-button use-essence" data-pet-id="${pet.petId}" data-essence="${validEssence}" title="Usar Essência ${formatRarity(validEssence)}">
                                 <img src="../../Assets/Icons/soul-essence.png" alt="Usar Essência" />
@@ -534,15 +531,6 @@
                     // Aplicar o gradiente com base na raridade
                     const petImageBackground = petItem.querySelector('.pet-image-background');
                     petImageBackground.style.background = rarityGradients[pet.rarity] || rarityGradients['Comum'];
-
-                    // Adicionar evento ao botão de gerar essência
-                    const generateEssenceButton = petItem.querySelector('.generate-essence');
-                    if (generateEssenceButton) {
-                        generateEssenceButton.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            window.electronAPI.send('generate-essence', pet.petId);
-                        });
-                    }
 
                     // Adicionar evento ao botão de usar essência
                     const useEssenceButton = petItem.querySelector('.use-essence');
@@ -575,14 +563,6 @@
 
         // Listeners para eventos de essência
         if (window.electronAPI?.on) {
-            window.electronAPI.on('essence-generated', (e, data) => {
-                console.log('Essências geradas:', data);
-                // Mostrar modal de recompensa
-                essenceRewardAmount.textContent = `${data.amount}x`;
-                essenceRewardRarity.textContent = `Essência ${formatRarity(data.rarity)}`;
-                essenceRewardOverlay.style.display = 'flex';
-            });
-
             window.electronAPI.on('essence-used', (e, data) => {
                 console.log('Essência usada:', data);
                 alert(`Pet evoluiu de ${formatRarity(data.oldRarity)} para ${formatRarity(data.newRarity)}!`);

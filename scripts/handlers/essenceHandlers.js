@@ -70,41 +70,6 @@ function registerEssenceHandlers({ electron, managers, store }) {
   });
 
   /**
-   * Gerar essência de um pet
-   */
-  ipcMain.on('generate-essence', async (event, petId) => {
-    try {
-      const pet = await petManager.loadPet(petId);
-      if (!pet) {
-        console.error('Pet não encontrado:', petId);
-        return;
-      }
-
-      const beforeAmount = electronStore.get(`essences.${pet.rarity}`, 0);
-      const result = essenceManager.generateEssencesFromPet(electronStore, pet);
-      const afterAmount = result[pet.rarity];
-      const amount = afterAmount - beforeAmount;
-      
-      console.log(`Geradas ${amount} essências ${pet.rarity} do pet ${pet.name}`);
-
-      // Broadcast para todas as janelas
-      BrowserWindow.getAllWindows().forEach(win => {
-        if (win && win.webContents) {
-          win.webContents.send('essence-generated', {
-            petId,
-            rarity: pet.rarity,
-            amount,
-            inventory: result
-          });
-        }
-      });
-
-    } catch (err) {
-      console.error('Erro ao gerar essência:', err);
-    }
-  });
-
-  /**
    * Usar essência em um pet (evoluir raridade)
    */
   ipcMain.on('use-essence-on-pet', async (event, { petId, essenceRarity }) => {

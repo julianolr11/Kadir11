@@ -70,7 +70,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'open-tray-window', // Abrir a janela da bandeja
       'open-gift-window', // Abrir a janela de presentes
       'redeem-gift-code', // Resgatar código de presente
-      'generate-essence', // Gerar essência de um pet
       'use-essence-on-pet', // Usar essência para evoluir raridade
       'craft-essence', // Fazer craft de essências
       'open-essence-window', // Abrir janela de inventário de essências
@@ -102,7 +101,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'gift-redeemed', // Presente resgatado com sucesso
       'gift-error', // Erro ao resgatar presente
       'boss-defeated', // Evento de recompensa especial do boss
-      'essence-generated', // Essência gerada
       'essence-used', // Essência usada em pet
       'essence-crafted', // Essência craftada
       'essence-reward', // Recompensa de essência ao deletar pet
