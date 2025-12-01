@@ -121,24 +121,6 @@ function registerEssenceHandlers({ electron, managers, store }) {
       return { success: false, error: error.message };
     }
   });
-            petId,
-            oldRarity: result.oldRarity,
-            newRarity: result.newRarity,
-            inventory: result.inventory
-          });
-          
-          // Se for o pet atual, atualizar dados completos
-          const currentPet = appState.currentPet;
-          if (currentPet && currentPet.petId === petId) {
-            win.webContents.send('pet-data', pet);
-          }
-        }
-      });
-
-    } catch (err) {
-      console.error('Erro ao usar essência:', err);
-    }
-  });
 
   /**
    * Fazer craft de essências (MANUAL - atualmente o craft é automático)
