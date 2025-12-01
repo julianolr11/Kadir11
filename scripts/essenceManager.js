@@ -47,13 +47,45 @@ function getEssenceInventory(store) {
 }
 
 /**
- * Adiciona essências ao inventário
+ * Adiciona essências ao inventário e faz auto-craft se atingir 10
+ * Retorna objeto com inventário atualizado e informações de craft
  */
 function addEssences(store, rarity, amount) {
   const inventory = getEssenceInventory(store);
   inventory[rarity] = (inventory[rarity] || 0) + amount;
+  
+  const craftResults = [];
+  
+  // Auto-craft: enquanto tiver 10+ essências e não for Lendário (tier máximo)
+  let currentTier = ESSENCE_TIERS[rarity];
+  let currentRarity = rarity;
+  
+  while (currentTier < 5 && inventory[currentRarity] >= 10) {
+    const crafted = Math.floor(inventory[currentRarity] / 10);
+    inventory[currentRarity] = inventory[currentRarity] % 10; // Resto
+    
+    const nextTier = currentTier + 1;
+    const nextRarity = ESSENCE_NAMES[nextTier];
+    
+    inventory[nextRarity] = (inventory[nextRarity] || 0) + crafted;
+    
+    craftResults.push({
+      from: currentRarity,
+      to: nextRarity,
+      amount: crafted
+    });
+    
+    // Continuar verificando o próximo tier
+    currentTier = nextTier;
+    currentRarity = nextRarity;
+  }
+  
   store.set('essences', inventory);
-  return inventory;
+  
+  return {
+    inventory,
+    craftResults
+  };
 }
 
 /**
@@ -71,6 +103,7 @@ function removeEssences(store, rarity, amount) {
 
 /**
  * Gera essências de um pet (1-3 baseado na raridade)
+ * Retorna objeto com inventário e resultados de craft
  */
 function generateEssencesFromPet(store, pet) {
   const amount = Math.floor(Math.random() * 3) + 1; // 1 a 3

@@ -141,7 +141,8 @@ function registerEssenceHandlers({ electron, managers, store }) {
   });
 
   /**
-   * Fazer craft de essências
+   * Fazer craft de essências (MANUAL - atualmente o craft é automático)
+   * Este handler está mantido para compatibilidade futura
    */
   ipcMain.on('craft-essence', async (event, fromRarity) => {
     try {
@@ -220,9 +221,7 @@ function enhanceDeletePetHandler({ electron, managers, store }) {
 
       // Gerar essências antes de deletar (1-3 baseado na raridade)
       const amount = Math.floor(Math.random() * 3) + 1; // 1 a 3
-      const beforeAmount = electronStore.get(`essences.${pet.rarity}`, 0);
-      essenceManager.addEssences(electronStore, pet.rarity, amount);
-      const essenceInventory = essenceManager.getEssenceInventory(electronStore);
+      const result = essenceManager.addEssences(electronStore, pet.rarity, amount);
       
       // Deletar o pet
       await petManager.deletePet(petId);
@@ -233,12 +232,20 @@ function enhanceDeletePetHandler({ electron, managers, store }) {
       }
 
       console.log(`Pet ${pet.name} deletado. Recompensa: ${amount}x Essência ${pet.rarity}`);
+      
+      // Log de auto-crafts
+      if (result.craftResults && result.craftResults.length > 0) {
+        result.craftResults.forEach(craft => {
+          console.log(`Auto-craft: ${craft.amount}x Essência ${craft.to} (de ${craft.from})`);
+        });
+      }
 
       // Enviar recompensa para a janela que solicitou
       event.sender.send('essence-reward', {
         rarity: pet.rarity,
         amount,
-        inventory: essenceInventory
+        inventory: result.inventory,
+        craftResults: result.craftResults || []
       });
 
       // Broadcast para outras janelas

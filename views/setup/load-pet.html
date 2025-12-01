@@ -300,6 +300,18 @@
             margin: 10px 0;
         }
 
+        #essence-reward-crafts {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #essence-reward-crafts .craft-item {
+            font-size: 14px;
+            color: #4caf50;
+            margin: 5px 0;
+        }
+
         #limit-box {
             background-color: #2a323e;
             border: 2px solid #ffffff;
@@ -368,6 +380,7 @@
             <img src="../../Assets/Icons/soul-essence.png" alt="Essência">
             <div class="essence-amount" id="essence-reward-amount">3x</div>
             <p id="essence-reward-rarity">Essência Rara</p>
+            <div id="essence-reward-crafts"></div>
             <div class="confirm-buttons">
                 <button class="button small-button" id="essence-reward-ok">OK</button>
             </div>
@@ -388,6 +401,7 @@
         const essenceRewardOverlay = document.getElementById('essence-reward-overlay');
         const essenceRewardAmount = document.getElementById('essence-reward-amount');
         const essenceRewardRarity = document.getElementById('essence-reward-rarity');
+        const essenceRewardCrafts = document.getElementById('essence-reward-crafts');
         const essenceRewardOkBtn = document.getElementById('essence-reward-ok');
         let petIdToDelete = null;
         let petLimit = 3;
@@ -573,6 +587,18 @@
                 // Mostrar modal de recompensa
                 essenceRewardAmount.textContent = `${data.amount}x`;
                 essenceRewardRarity.textContent = `Essência ${formatRarity(data.rarity)}`;
+                
+                // Mostrar crafts automáticos se houver
+                essenceRewardCrafts.innerHTML = '';
+                if (data.craftResults && data.craftResults.length > 0) {
+                    data.craftResults.forEach(craft => {
+                        const craftItem = document.createElement('div');
+                        craftItem.className = 'craft-item';
+                        craftItem.textContent = `✨ ${craft.amount}x Essência ${formatRarity(craft.to)} criada!`;
+                        essenceRewardCrafts.appendChild(craftItem);
+                    });
+                }
+                
                 essenceRewardOverlay.style.display = 'flex';
             });
         }
