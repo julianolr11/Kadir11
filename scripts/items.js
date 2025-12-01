@@ -328,6 +328,11 @@ function updateItems() {
     const label = document.createElement('span');
     label.textContent = info.name;
     label.className = 'item-name';
+    
+    // Adicionar classe de raridade se o item tiver
+    if (info.rarity) {
+      label.classList.add(`rarity-${info.rarity}`);
+    }
 
     const infoIcon = document.createElement('span');
     infoIcon.textContent = 'ⓘ';
