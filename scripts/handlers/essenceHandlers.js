@@ -80,8 +80,10 @@ function registerEssenceHandlers({ electron, managers, store }) {
         return;
       }
 
+      const beforeAmount = electronStore.get(`essences.${pet.rarity}`, 0);
       const result = essenceManager.generateEssencesFromPet(electronStore, pet);
-      const amount = result[pet.rarity] - (electronStore.get(`essences.${pet.rarity}`, 0) - result[pet.rarity]);
+      const afterAmount = result[pet.rarity];
+      const amount = afterAmount - beforeAmount;
       
       console.log(`Geradas ${amount} essências ${pet.rarity} do pet ${pet.name}`);
 
@@ -216,9 +218,11 @@ function enhanceDeletePetHandler({ electron, managers, store }) {
         throw new Error('Pet não encontrado');
       }
 
-      // Gerar essências antes de deletar
-      const essenceReward = essenceManager.generateEssencesFromPet(electronStore, pet);
+      // Gerar essências antes de deletar (1-3 baseado na raridade)
       const amount = Math.floor(Math.random() * 3) + 1; // 1 a 3
+      const beforeAmount = electronStore.get(`essences.${pet.rarity}`, 0);
+      essenceManager.addEssences(electronStore, pet.rarity, amount);
+      const essenceInventory = essenceManager.getEssenceInventory(electronStore);
       
       // Deletar o pet
       await petManager.deletePet(petId);
@@ -234,7 +238,7 @@ function enhanceDeletePetHandler({ electron, managers, store }) {
       event.sender.send('essence-reward', {
         rarity: pet.rarity,
         amount,
-        inventory: essenceReward
+        inventory: essenceInventory
       });
 
       // Broadcast para outras janelas
