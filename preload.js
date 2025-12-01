@@ -212,6 +212,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get-gift-history',
       'get-essence-inventory',
       'get-valid-essence-for-pet',
+      'get-all-pets',
+      'use-essence-on-pet',
     ];
     if (validChannels.includes(channel)) {
       console.log(`Invocando canal IPC: ${channel}`, ...args);

@@ -382,9 +382,6 @@ document.querySelectorAll('.menu-item').forEach((item) => {
     } else if (action === 'gift-pet') {
       console.log('Abrir Presentes');
       window.electronAPI.send('open-gift-window');
-    } else if (action === 'essences-pet') {
-      console.log('Abrir Inventário de Essências');
-      window.electronAPI.send('open-essence-window');
     } else if (action === 'battle-pet') {
       // Verificar se o pet tem golpes
       const moves = petData.knownMoves || petData.moves || [];

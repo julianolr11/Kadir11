@@ -334,6 +334,32 @@ async function getPet(petId) {
   return loadPet(petId);
 }
 
+async function getAllPets() {
+  await ensurePetsDir();
+  try {
+    const files = await fs.readdir(petsDir);
+    const petFiles = files.filter((f) => f.startsWith('pet_') && f.endsWith('.json'));
+    
+    const pets = [];
+    for (const file of petFiles) {
+      try {
+        const petFilePath = path.join(petsDir, file);
+        const data = await fs.readFile(petFilePath, 'utf8');
+        const pet = JSON.parse(data);
+        ensureStatusImage(pet);
+        pets.push(pet);
+      } catch (err) {
+        console.error(`Erro ao carregar pet ${file}:`, err);
+      }
+    }
+    
+    return pets;
+  } catch (err) {
+    console.error('Erro ao listar todos os pets:', err);
+    return [];
+  }
+}
+
 module.exports = {
   createPet,
   listPets,
@@ -343,4 +369,5 @@ module.exports = {
   deletePet,
   cleanupOrphanPets,
   addItem,
+  getAllPets,
 };

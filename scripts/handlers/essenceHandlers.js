@@ -72,20 +72,19 @@ function registerEssenceHandlers({ electron, managers, store }) {
   /**
    * Usar essência em um pet (evoluir raridade)
    */
-  ipcMain.on('use-essence-on-pet', async (event, { petId, essenceRarity }) => {
+  ipcMain.handle('use-essence-on-pet', async (event, { petId, essenceRarity }) => {
     try {
       const pet = await petManager.loadPet(petId);
       if (!pet) {
         console.error('Pet não encontrado:', petId);
-        return;
+        return { success: false, error: 'Pet não encontrado' };
       }
 
       const result = essenceManager.useEssenceOnPet(electronStore, pet, essenceRarity);
       
       if (!result.success) {
         console.error('Erro ao usar essência:', result.error);
-        // Poderia enviar um evento de erro para o renderer
-        return;
+        return result;
       }
 
       // Atualizar raridade do pet
@@ -98,6 +97,30 @@ function registerEssenceHandlers({ electron, managers, store }) {
       BrowserWindow.getAllWindows().forEach(win => {
         if (win && win.webContents) {
           win.webContents.send('essence-used', {
+            petId: pet.petId,
+            oldRarity: result.oldRarity,
+            newRarity: result.newRarity,
+            inventory: result.inventory
+          });
+        }
+      });
+
+      // Se for o pet atual, atualizar o estado
+      if (appState.currentPet && appState.currentPet.petId === petId) {
+        appState.currentPet = pet;
+        BrowserWindow.getAllWindows().forEach(win => {
+          if (win && win.webContents) {
+            win.webContents.send('pet-data', pet);
+          }
+        });
+      }
+
+      return { success: true, oldRarity: result.oldRarity, newRarity: result.newRarity };
+    } catch (error) {
+      console.error('Erro ao usar essência:', error);
+      return { success: false, error: error.message };
+    }
+  });
             petId,
             oldRarity: result.oldRarity,
             newRarity: result.newRarity,
@@ -105,7 +128,7 @@ function registerEssenceHandlers({ electron, managers, store }) {
           });
           
           // Se for o pet atual, atualizar dados completos
-          const currentPet = appState.getCurrentPet();
+          const currentPet = appState.currentPet;
           if (currentPet && currentPet.petId === petId) {
             win.webContents.send('pet-data', pet);
           }
@@ -160,6 +183,18 @@ function registerEssenceHandlers({ electron, managers, store }) {
    */
   ipcMain.handle('get-valid-essence-for-pet', async (event, pet) => {
     return essenceManager.getValidEssenceForPet(electronStore, pet);
+  });
+
+  /**
+   * Obter todos os pets disponíveis
+   */
+  ipcMain.handle('get-all-pets', async () => {
+    try {
+      return await petManager.getAllPets();
+    } catch (error) {
+      console.error('Erro ao buscar todos os pets:', error);
+      return [];
+    }
   });
 
   console.log('✓ Essence handlers registrados');
