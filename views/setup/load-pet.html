@@ -88,7 +88,7 @@
             left: 0;
             width: 130px;
             height: 130px;
-            background: url('Assets/Rarity/texture.png');
+            background: url('../../Assets/Rarity/texture.png');
             background-size: cover;
             opacity: 0.5;
             border-radius: 7px;
@@ -128,8 +128,18 @@
             image-rendering: pixelated;
             margin-right: 2px;
         }
+        .action-buttons {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .essence-button,
         .delete-button {
-            background-color: #ff4444;
             border: none;
             border-radius: 5px;
             padding: 5px;
@@ -137,10 +147,6 @@
             font-family: 'PixelOperator', sans-serif;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
             width: 30px;
             height: 30px;
             display: flex;
@@ -148,10 +154,31 @@
             justify-content: center;
         }
 
+        .essence-button {
+            background-color: #6a4c93;
+        }
+
+        .essence-button:hover {
+            background-color: #533a71;
+        }
+
+        .essence-button.use-essence {
+            background-color: #4a90e2;
+        }
+
+        .essence-button.use-essence:hover {
+            background-color: #357ab8;
+        }
+
+        .delete-button {
+            background-color: #ff4444;
+        }
+
         .delete-button:hover {
             background-color: #cc0000;
         }
 
+        .essence-button img,
         .delete-button img {
             width: 20px !important;
             height: 20px !important;
@@ -231,6 +258,60 @@
             z-index: 50;
         }
 
+        /* Modal de recompensa de essências */
+        #essence-reward-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 60;
+        }
+
+        #essence-reward-box {
+            background-color: #2a323e;
+            border: 2px solid #6a4c93;
+            border-radius: 7px;
+            padding: 30px;
+            text-align: center;
+            font-family: 'PixelOperator', sans-serif;
+            min-width: 300px;
+        }
+
+        #essence-reward-box h2 {
+            color: #6a4c93;
+            margin-bottom: 15px;
+        }
+
+        #essence-reward-box .essence-amount {
+            font-size: 32px;
+            color: #ffffff;
+            margin: 15px 0;
+        }
+
+        #essence-reward-box img {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            margin: 10px 0;
+        }
+
+        #essence-reward-crafts {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #essence-reward-crafts .craft-item {
+            font-size: 14px;
+            color: #4caf50;
+            margin: 5px 0;
+        }
+
         #limit-box {
             background-color: #2a323e;
             border: 2px solid #ffffff;
@@ -293,6 +374,19 @@
         </div>
     </div>
 
+    <div id="essence-reward-overlay">
+        <div id="essence-reward-box">
+            <h2>Essências Obtidas!</h2>
+            <img src="../../Assets/Icons/soul-essence.png" alt="Essência">
+            <div class="essence-amount" id="essence-reward-amount">3x</div>
+            <p id="essence-reward-rarity">Essência Rara</p>
+            <div id="essence-reward-crafts"></div>
+            <div class="confirm-buttons">
+                <button class="button small-button" id="essence-reward-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { rarityGradients } from '../../scripts/constants.js';
 
@@ -304,13 +398,19 @@
         const limitOkBtn = document.getElementById('limit-ok');
         const showPenButton = document.getElementById('show-pen-button');
         const createNewPetBtn = document.getElementById('create-new-pet-button');
+        const essenceRewardOverlay = document.getElementById('essence-reward-overlay');
+        const essenceRewardAmount = document.getElementById('essence-reward-amount');
+        const essenceRewardRarity = document.getElementById('essence-reward-rarity');
+        const essenceRewardCrafts = document.getElementById('essence-reward-crafts');
+        const essenceRewardOkBtn = document.getElementById('essence-reward-ok');
         let petIdToDelete = null;
         let petLimit = 3;
+        let essenceInventory = {};
 
         const penCanvas = document.getElementById('pen-canvas');
         const penCtx = penCanvas ? penCanvas.getContext('2d') : null;
         const tileset = new Image();
-        tileset.src = 'Assets/tileset/tileset.png';
+        tileset.src = '../../Assets/tileset/tileset.png';
         let penInfo = { size: 'small', maxPets: 3 };
         const sizeMap = { small: { w: 4, h: 3 }, medium: { w: 5, h: 4 }, large: { w: 7, h: 5 } };
 
@@ -395,10 +495,21 @@
                         limitOverlay.style.display = 'none';
                     }
                 }
-                pets.forEach(pet => {
+                pets.forEach(async pet => {
                     const petItem = document.createElement('div');
                     petItem.className = 'pet-item';
                     petItem.setAttribute('data-element', pet.element);
+                    
+                    // Verificar se há essência válida para usar neste pet
+                    let validEssence = null;
+                    if (window.electronAPI.getValidEssenceForPet) {
+                        try {
+                            validEssence = await window.electronAPI.getValidEssenceForPet(pet);
+                        } catch (err) {
+                            console.error('Erro ao verificar essência válida:', err);
+                        }
+                    }
+                    
                     petItem.innerHTML = `
                         <div class="pet-image-container">
                             <div class="pet-image-background"></div>
@@ -412,18 +523,38 @@
                             <p><strong>Último Acesso:</strong> ${pet.lastAccessed ? formatDate(pet.lastAccessed) : 'Nunca'}</p>
                             <p><img class="currency-icon" src="../../Assets/Icons/dna-kadir.png" alt="KP"> ${pet.kadirPoints ?? 0}</p>
                         </div>
-                        <button class="delete-button" data-pet-id="${pet.petId}">
-                            <img src="../../Assets/Icons/trash-can.svg" alt="Delete Icon" style="image-rendering: pixelated;" />
-                        </button>
+                        <div class="action-buttons">
+                            ${validEssence ? `
+                            <button class="essence-button use-essence" data-pet-id="${pet.petId}" data-essence="${validEssence}" title="Usar Essência ${formatRarity(validEssence)}">
+                                <img src="../../Assets/Icons/soul-essence.png" alt="Usar Essência" />
+                            </button>
+                            ` : ''}
+                            <button class="delete-button" data-pet-id="${pet.petId}">
+                                <img src="../../Assets/Icons/trash-can.svg" alt="Delete Icon" style="image-rendering: pixelated;" />
+                            </button>
+                        </div>
                     `;
-                    petItem.addEventListener('click', () => {
-                        window.electronAPI.selectPet(pet.petId);
+                    petItem.addEventListener('click', (e) => {
+                        // Não selecionar o pet se clicou em um botão
+                        if (!e.target.closest('button')) {
+                            window.electronAPI.selectPet(pet.petId);
+                        }
                     });
                     petList.appendChild(petItem);
 
                     // Aplicar o gradiente com base na raridade
                     const petImageBackground = petItem.querySelector('.pet-image-background');
                     petImageBackground.style.background = rarityGradients[pet.rarity] || rarityGradients['Comum'];
+
+                    // Adicionar evento ao botão de usar essência
+                    const useEssenceButton = petItem.querySelector('.use-essence');
+                    if (useEssenceButton) {
+                        useEssenceButton.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const essenceRarity = e.currentTarget.dataset.essence;
+                            window.electronAPI.send('use-essence-on-pet', { petId: pet.petId, essenceRarity });
+                        });
+                    }
 
                     // Adicionar evento ao botão de exclusão
                     const deleteButton = petItem.querySelector('.delete-button');
@@ -441,6 +572,40 @@
         reloadPetList();
 
         window.electronAPI?.onPetCreated(() => {
+            reloadPetList();
+        });
+
+        // Listeners para eventos de essência
+        if (window.electronAPI?.on) {
+            window.electronAPI.on('essence-used', (e, data) => {
+                console.log('Essência usada:', data);
+                alert(`Pet evoluiu de ${formatRarity(data.oldRarity)} para ${formatRarity(data.newRarity)}!`);
+                reloadPetList(); // Recarregar para atualizar raridade e botões
+            });
+
+            window.electronAPI.on('essence-reward', (e, data) => {
+                // Mostrar modal de recompensa
+                essenceRewardAmount.textContent = `${data.amount}x`;
+                essenceRewardRarity.textContent = `Essência ${formatRarity(data.rarity)}`;
+                
+                // Mostrar crafts automáticos se houver
+                essenceRewardCrafts.innerHTML = '';
+                if (data.craftResults && data.craftResults.length > 0) {
+                    data.craftResults.forEach(craft => {
+                        const craftItem = document.createElement('div');
+                        craftItem.className = 'craft-item';
+                        craftItem.textContent = `✨ ${craft.amount}x Essência ${formatRarity(craft.to)} criada!`;
+                        essenceRewardCrafts.appendChild(craftItem);
+                    });
+                }
+                
+                essenceRewardOverlay.style.display = 'flex';
+            });
+        }
+
+        // Botão OK do modal de recompensa de essência
+        essenceRewardOkBtn?.addEventListener('click', () => {
+            essenceRewardOverlay.style.display = 'none';
             reloadPetList();
         });
 

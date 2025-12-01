@@ -70,6 +70,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'open-tray-window', // Abrir a janela da bandeja
       'open-gift-window', // Abrir a janela de presentes
       'redeem-gift-code', // Resgatar código de presente
+      'use-essence-on-pet', // Usar essência para evoluir raridade
+      'craft-essence', // Fazer craft de essências
+      'open-essence-window', // Abrir janela de inventário de essências
+      'close-essence-window', // Fechar janela de inventário de essências
     ];
     if (validChannels.includes(channel)) {
       console.log(`Enviando canal IPC: ${channel}`, data);
@@ -97,6 +101,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'gift-redeemed', // Presente resgatado com sucesso
       'gift-error', // Erro ao resgatar presente
       'boss-defeated', // Evento de recompensa especial do boss
+      'essence-used', // Essência usada em pet
+      'essence-crafted', // Essência craftada
+      'essence-reward', // Recompensa de essência ao deletar pet
+      'craft-essence-error', // Erro ao fazer craft
+      'pet-deleted', // Pet deletado (broadcast)
     ];
     if (validChannels.includes(channel)) {
       console.log(`Registrando listener para o canal: ${channel}`);
@@ -182,6 +191,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.send('close-hatch-window');
   },
   useItem: (id) => ipcRenderer.invoke('use-item', id),
+  getEssenceInventory: () => ipcRenderer.invoke('get-essence-inventory'),
+  getValidEssenceForPet: (pet) => ipcRenderer.invoke('get-valid-essence-for-pet', pet),
   invoke: (channel, ...args) => {
     const validChannels = [
       'get-current-pet',
@@ -199,6 +210,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get-species-info',
       'get-bestiary',
       'get-gift-history',
+      'get-essence-inventory',
+      'get-valid-essence-for-pet',
+      'get-all-pets',
+      'use-essence-on-pet',
     ];
     if (validChannels.includes(channel)) {
       console.log(`Invocando canal IPC: ${channel}`, ...args);

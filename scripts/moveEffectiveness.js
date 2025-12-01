@@ -90,24 +90,26 @@ export function computeBattlePower(move, pet) {
   const level = pet.level || 1;
 
   // Escala por nível (mais conservadora que a UI)
-  const levelScale = 1 + (Math.max(level, 1) - 1) * 0.03;
+  // Reduzir crescimento por nível para suavizar curva de poder
+  const levelScale = 1 + (Math.max(level, 1) - 1) * 0.025;
 
   // Raridade influencia de forma moderada
   const rarity = String(move.rarity || 'Comum');
+  // Ajuste de raridade menos agressivo para reduzir one-shots
   const rarityFactors = {
     Comum: 1.0,
-    Incomum: 1.08,
-    Raro: 1.16,
-    MuitoRaro: 1.28,
-    Epico: 1.38,
-    Lendario: 1.5,
+    Incomum: 1.06,
+    Raro: 1.12,
+    MuitoRaro: 1.20,
+    Epico: 1.28,
+    Lendario: 1.38,
   };
   const rarityScale = rarityFactors[rarity] || 1.0;
 
   // STAB (Same-Type Attack Bonus): se o elemento do pet pertence ao golpe
   const elements = Array.isArray(move.elements) ? move.elements : [];
   const hasSTAB = elements.includes(String(pet.element || '').toLowerCase());
-  const stabScale = hasSTAB ? 1.2 : 1.0;
+  const stabScale = hasSTAB ? 1.15 : 1.0;
 
   // Penalidade/bonificação por efeito de status
   const effect = String(move.effect || '').toLowerCase();
@@ -123,10 +125,15 @@ export function computeBattlePower(move, pet) {
   const effectScale = effectFactors[effect] || 1.0;
 
   // Multi-elemento e escopo de espécie
-  const multiElementBoost = elements.length > 1 ? 1.03 : 1.0;
+  const multiElementBoost = elements.length > 1 ? 1.02 : 1.0;
   const species = Array.isArray(move.species) ? move.species : [];
-  const speciesScopeScale = species.length <= 1 ? 1.05 : species.length >= 6 ? 0.98 : 1.0;
+  // Penalizar golpes muito abrangentes mais fortemente
+  const speciesScopeScale = species.length <= 1 ? 1.05 : species.length >= 6 ? 0.95 : 1.0;
 
-  const scaled = base * levelScale * rarityScale * stabScale * effectScale * multiElementBoost * speciesScopeScale;
+  let scaled = base * levelScale * rarityScale * stabScale * effectScale * multiElementBoost * speciesScopeScale;
+  // Limite suave para evitar explosões de dano base
+  if (scaled > base * 2.5) {
+    scaled = base * 2.5 + (scaled - base * 2.5) * 0.5; // compressão acima do limiar
+  }
   return Math.round(scaled);
 }

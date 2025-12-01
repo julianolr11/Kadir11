@@ -305,6 +305,19 @@ function registerAllHandlers(config) {
   // 12. Bestiário (descoberta de criaturas)
   registerBestiaryHandlers(windowManager);
 
+  // 13. Sistema de Essências
+  const { registerEssenceHandlers, enhanceDeletePetHandler } = require('../handlers/essenceHandlers');
+  registerEssenceHandlers({
+    electron: { ipcMain, BrowserWindow },
+    managers: { appState, petManager },
+    store: { store }
+  });
+  enhanceDeletePetHandler({
+    electron: { ipcMain, BrowserWindow },
+    managers: { appState, petManager },
+    store: { store }
+  });
+
   return { resetTimers };
 }
 

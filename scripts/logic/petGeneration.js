@@ -50,15 +50,29 @@ function generatePetFromEgg(eggId, rarity) {
       ? path.posix.join(info.dir, info.element, info.race)
       : path.posix.join(info.dir, info.race);
     const monsBase = path.join(__dirname, '..', '..', 'Assets', 'Mons');
-    const frontGif = path.join(monsBase, base, 'front.gif');
-    const raceGif = path.join(monsBase, base, `${info.race}.gif`);
-    if (fs.existsSync(frontGif)) {
-      statusImage = path.posix.join(base, 'front.gif');
-    } else if (fs.existsSync(raceGif)) {
-      statusImage = path.posix.join(base, `${info.race}.gif`);
-    } else {
+    
+    // Priorizar front.gif > idle.gif > front.png > idle.png > race.png
+    const candidates = [
+      'front.gif',
+      'idle.gif',
+      'front.png',
+      'idle.png',
+      `${info.race}.png`
+    ];
+    
+    for (const candidate of candidates) {
+      const fullPath = path.join(monsBase, base, candidate);
+      if (fs.existsSync(fullPath)) {
+        statusImage = path.posix.join(base, candidate);
+        break;
+      }
+    }
+    
+    // Se não encontrou nenhum, usar fallback
+    if (!statusImage) {
       statusImage = path.posix.join(base, `${info.race}.png`);
     }
+    
     bioImage = path.posix.join(base, `${info.race}.png`);
   } else if (info.dir) {
     statusImage = `${info.dir}/${info.dir.toLowerCase()}.png`;

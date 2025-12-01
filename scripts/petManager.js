@@ -51,7 +51,8 @@ function ensureStatusImage(pet) {
 
   if (relativeDir && relativeDir !== '.') {
     const baseDir = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir);
-    const candidates = ['front.gif', 'front.png', 'idle.gif', 'idle.png'];
+    // Ordem de prioridade expandida: front.gif > idle.gif > front.png > idle.png
+    const candidates = ['front.gif', 'idle.gif', 'front.png', 'idle.png'];
     for (const file of candidates) {
       const full = path.join(baseDir, file);
       if (fsSync.existsSync(full)) {
@@ -70,11 +71,16 @@ function ensureStatusImage(pet) {
   }
 
   if (!pet.bioImage) {
-    // Usa portrait se existir; fallback para eggsy
-    const portraitPath = relativeDir
-      ? path.join(__dirname, '..', 'Assets', 'Mons', relativeDir, `${pet.name}.png`)
-      : null;
-    pet.bioImage = fsSync.existsSync(portraitPath) ? `${pet.name}.png` : 'eggsy.png';
+    // Tenta encontrar {race}.png na pasta, fallback para eggsy
+    if (relativeDir && pet.race) {
+      const racePath = path.join(__dirname, '..', 'Assets', 'Mons', relativeDir, `${pet.race}.png`);
+      if (fsSync.existsSync(racePath)) {
+        pet.bioImage = path.posix.join(relativeDir, `${pet.race}.png`);
+      }
+    }
+    if (!pet.bioImage) {
+      pet.bioImage = 'eggsy.png';
+    }
   }
 }
 
@@ -328,6 +334,32 @@ async function getPet(petId) {
   return loadPet(petId);
 }
 
+async function getAllPets() {
+  await ensurePetsDir();
+  try {
+    const files = await fs.readdir(petsDir);
+    const petFiles = files.filter((f) => f.startsWith('pet_') && f.endsWith('.json'));
+    
+    const pets = [];
+    for (const file of petFiles) {
+      try {
+        const petFilePath = path.join(petsDir, file);
+        const data = await fs.readFile(petFilePath, 'utf8');
+        const pet = JSON.parse(data);
+        ensureStatusImage(pet);
+        pets.push(pet);
+      } catch (err) {
+        console.error(`Erro ao carregar pet ${file}:`, err);
+      }
+    }
+    
+    return pets;
+  } catch (err) {
+    console.error('Erro ao listar todos os pets:', err);
+    return [];
+  }
+}
+
 module.exports = {
   createPet,
   listPets,
@@ -337,4 +369,5 @@ module.exports = {
   deletePet,
   cleanupOrphanPets,
   addItem,
+  getAllPets,
 };
