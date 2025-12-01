@@ -156,9 +156,10 @@ function registerEssenceHandlers({ electron, managers, store }) {
 
   /**
    * Obter inventário de essências
+   * Normaliza automaticamente para garantir auto-craft
    */
   ipcMain.handle('get-essence-inventory', async () => {
-    return essenceManager.getEssenceInventory(electronStore);
+    return essenceManager.normalizeEssences(electronStore);
   });
 
   /**

@@ -47,6 +47,35 @@ function getEssenceInventory(store) {
 }
 
 /**
+ * Normaliza o inventário de essências aplicando auto-craft em todas as essências
+ * Garante que nenhuma tier tenha 10+ essências
+ */
+function normalizeEssences(store) {
+  const inventory = getEssenceInventory(store);
+  let hasChanges = false;
+  
+  // Processar cada tier do menor para o maior (exceto Lendário)
+  for (let tier = 0; tier < 5; tier++) {
+    const currentRarity = ESSENCE_NAMES[tier];
+    const nextRarity = ESSENCE_NAMES[tier + 1];
+    
+    if (inventory[currentRarity] >= 10) {
+      const crafted = Math.floor(inventory[currentRarity] / 10);
+      inventory[currentRarity] = inventory[currentRarity] % 10;
+      inventory[nextRarity] = (inventory[nextRarity] || 0) + crafted;
+      hasChanges = true;
+    }
+  }
+  
+  // Salvar se houve mudanças
+  if (hasChanges) {
+    store.set('essences', inventory);
+  }
+  
+  return inventory;
+}
+
+/**
  * Adiciona essências ao inventário e faz auto-craft se atingir 10
  * Retorna objeto com inventário atualizado e informações de craft
  */
@@ -213,6 +242,7 @@ module.exports = {
   CRAFT_COST,
   initEssenceInventory,
   getEssenceInventory,
+  normalizeEssences,
   addEssences,
   removeEssences,
   generateEssencesFromPet,
