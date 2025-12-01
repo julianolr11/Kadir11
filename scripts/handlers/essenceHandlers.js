@@ -4,17 +4,70 @@
  */
 
 const essenceManager = require('../essenceManager');
+const path = require('path');
+
+let essenceWindow = null;
+
+/**
+ * Cria a janela de inventário de essências
+ */
+function createEssenceWindow(windowManager) {
+  if (essenceWindow && !essenceWindow.isDestroyed()) {
+    essenceWindow.focus();
+    return essenceWindow;
+  }
+
+  const { BrowserWindow } = require('electron');
+  
+  essenceWindow = new BrowserWindow({
+    width: 700,
+    height: 600,
+    show: false,
+    resizable: false,
+    frame: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, '../../preload.js')
+    }
+  });
+
+  windowManager.attachFadeHandlers(essenceWindow);
+  essenceWindow.loadFile(path.join(__dirname, '../../views/essence-inventory.html'));
+
+  essenceWindow.on('closed', () => {
+    essenceWindow = null;
+  });
+
+  return essenceWindow;
+}
 
 /**
  * Registra todos os handlers de essência
  */
 function registerEssenceHandlers({ electron, managers, store }) {
   const { ipcMain, BrowserWindow } = electron;
-  const { appState, petManager } = managers;
+  const { appState, petManager, windowManager } = managers;
   const { store: electronStore } = store;
 
   // Inicializar inventário de essências
   essenceManager.initEssenceInventory(electronStore);
+
+  /**
+   * Abrir janela de inventário de essências
+   */
+  ipcMain.on('open-essence-window', () => {
+    createEssenceWindow(windowManager);
+  });
+
+  /**
+   * Fechar janela de inventário de essências
+   */
+  ipcMain.on('close-essence-window', () => {
+    if (essenceWindow && !essenceWindow.isDestroyed()) {
+      essenceWindow.close();
+    }
+  });
 
   /**
    * Gerar essência de um pet

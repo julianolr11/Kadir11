@@ -73,6 +73,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'generate-essence', // Gerar essência de um pet
       'use-essence-on-pet', // Usar essência para evoluir raridade
       'craft-essence', // Fazer craft de essências
+      'open-essence-window', // Abrir janela de inventário de essências
+      'close-essence-window', // Fechar janela de inventário de essências
     ];
     if (validChannels.includes(channel)) {
       console.log(`Enviando canal IPC: ${channel}`, data);
