@@ -29,6 +29,7 @@
             justify-content: flex-start;
             padding: 0;
             margin: 0;
+                overflow: hidden;
         }
 
         /* Título configurado em styles/main.css */
@@ -74,6 +75,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+                flex-shrink: 0;
         }
 
         #coin-icon {
@@ -90,6 +92,7 @@
             flex: 1;
             min-height: 0;
             overflow-y: scroll;
+                flex-shrink: 1;
         }
 
         /* Aplicar estilo de scrollbar ao items-list */
@@ -327,6 +330,7 @@
             top: 35px;
             right: 5px;
             align-self: unset;
+                z-index: 10;
         }
 
         /* Modal de Essências */
