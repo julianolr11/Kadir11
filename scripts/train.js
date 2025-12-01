@@ -133,7 +133,15 @@ async function loadMoves() {
   try {
     const response = await fetch('../../data/moves.json');
     const moves = await response.json();
-    renderMoves(moves);
+    
+    // Deduplica golpes por nome (última linha de defesa)
+    const uniqueMoves = Array.from(new Map(moves.map(m => [m.name, m])).values());
+    
+    if (moves.length > uniqueMoves.length) {
+      console.warn(`⚠️ ${moves.length - uniqueMoves.length} golpes duplicados removidos`);
+    }
+    
+    renderMoves(uniqueMoves);
   } catch (err) {
     console.error('Erro ao carregar golpes:', err);
   }

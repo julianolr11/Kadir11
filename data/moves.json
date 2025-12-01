@@ -829,22 +829,6 @@
     "type": "special"
   },
   {
-    "name": "Asas de Brasa",
-    "description": "Investida com asas em chamas que pode queimar o alvo.",
-    "rarity": "Raro",
-    "elements": [
-      "fogo"
-    ],
-    "species": [
-      "Ave"
-    ],
-    "power": 108,
-    "effect": "queimado",
-    "cost": 20,
-    "level": 5,
-    "type": "physical"
-  },
-  {
     "name": "Rajada Ígnea",
     "description": "Jato de chamas intensas que pode queimar o inimigo.",
     "rarity": "Raro",
@@ -1172,22 +1156,6 @@
     "cost": 25,
     "level": 7,
     "type": "physical"
-  },
-  {
-    "name": "Chamas da Fênix",
-    "description": "Explosão de fogo renascente típica das aves de fogo que deixa o inimigo queimado.",
-    "rarity": "Raro",
-    "elements": [
-      "fogo"
-    ],
-    "species": [
-      "Ave"
-    ],
-    "power": 108,
-    "effect": "queimado",
-    "cost": 20,
-    "level": 5,
-    "type": "special"
   },
   {
     "name": "Faísca",
