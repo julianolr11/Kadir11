@@ -227,9 +227,9 @@ function enhanceDeletePetHandler({ electron, managers, store }) {
       // Deletar o pet
       await petManager.deletePet(petId);
 
-      const currentPet = appState.getCurrentPet();
+      const currentPet = appState.currentPet;
       if (currentPet && currentPet.petId === petId) {
-        appState.setCurrentPet(null);
+        appState.currentPet = null;
       }
 
       console.log(`Pet ${pet.name} deletado. Recompensa: ${amount}x Essência ${pet.rarity}`);
