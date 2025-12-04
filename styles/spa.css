@@ -1,0 +1,491 @@
+/**
+ * SPA Styles - Estilos visuais unificados para o SPA
+ * Integra o design visual do Kadir11 original
+ */
+
+/* =========================== */
+/* RESET E VARIÁVEIS GLOBAIS   */
+/* =========================== */
+
+:root {
+  /* Cores principais */
+  --color-bg-primary: #101218;
+  --color-bg-secondary: #2a323e;
+  --color-bg-tertiary: #3a4450;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-text-muted: #999999;
+  
+  /* Acentos */
+  --color-accent-green: #00ff88;
+  --color-accent-blue: #44aaff;
+  --color-accent-red: #ff4444;
+  --color-accent-yellow: #f1c40f;
+  
+  /* Raridades */
+  --color-rarity-comum: #808080;
+  --color-rarity-incomum: #D3D3D3;
+  --color-rarity-raro: #32CD32;
+  --color-rarity-muito-raro: #4682B4;
+  --color-rarity-epico: #800080;
+  --color-rarity-lendario: #FFD700;
+  
+  /* Elementos */
+  --color-element-fogo: #ff6b6b;
+  --color-element-agua: #4dabf7;
+  --color-element-terra: #82c91e;
+  --color-element-ar: #8b5cf6;
+  --color-element-puro: #ffd60a;
+  
+  /* Transições padrão */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* Reset global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* =========================== */
+/* SPA CONTAINER                */
+/* =========================== */
+
+#spa-app-container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-primary);
+  font-family: 'Courier New', monospace;
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* =========================== */
+/* PÁGINAS                      */
+/* =========================== */
+
+.spa-page {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, #16213e 100%);
+}
+
+/* Estilo da página: header, conteúdo, footer */
+.spa-page-header {
+  padding: 24px;
+  border-bottom: 2px solid var(--color-accent-blue);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.spa-page-header h1 {
+  font-size: 2em;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.spa-page-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.spa-page-footer {
+  padding: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar customizado */
+.spa-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.spa-page::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.spa-page::-webkit-scrollbar-thumb {
+  background: var(--color-bg-tertiary);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+.spa-page::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================== */
+/* COMPONENTES                  */
+/* =========================== */
+
+/* Cards e containers */
+.spa-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all var(--transition-normal);
+}
+
+.spa-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Grid layout para listagens */
+.spa-grid-list {
+  display: grid;
+  gap: 12px;
+}
+
+.spa-grid-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border-left: 4px solid var(--color-accent-blue);
+  transition: all var(--transition-fast);
+}
+
+.spa-grid-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+/* Stats display */
+.spa-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.spa-stat-label {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.spa-stat-value {
+  color: var(--color-accent-blue);
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* Barras de progresso */
+.spa-progress-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 8px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.spa-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-green));
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(68, 170, 255, 0.5);
+}
+
+/* Badges e tags */
+.spa-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(68, 170, 255, 0.2);
+  border: 1px solid var(--color-accent-blue);
+  border-radius: 20px;
+  font-size: 0.85em;
+  color: var(--color-accent-blue);
+  text-transform: uppercase;
+  font-weight: bold;
+  margin: 4px 4px 4px 0;
+}
+
+.spa-badge.rarity-comum { border-color: var(--color-rarity-comum); color: var(--color-rarity-comum); background: rgba(128, 128, 128, 0.1); }
+.spa-badge.rarity-incomum { border-color: var(--color-rarity-incomum); color: var(--color-rarity-incomum); background: rgba(211, 211, 211, 0.1); }
+.spa-badge.rarity-raro { border-color: var(--color-rarity-raro); color: var(--color-rarity-raro); background: rgba(50, 205, 50, 0.1); }
+.spa-badge.rarity-muito-raro { border-color: var(--color-rarity-muito-raro); color: var(--color-rarity-muito-raro); background: rgba(70, 130, 180, 0.1); }
+.spa-badge.rarity-epico { border-color: var(--color-rarity-epico); color: var(--color-rarity-epico); background: rgba(128, 0, 128, 0.1); }
+.spa-badge.rarity-lendario { border-color: var(--color-rarity-lendario); color: var(--color-rarity-lendario); background: rgba(255, 215, 0, 0.1); }
+
+/* =========================== */
+/* BOTÕES                       */
+/* =========================== */
+
+.spa-btn {
+  padding: 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spa-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.spa-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.spa-btn-primary {
+  background: rgba(68, 170, 255, 0.2);
+  border-color: var(--color-accent-blue);
+  color: var(--color-accent-blue);
+}
+
+.spa-btn-primary:hover {
+  background: rgba(68, 170, 255, 0.4);
+  box-shadow: 0 0 12px rgba(68, 170, 255, 0.3);
+}
+
+.spa-btn-success {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.spa-btn-success:hover {
+  background: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+}
+
+.spa-btn-danger {
+  background: rgba(255, 68, 68, 0.15);
+  border-color: var(--color-accent-red);
+  color: var(--color-accent-red);
+}
+
+.spa-btn-danger:hover {
+  background: rgba(255, 68, 68, 0.3);
+  box-shadow: 0 0 12px rgba(255, 68, 68, 0.3);
+}
+
+.spa-btn-warning {
+  background: rgba(241, 196, 15, 0.15);
+  border-color: var(--color-accent-yellow);
+  color: var(--color-accent-yellow);
+}
+
+.spa-btn-warning:hover {
+  background: rgba(241, 196, 15, 0.3);
+  box-shadow: 0 0 12px rgba(241, 196, 15, 0.3);
+}
+
+.spa-btn-small {
+  padding: 8px 16px;
+  font-size: 0.9em;
+}
+
+.spa-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================== */
+/* TIPOGRAFIA                   */
+/* =========================== */
+
+.spa-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-bottom: 24px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+.spa-subtitle {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 16px 0 8px 0;
+  color: var(--color-text-secondary);
+  letter-spacing: 1px;
+}
+
+.spa-text {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.spa-text-muted {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+.spa-text-emphasis {
+  color: var(--color-accent-blue);
+  font-weight: bold;
+}
+
+/* =========================== */
+/* ANIMAÇÕES                    */
+/* =========================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(68, 170, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(68, 170, 255, 0.5);
+  }
+}
+
+.spa-animate-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.spa-animate-slide {
+  animation: slideInLeft 0.3s ease-in;
+}
+
+/* =========================== */
+/* ELEMENTOS                    */
+/* =========================== */
+
+.element-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.element-fogo { color: var(--color-element-fogo); }
+.element-agua { color: var(--color-element-agua); }
+.element-terra { color: var(--color-element-terra); }
+.element-ar { color: var(--color-element-ar); }
+.element-puro { color: var(--color-element-puro); }
+
+/* =========================== */
+/* RESPONSIVIDADE              */
+/* =========================== */
+
+@media (max-width: 768px) {
+  .spa-page-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .spa-page-footer {
+    grid-template-columns: 1fr;
+  }
+  
+  .spa-title {
+    font-size: 1.8em;
+  }
+}
+
+/* =========================== */
+/* STATES                       */
+/* =========================== */
+
+.is-active {
+  border-left-color: var(--color-accent-green);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.is-selected {
+  border-color: var(--color-accent-blue);
+  background: rgba(68, 170, 255, 0.1);
+}
+
+.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.is-error {
+  border-left-color: var(--color-accent-red);
+  background: rgba(255, 68, 68, 0.05);
+}
+
+.is-warning {
+  border-left-color: var(--color-accent-yellow);
+  background: rgba(241, 196, 15, 0.05);
+}
+
+.is-success {
+  border-left-color: var(--color-accent-green);
+  background: rgba(0, 255, 136, 0.05);
+}
