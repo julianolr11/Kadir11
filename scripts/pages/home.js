@@ -4,222 +4,118 @@
  */
 
 function homePage(state = {}) {
+  const gameState = window.gameState;
+  
   return `
-    <div class="page home-page">
-      <div class="page-header">
-        <h1>🏠 Kadir11 SPA</h1>
-        <p>Versão Single Page Application</p>
+    <div class="spa-page">
+      <!-- Header -->
+      <div class="spa-page-header">
+        <div>
+          <h1 class="spa-title">🏠 Kadir11 SPA</h1>
+          <p class="spa-text-muted">Single Page Application - FASE 1-4</p>
+        </div>
       </div>
 
-      <div class="page-content">
-        <div class="welcome-card">
-          <h2>Bem-vindo!</h2>
-          <p>Esta é a infraestrutura base da aplicação SPA.</p>
-          <p>Use os botões abaixo para testar a navegação.</p>
+      <!-- Content -->
+      <div class="spa-page-content">
+        <!-- Welcome Card -->
+        <div class="spa-card spa-animate-in" style="background: linear-gradient(135deg, rgba(68, 170, 255, 0.1), rgba(0, 255, 136, 0.1)); border-color: rgba(68, 170, 255, 0.3);">
+          <h2 class="spa-subtitle">🎮 Bem-vindo ao Kadir11!</h2>
+          <p class="spa-text">Esta é a infraestrutura base da aplicação Single Page. Navegue entre as seções usando os botões abaixo.</p>
         </div>
 
-        <div class="navigation-grid">
-          <button class="nav-btn" onclick="router.navigate('/home')">
-            🏠 Home
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/status')">
-            📊 Status
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/items')">
-            🎒 Items
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/store')">
-            🛍️ Loja
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/nests')">
-            🥚 Ninhos
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/pen')">
-            🏠 Pen
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/bestiary')">
-            📖 Bestiário
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/test')">
-            🧪 Test
-          </button>
-          
-          <button class="nav-btn" onclick="router.navigate('/debug')">
-            🐛 Debug
-          </button>
-        </div>
-
-        <div class="info-box">
-          <h3>Estado Atual</h3>
-          <div class="state-display">
-            <p><strong>Página:</strong> ${gameState.get('currentPage')}</p>
-            <p><strong>Mini-mode:</strong> ${gameState.get('isMiniMode') ? 'Ativo' : 'Inativo'}</p>
-            <p><strong>Pet ativo:</strong> ${gameState.get('currentPet') ? gameState.get('currentPet').name : 'Nenhum'}</p>
-            <p><strong>Moedas:</strong> ${gameState.get('coins')}</p>
+        <!-- Navigation Grid -->
+        <div style="margin: 24px 0;">
+          <h3 class="spa-subtitle">📍 Navegação</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/home')">🏠 Home</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/status')">📊 Status</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/items')">🎒 Items</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/store')">🛍️ Loja</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/nests')">🥚 Ninhos</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/pen')">🏠 Pen</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/bestiary')">📖 Bestiário</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/test')">🧪 Test</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/debug')">🐛 Debug</button>
           </div>
         </div>
 
-        <div class="router-info">
-          <h3>Informações do Router</h3>
-          <div class="router-display">
-            <p><strong>Página atual:</strong> ${router.getCurrentPage()}</p>
-            <p><strong>Histórico:</strong> ${router.getHistory().join(' → ')}</p>
+        <!-- Game State -->
+        <div class="spa-card spa-animate-slide" style="margin-top: 24px; border-color: rgba(68, 170, 255, 0.3);">
+          <h3 class="spa-subtitle">📈 Estado do Jogo</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
+            <div>
+              <div class="spa-stat">
+                <span class="spa-stat-label">💰 Moedas</span>
+                <span class="spa-stat-value">${gameState.get('coins') || 0}</span>
+              </div>
+              <div class="spa-stat">
+                <span class="spa-stat-label">🎛️ Mini-mode</span>
+                <span class="spa-stat-value">${gameState.get('isMiniMode') ? '✓ Ativo' : '✗ Inativo'}</span>
+              </div>
+            </div>
+            <div>
+              <div class="spa-stat">
+                <span class="spa-stat-label">🐾 Pet Ativo</span>
+                <span class="spa-stat-value">${gameState.get('currentPet')?.name || '—'}</span>
+              </div>
+              <div class="spa-stat">
+                <span class="spa-stat-label">🆔 ID do Pet</span>
+                <span class="spa-stat-value" style="font-size: 0.9em; font-family: monospace;">${gameState.get('currentPet')?.id || '—'}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="test-actions">
-          <h3>Ações de Teste</h3>
-          <button class="test-btn" onclick="
-            gameState.set('coins', gameState.get('coins') + 10);
-          ">
-            ➕ Adicionar 10 moedas
-          </button>
-          <button class="test-btn" onclick="
-            gameState.set('isMiniMode', !gameState.get('isMiniMode'));
-          ">
-            🎛️ Toggle Mini-mode
-          </button>
-          <button class="test-btn" onclick="
-            gameState.set('currentPet', { 
-              id: '000001', 
-              name: 'Teste Pet',
-              level: 5
-            });
-          ">
-            🐾 Simular pet
-          </button>
-          <button class="test-btn" onclick="router.back()">
-            ⬅️ Voltar
-          </button>
+        <!-- Router Info -->
+        <div class="spa-card" style="margin-top: 16px; border-color: rgba(0, 255, 136, 0.3);">
+          <h3 class="spa-subtitle">🛣️ Informações do Router</h3>
+          <div style="margin-top: 12px;">
+            <div class="spa-stat">
+              <span class="spa-stat-label">Página Atual</span>
+              <span class="spa-stat-value">${router.getCurrentPage()}</span>
+            </div>
+            <div class="spa-stat">
+              <span class="spa-stat-label">Histórico</span>
+              <span class="spa-stat-value" style="font-size: 0.9em; word-break: break-all;">${router.getHistory().join(' → ')}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Actions -->
+        <div style="margin: 24px 0;">
+          <h3 class="spa-subtitle">🧪 Ações de Teste</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button class="spa-btn spa-btn-success spa-btn-small" onclick="
+              gameState.set('coins', gameState.get('coins') + 10);
+              location.hash = '#/home';
+            ">➕ +10 Moedas</button>
+            <button class="spa-btn spa-btn-warning spa-btn-small" onclick="
+              gameState.set('isMiniMode', !gameState.get('isMiniMode'));
+              location.hash = '#/home';
+            ">🎛️ Toggle Mini-mode</button>
+            <button class="spa-btn spa-btn-primary spa-btn-small" onclick="
+              gameState.set('currentPet', { 
+                id: '000001', 
+                name: 'Test Pet',
+                level: 5,
+                element: 'fogo',
+                rarity: 'raro'
+              });
+              location.hash = '#/home';
+            ">🐾 Simular Pet</button>
+            <button class="spa-btn spa-btn-danger spa-btn-small" onclick="router.back()">⬅️ Voltar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="spa-page-footer">
+        <button class="spa-btn spa-btn-primary" onclick="window.closeSPA()">✕ Fechar SPA</button>
+        <div style="text-align: right; font-size: 0.85em; color: var(--color-text-muted); align-self: center;">
+          FASE 1-4 Completa | ${new Date().toLocaleString('pt-BR')}
         </div>
       </div>
     </div>
-
-    <style>
-      .home-page {
-        padding: 20px;
-      }
-
-      .page-header {
-        text-align: center;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #3a3a4a;
-        padding-bottom: 20px;
-      }
-
-      .page-header h1 {
-        font-size: 2.5em;
-        margin: 0;
-      }
-
-      .page-header p {
-        color: #999;
-        margin: 5px 0 0 0;
-      }
-
-      .welcome-card {
-        background: linear-gradient(135deg, #2a3a4a 0%, #3a4a5a 100%);
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
-      }
-
-      .navigation-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 10px;
-        margin: 20px 0;
-      }
-
-      .nav-btn {
-        background: #4a6a8a;
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1em;
-        transition: all 0.3s;
-      }
-
-      .nav-btn:hover {
-        background: #5a7aaa;
-        transform: translateY(-2px);
-      }
-
-      .info-box {
-        background: #2a3a4a;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 15px 0;
-      }
-
-      .state-display {
-        display: grid;
-        gap: 8px;
-      }
-
-      .state-display p {
-        margin: 0;
-        font-family: monospace;
-        font-size: 0.9em;
-      }
-
-      .router-info {
-        background: #1a2a3a;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 15px 0;
-      }
-
-      .router-display {
-        display: grid;
-        gap: 8px;
-      }
-
-      .router-display p {
-        margin: 0;
-        font-family: monospace;
-        font-size: 0.85em;
-        word-break: break-all;
-      }
-
-      .test-actions {
-        background: #3a4a5a;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-      }
-
-      .test-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        margin: 8px 0;
-        background: #2a5a7a;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9em;
-        transition: all 0.3s;
-      }
-
-      .test-btn:hover {
-        background: #3a6a8a;
-      }
-
-      .test-btn:active {
-        transform: scale(0.98);
-      }
-    </style>
-  `
+  `;
 }
