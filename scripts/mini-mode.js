@@ -2,6 +2,8 @@ console.log('mini-mode.js carregado');
 
 // Estado do mini-mode
 let currentPet = null;
+let miniModeBridge = null;
+let bridgeReady = false;
 
 // Elementos DOM
 const petElementImg = document.getElementById('pet-element-img');
@@ -21,10 +23,40 @@ const rarityGradients = {
   Lendario: 'linear-gradient(135deg, #FFD700, #FFA500)',
 };
 
+/**
+ * Callback global para atualizar UI quando bridge recebe broadcast
+ */
+window.updateMiniModeUI = function(pet) {
+  if (pet) {
+    updatePetData(pet);
+  }
+};
+
 // Inicialização
-function init() {
+async function init() {
+  // Inicializar MiniModeBridge (FASE 10)
+  if (window.MiniModeBridge) {
+    miniModeBridge = new window.MiniModeBridge();
+    const bridgeInit = await miniModeBridge.init();
+    if (bridgeInit) {
+      bridgeReady = true;
+      console.log('[MiniMode] Bridge IPC conectado');
+      
+      // Carregar dados iniciais do bridge
+      if (miniModeBridge.petData) {
+        updatePetData(miniModeBridge.petData);
+      }
+    } else {
+      console.warn('[MiniMode] Bridge IPC falhou, usando fallback');
+    }
+  }
+  
   setupEventListeners();
-  requestPetData();
+  
+  // Se bridge não funcionou, pedir dados pelo método antigo
+  if (!bridgeReady) {
+    requestPetData();
+  }
 }
 
 // Event Listeners
@@ -137,3 +169,4 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
