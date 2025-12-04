@@ -25,7 +25,8 @@ window.initSPA = function() {
   router.registerAll({
     '/home': homePage,
     '/test': testPage,
-    '/debug': debugPage
+    '/debug': debugPage,
+    '/status': statusPage
   })
   
   // Navega para home

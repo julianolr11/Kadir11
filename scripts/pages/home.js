@@ -23,6 +23,10 @@ function homePage(state = {}) {
             🏠 Home
           </button>
           
+          <button class="nav-btn" onclick="router.navigate('/status')">
+            📊 Status
+          </button>
+          
           <button class="nav-btn" onclick="router.navigate('/test')">
             🧪 Test Page
           </button>
