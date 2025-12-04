@@ -1,46 +1,16 @@
 /**
  * SPA IPC Handler - Expõe métodos de IPC para o renderer
- * Deve ser registrado no main.js como handlers
+ * Registra apenas handlers novos (não duplica os existentes)
  */
 
 // Exportar para uso em main.js
 function setupSPAIpcHandlers(ipcMain, petManager, store) {
-  console.log('[SPA IPC] Configurando handlers...');
-
-  /**
-   * get-current-pet
-   * Retorna o pet atualmente selecionado
-   */
-  ipcMain.handle('get-current-pet', () => {
-    try {
-      const petId = store.get('currentPet');
-      if (!petId) return null;
-
-      const pet = petManager.getPet(petId);
-      return pet || null;
-    } catch (error) {
-      console.error('[SPA IPC] Erro em get-current-pet:', error);
-      return null;
-    }
-  });
-
-  /**
-   * get-all-pets
-   * Retorna lista de todos os pets
-   */
-  ipcMain.handle('get-all-pets', () => {
-    try {
-      const pets = petManager.getAllPets();
-      return pets || [];
-    } catch (error) {
-      console.error('[SPA IPC] Erro em get-all-pets:', error);
-      return [];
-    }
-  });
+  console.log('[SPA IPC] Configurando handlers novos...');
 
   /**
    * get-store-data
    * Retorna dados da store (moedas, settings)
+   * NOVO - não existe no sistema antigo
    */
   ipcMain.handle('get-store-data', () => {
     try {
@@ -55,31 +25,11 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
   });
 
   /**
-   * update-pet
-   * Atualiza dados do pet atual
+   * update-coins-spa
+   * Atualiza moedas na store (versão SPA)
+   * NOVO - método separado do sistema antigo
    */
-  ipcMain.handle('update-pet', (event, petData) => {
-    try {
-      const updated = petManager.updatePet(petData);
-      
-      // Broadcast para todas as windows
-      const { BrowserWindow } = require('electron');
-      BrowserWindow.getAllWindows().forEach(win => {
-        win.webContents.send('pet-data', updated);
-      });
-
-      return updated;
-    } catch (error) {
-      console.error('[SPA IPC] Erro em update-pet:', error);
-      return null;
-    }
-  });
-
-  /**
-   * update-coins
-   * Atualiza moedas na store
-   */
-  ipcMain.handle('update-coins', (event, coins) => {
+  ipcMain.handle('update-coins-spa', (event, coins) => {
     try {
       store.set('coins', Math.max(0, coins));
       const updated = store.get('coins');
@@ -92,14 +42,37 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
 
       return updated;
     } catch (error) {
-      console.error('[SPA IPC] Erro em update-coins:', error);
+      console.error('[SPA IPC] Erro em update-coins-spa:', error);
       return 0;
     }
   });
 
   /**
-   * create-pet
-   * Cria novo pet
+   * update-pet-spa
+   * Atualiza dados do pet atual (versão SPA)
+   * NOVO - método separado do sistema antigo
+   */
+  ipcMain.handle('update-pet-spa', (event, petData) => {
+    try {
+      const updated = petManager.updatePet(petData);
+      
+      // Broadcast para todas as windows
+      const { BrowserWindow } = require('electron');
+      BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('pet-data', updated);
+      });
+
+      return updated;
+    } catch (error) {
+      console.error('[SPA IPC] Erro em update-pet-spa:', error);
+      return null;
+    }
+  });
+
+  /**
+   * create-pet-spa
+   * Cria novo pet (versão SPA)
+   * NOVO - método separado do sistema antigo
    */
   ipcMain.handle('create-pet-spa', (event, petData) => {
     try {
@@ -120,8 +93,9 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
   });
 
   /**
-   * select-pet
-   * Seleciona um pet como atual
+   * select-pet-spa
+   * Seleciona um pet como atual (versão SPA)
+   * NOVO - método separado do sistema antigo
    */
   ipcMain.handle('select-pet-spa', (event, petId) => {
     try {
@@ -143,7 +117,7 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
     }
   });
 
-  console.log('[SPA IPC] ✅ 7 handlers registrados');
+  console.log('[SPA IPC] ✅ 5 handlers novos registrados');
 }
 
 module.exports = { setupSPAIpcHandlers };

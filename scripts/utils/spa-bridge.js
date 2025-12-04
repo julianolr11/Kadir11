@@ -113,7 +113,7 @@ class SPABridge {
     }
 
     try {
-      const result = await window.electronAPI.invoke('update-pet', petData);
+      const result = await window.electronAPI.invoke('update-pet-spa', petData);
       console.log('[SPABridge] Pet atualizado no main process:', result);
       return result;
     } catch (error) {
@@ -133,7 +133,7 @@ class SPABridge {
     }
 
     try {
-      const result = await window.electronAPI.invoke('update-coins', coins);
+      const result = await window.electronAPI.invoke('update-coins-spa', coins);
       console.log('[SPABridge] Moedas atualizadas:', result);
       return result;
     } catch (error) {

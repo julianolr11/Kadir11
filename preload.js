@@ -230,7 +230,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get-gift-history',
       'get-essence-inventory',
       'get-valid-essence-for-pet',
-      'get-all-pets',
       'use-essence-on-pet',
       'cheat-add-essences',
       'get-species-affinities',
@@ -241,8 +240,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'apply-species-changes',
       'get-front-ext-batch',
       'get-store-data', // SPA FASE 9
-      'update-pet', // SPA FASE 9
-      'update-coins', // SPA FASE 9
+      'update-pet-spa', // SPA FASE 9
+      'update-coins-spa', // SPA FASE 9
       'create-pet-spa', // SPA FASE 9
       'select-pet-spa', // SPA FASE 9
     ];
