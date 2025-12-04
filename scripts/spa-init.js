@@ -29,7 +29,9 @@ window.initSPA = function() {
     '/status': statusPage,
     '/items': itemsPage,
     '/store': storePage,
-    '/nests': nestsPage
+    '/nests': nestsPage,
+    '/pen': penPage,
+    '/bestiary': bestiaryPage
   })
   
   // Navega para home

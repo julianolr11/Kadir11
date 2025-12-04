@@ -39,6 +39,14 @@ function homePage(state = {}) {
             🥚 Ninhos
           </button>
           
+          <button class="nav-btn" onclick="router.navigate('/pen')">
+            🏠 Pen
+          </button>
+          
+          <button class="nav-btn" onclick="router.navigate('/bestiary')">
+            📖 Bestiário
+          </button>
+          
           <button class="nav-btn" onclick="router.navigate('/test')">
             🧪 Test
           </button>
