@@ -49,7 +49,7 @@ class SPABridge {
       }
 
       // Carregar lista de pets
-      const petsResponse = await window.electronAPI.invoke('get-all-pets');
+      const petsResponse = await window.electronAPI.invoke('list-pets');
       if (petsResponse && Array.isArray(petsResponse)) {
         gameState.set('pets', petsResponse);
       }
