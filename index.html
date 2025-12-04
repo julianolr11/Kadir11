@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'">
     <title>Kadir11 - Pet Tray (Teste)</title>
     <link rel="stylesheet" href="styles/main.css">
     <style>
@@ -608,43 +608,7 @@
     <script src="scripts/pages/home.js"></script>
     <script src="scripts/pages/test.js"></script>
     <script src="scripts/pages/debug.js"></script>
-    <script>
-      // Inicializa SPA quando modo mini-mode está ativo
-      window.initSPA = function() {
-        const container = document.getElementById('spa-app-container')
-        const trayContainer = document.querySelector('.tray-container')
-        
-        // Esconde tray e mostra SPA
-        if (trayContainer) trayContainer.style.display = 'none'
-        container.style.display = 'block'
-        
-        // Configura container do roteador
-        router.setContainer(container)
-        
-        // Registra páginas
-        router.registerAll({
-          '/home': homePage,
-          '/test': testPage,
-          '/debug': debugPage
-        })
-        
-        // Navega para home
-        router.navigate('/home')
-        
-        console.log('[SPA] Inicializado com sucesso')
-      }
-      
-      // Desativa SPA e volta ao tray
-      window.closeSPA = function() {
-        const container = document.getElementById('spa-app-container')
-        const trayContainer = document.querySelector('.tray-container')
-        
-        container.style.display = 'none'
-        if (trayContainer) trayContainer.style.display = 'flex'
-        
-        console.log('[SPA] Fechado')
-      }
-    </script>
+    <script src="scripts/spa-init.js"></script>
 
     <script type="module" src="scripts/tray.js"></script>
 
