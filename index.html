@@ -599,6 +599,52 @@
         </div>
     </div>
 
+    <!-- SPA Container -->
+    <div id="spa-app-container" style="display: none; width: 100%; height: 100%; overflow: auto;"></div>
+
+    <!-- SPA Scripts -->
+    <script src="scripts/router.js"></script>
+    <script src="scripts/state/gameState.js"></script>
+    <script src="scripts/pages/home.js"></script>
+    <script src="scripts/pages/test.js"></script>
+    <script src="scripts/pages/debug.js"></script>
+    <script>
+      // Inicializa SPA quando modo mini-mode está ativo
+      window.initSPA = function() {
+        const container = document.getElementById('spa-app-container')
+        const trayContainer = document.querySelector('.tray-container')
+        
+        // Esconde tray e mostra SPA
+        if (trayContainer) trayContainer.style.display = 'none'
+        container.style.display = 'block'
+        
+        // Configura container do roteador
+        router.setContainer(container)
+        
+        // Registra páginas
+        router.registerAll({
+          '/home': homePage,
+          '/test': testPage,
+          '/debug': debugPage
+        })
+        
+        // Navega para home
+        router.navigate('/home')
+        
+        console.log('[SPA] Inicializado com sucesso')
+      }
+      
+      // Desativa SPA e volta ao tray
+      window.closeSPA = function() {
+        const container = document.getElementById('spa-app-container')
+        const trayContainer = document.querySelector('.tray-container')
+        
+        container.style.display = 'none'
+        if (trayContainer) trayContainer.style.display = 'flex'
+        
+        console.log('[SPA] Fechado')
+      }
+    </script>
 
     <script type="module" src="scripts/tray.js"></script>
 
