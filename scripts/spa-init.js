@@ -44,6 +44,19 @@ window.initSPA = function() {
     '/settings': settingsPage,
   })
   
+  // Inicializar SPA Bridge (integração IPC)
+  if (window.SPABridge && !window.spaBridge) {
+    window.spaBridge = new SPABridge()
+    window.spaBridge.init().then(success => {
+      if (success) {
+        console.log('[SPA] Bridge IPC conectado ✅')
+      } else {
+        console.warn('[SPA] Bridge IPC falhou, usando localStorage')
+        window.spaBridge.restoreFromLocalStorage()
+      }
+    })
+  }
+  
   // Navega para home
   router.navigate('/home')
   
@@ -58,11 +71,16 @@ window.closeSPA = function() {
     console.error('[SPA] Container não encontrado')
     return
   }
+
+  // Sincronizar estado antes de fechar
+  if (window.spaBridge) {
+    window.spaBridge.syncToLocalStorage()
+  }
   
   container.style.display = 'none'
   if (trayContainer) trayContainer.style.display = 'flex'
   
-  console.log('[SPA] Fechado')
+  console.log('[SPA] Fechado e estado sincronizado')
 }
 
 // Auto-debug no console
