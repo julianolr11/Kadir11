@@ -35,6 +35,8 @@ function homePage(state = {}) {
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/nests')">🥚 Ninhos</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/pen')">🏠 Pen</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/bestiary')">📖 Bestiário</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/training-menu')">🏋️ Treino</button>
+            <button class="spa-btn spa-btn-danger" onclick="router.navigate('/battle-menu')">⚔️ Batalha</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/test')">🧪 Test</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/debug')">🐛 Debug</button>
           </div>
@@ -100,7 +102,14 @@ function homePage(state = {}) {
                 name: 'Test Pet',
                 level: 5,
                 element: 'fogo',
-                rarity: 'raro'
+                rarity: 'raro',
+                life: 100,
+                maxLife: 100,
+                force: 8,
+                defense: 6,
+                speed: 7,
+                intelligence: 5,
+                moves: ['Arranhão', 'Mordida', 'Ataque Rápido']
               });
               location.hash = '#/home';
             ">🐾 Simular Pet</button>

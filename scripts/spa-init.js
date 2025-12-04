@@ -31,7 +31,13 @@ window.initSPA = function() {
     '/store': storePage,
     '/nests': nestsPage,
     '/pen': penPage,
-    '/bestiary': bestiaryPage
+    '/bestiary': bestiaryPage,
+    '/training-menu': trainingMenuPage,
+    '/training-force': trainingForcePage,
+    '/training-defense': trainingDefensePage,
+    '/training-attributes': trainingAttributesPage,
+    '/battle-menu': battleMenuPage,
+    '/battle-arena': battleArenaPage,
   })
   
   // Navega para home
