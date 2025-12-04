@@ -26,7 +26,10 @@ window.initSPA = function() {
     '/home': homePage,
     '/test': testPage,
     '/debug': debugPage,
-    '/status': statusPage
+    '/status': statusPage,
+    '/items': itemsPage,
+    '/store': storePage,
+    '/nests': nestsPage
   })
   
   // Navega para home

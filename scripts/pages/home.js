@@ -27,8 +27,20 @@ function homePage(state = {}) {
             📊 Status
           </button>
           
+          <button class="nav-btn" onclick="router.navigate('/items')">
+            🎒 Items
+          </button>
+          
+          <button class="nav-btn" onclick="router.navigate('/store')">
+            🛍️ Loja
+          </button>
+          
+          <button class="nav-btn" onclick="router.navigate('/nests')">
+            🥚 Ninhos
+          </button>
+          
           <button class="nav-btn" onclick="router.navigate('/test')">
-            🧪 Test Page
+            🧪 Test
           </button>
           
           <button class="nav-btn" onclick="router.navigate('/debug')">
