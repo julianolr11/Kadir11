@@ -121,6 +121,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'species-updated', // Espécies atualizadas (Dev Mode)
       'nest-full-error', // Ninhos cheios ao tentar chocar ovo
       'mini-menu-action', // Ação do menu mini-mode
+      'coins-updated', // Moedas atualizadas (SPA FASE 9)
+      'inventory-updated', // Inventário atualizado (SPA FASE 9)
+      'pets-list-updated', // Lista de pets atualizada (SPA FASE 9)
     ];
     if (validChannels.includes(channel)) {
       console.log(`Registrando listener para o canal: ${channel}`);
@@ -237,6 +240,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'rename-species',
       'apply-species-changes',
       'get-front-ext-batch',
+      'get-current-pet', // SPA FASE 9
+      'get-all-pets', // SPA FASE 9
+      'get-store-data', // SPA FASE 9
+      'update-pet', // SPA FASE 9
+      'update-coins', // SPA FASE 9
+      'create-pet', // SPA FASE 9
+      'select-pet', // SPA FASE 9
     ];
     if (validChannels.includes(channel)) {
       console.log(`Invocando canal IPC: ${channel}`, ...args);

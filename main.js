@@ -30,6 +30,9 @@ try {
 const store = new Store();
 const state = createStoreState(store);
 
+// Integração SPA - Import dos handlers IPC
+const { setupSPAIpcHandlers } = require('./scripts/handlers/spa-ipc-handler');
+
 // currentPet agora gerenciado exclusivamente via stateManager (appState)
 // Removido estado duplicado local
 let journeyImagesCache = null;
@@ -156,6 +159,10 @@ app.whenReady().then(() => {
     handlers: require('./scripts/handlers/handlersIndex'),
   });
   journeyImagesCache = journeyImagesCacheRef.value;
+
+  // Inicializar handlers IPC do SPA (FASE 9)
+  setupSPAIpcHandlers(ipcMain, petManager, store);
+  console.log('[SPA] Handlers IPC registrados');
 
   app.on('activate', () => {
     if (windowManager.getStartWindow() === null) {
