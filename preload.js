@@ -240,13 +240,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'rename-species',
       'apply-species-changes',
       'get-front-ext-batch',
-      'get-current-pet', // SPA FASE 9
-      'get-all-pets', // SPA FASE 9
       'get-store-data', // SPA FASE 9
       'update-pet', // SPA FASE 9
       'update-coins', // SPA FASE 9
-      'create-pet', // SPA FASE 9
-      'select-pet', // SPA FASE 9
+      'create-pet-spa', // SPA FASE 9
+      'select-pet-spa', // SPA FASE 9
     ];
     if (validChannels.includes(channel)) {
       console.log(`Invocando canal IPC: ${channel}`, ...args);

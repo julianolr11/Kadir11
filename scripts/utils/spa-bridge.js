@@ -78,25 +78,25 @@ class SPABridge {
     const gameState = window.gameState;
 
     // Listener: pet-data (vindo do main process)
-    window.electronAPI.onReceive('pet-data', (newPetData) => {
+    window.electronAPI.on('pet-data', (event, newPetData) => {
       gameState.set('currentPet', newPetData);
       console.log('[SPABridge] Pet atualizado via IPC:', newPetData.name);
     });
 
     // Listener: moedas atualizadas
-    window.electronAPI.onReceive('coins-updated', (coins) => {
+    window.electronAPI.on('coins-updated', (event, coins) => {
       gameState.set('coins', coins);
       console.log('[SPABridge] Moedas atualizadas:', coins);
     });
 
     // Listener: inventário atualizado
-    window.electronAPI.onReceive('inventory-updated', (inventory) => {
+    window.electronAPI.on('inventory-updated', (event, inventory) => {
       gameState.set('inventory', inventory);
       console.log('[SPABridge] Inventário atualizado');
     });
 
     // Listener: lista de pets atualizada
-    window.electronAPI.onReceive('pets-list-updated', (pets) => {
+    window.electronAPI.on('pets-list-updated', (event, pets) => {
       gameState.set('pets', pets);
       console.log('[SPABridge] Lista de pets atualizada');
     });
@@ -153,7 +153,7 @@ class SPABridge {
     }
 
     try {
-      const newPet = await window.electronAPI.invoke('create-pet', petData);
+      const newPet = await window.electronAPI.invoke('create-pet-spa', petData);
       console.log('[SPABridge] Pet criado:', newPet.name);
       return newPet;
     } catch (error) {
@@ -173,7 +173,7 @@ class SPABridge {
     }
 
     try {
-      const result = await window.electronAPI.invoke('select-pet', petId);
+      const result = await window.electronAPI.invoke('select-pet-spa', petId);
       console.log('[SPABridge] Pet selecionado:', result);
       return result;
     } catch (error) {

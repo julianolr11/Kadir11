@@ -101,7 +101,7 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
    * create-pet
    * Cria novo pet
    */
-  ipcMain.handle('create-pet', (event, petData) => {
+  ipcMain.handle('create-pet-spa', (event, petData) => {
     try {
       const newPet = petManager.createPet(petData);
       
@@ -114,7 +114,7 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
 
       return newPet;
     } catch (error) {
-      console.error('[SPA IPC] Erro em create-pet:', error);
+      console.error('[SPA IPC] Erro em create-pet-spa:', error);
       return null;
     }
   });
@@ -123,7 +123,7 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
    * select-pet
    * Seleciona um pet como atual
    */
-  ipcMain.handle('select-pet', (event, petId) => {
+  ipcMain.handle('select-pet-spa', (event, petId) => {
     try {
       const pet = petManager.getPet(petId);
       if (!pet) throw new Error('Pet não encontrado');
@@ -138,12 +138,12 @@ function setupSPAIpcHandlers(ipcMain, petManager, store) {
 
       return pet;
     } catch (error) {
-      console.error('[SPA IPC] Erro em select-pet:', error);
+      console.error('[SPA IPC] Erro em select-pet-spa:', error);
       return null;
     }
   });
 
-  console.log('[SPA IPC] ✅ 6 handlers registrados');
+  console.log('[SPA IPC] ✅ 7 handlers registrados');
 }
 
 module.exports = { setupSPAIpcHandlers };
