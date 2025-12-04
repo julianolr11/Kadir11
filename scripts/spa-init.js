@@ -38,6 +38,10 @@ window.initSPA = function() {
     '/training-attributes': trainingAttributesPage,
     '/battle-menu': battleMenuPage,
     '/battle-arena': battleArenaPage,
+    '/journey-menu': journeyMenuPage,
+    '/journey-progress': journeyProgressPage,
+    '/hatch-egg': hatchEggPage,
+    '/settings': settingsPage,
   })
   
   // Navega para home

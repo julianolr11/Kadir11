@@ -32,13 +32,16 @@ function homePage(state = {}) {
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/status')">📊 Status</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/items')">🎒 Items</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/store')">🛍️ Loja</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/pen')">🏠 Meu Pen</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/nests')">🥚 Ninhos</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/pen')">🏠 Pen</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/bestiary')">📖 Bestiário</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/hatch-egg')">🐣 Chocar Ovos</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/training-menu')">🏋️ Treino</button>
             <button class="spa-btn spa-btn-danger" onclick="router.navigate('/battle-menu')">⚔️ Batalha</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/test')">🧪 Test</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/debug')">🐛 Debug</button>
+            <button class="spa-btn spa-btn-success" onclick="router.navigate('/journey-menu')">🗺️ Jornada</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/bestiary')">📖 Bestiário</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/store')">🛒 Loja</button>
+            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/items')">🎒 Inventário</button>
+            <button class="spa-btn spa-btn-warning" onclick="router.navigate('/settings')">⚙️ Config</button>
           </div>
         </div>
 
@@ -122,7 +125,7 @@ function homePage(state = {}) {
       <div class="spa-page-footer">
         <button class="spa-btn spa-btn-primary" onclick="window.closeSPA()">✕ Fechar SPA</button>
         <div style="text-align: right; font-size: 0.85em; color: var(--color-text-muted); align-self: center;">
-          FASE 1-4 Completa | ${new Date().toLocaleString('pt-BR')}
+          SPA Completo (23 Rotas) | ${new Date().toLocaleString('pt-BR')}
         </div>
       </div>
     </div>
