@@ -18,6 +18,15 @@ function registerAssetsHandlers({
   logger.info('Registrando Assets Handlers');
 
   ipcMain.handle('get-species-info', async () => {
+    // Força recarregar dados sempre, evitando cache do módulo
+    if (typeof require !== 'undefined') {
+      try {
+        const constantsPath = require.resolve('../constants.mjs');
+        if (require.cache[constantsPath]) {
+          delete require.cache[constantsPath];
+        }
+      } catch {}
+    }
     await loadSpeciesData(baseDir);
     return getSpeciesData();
   });

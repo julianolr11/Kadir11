@@ -70,6 +70,7 @@ function setupNestHandlers(options = {}) {
     }
     if (nests.length >= nestCount) {
       logger.error(`Maximum nest capacity reached: ${nestCount}`);
+      event.reply('nest-full-error', 'Todos os ninhos estão cheios, aguarde');
       return;
     }
 
@@ -117,11 +118,23 @@ function setupNestHandlers(options = {}) {
 
       logger.info(`Egg hatched: ${newPet.name} (ID: ${newPet.petId}) with rarity ${egg.rarity}`);
 
+      // Marca como capturado no bestiário
+      try {
+        const bestiaryManager = require('../managers/bestiaryManager');
+        const specieName = petData.specie || newPet.race || newPet.name;
+        if (specieName) {
+          bestiaryManager.markAsOwned(specieName);
+        }
+      } catch (err) {
+        logger.warn('Falha ao marcar bestiário como owned:', err);
+      }
+
       const hatchWindow = getHatchWindow();
 
-      // Broadcast nest update and new pet to all windows
+      // Broadcast nest update, bestiary e novo pet para todas janelas
       broadcastToWindows((wc) => {
         wc.send('nests-data-updated', nests);
+        wc.send('bestiary-updated');
         // Don't send pet-created to hatch window (handled separately)
         if (wc !== hatchWindow?.webContents) {
           wc.send('pet-created', newPet);

@@ -89,7 +89,7 @@ function registerEssenceHandlers({ electron, managers, store }) {
 
       // Atualizar raridade do pet
       pet.rarity = result.newRarity;
-      await petManager.updatePet(pet);
+      await petManager.updatePet(pet.petId, pet);
 
       console.log(`Pet ${pet.name} evoluiu de ${result.oldRarity} para ${result.newRarity}`);
 
@@ -160,6 +160,35 @@ function registerEssenceHandlers({ electron, managers, store }) {
    */
   ipcMain.handle('get-essence-inventory', async () => {
     return essenceManager.normalizeEssences(electronStore);
+  });
+
+  /**
+   * CHEAT: Adiciona essências de todas as raridades
+   * Uso: ipcRenderer.invoke('cheat-add-essences', { each: 1 })
+   */
+  ipcMain.handle('cheat-add-essences', async (event, { each = 1 } = {}) => {
+    try {
+      const rarities = essenceManager.ESSENCE_NAMES;
+      let craftResults = [];
+      let inventory = essenceManager.getEssenceInventory(electronStore);
+      for (const r of rarities) {
+        const res = essenceManager.addEssences(electronStore, r, each);
+        inventory = res.inventory;
+        if (res.craftResults && res.craftResults.length) {
+          craftResults = craftResults.concat(res.craftResults);
+        }
+      }
+      // Broadcast para todas as janelas interessadas
+      BrowserWindow.getAllWindows().forEach(win => {
+        if (win && win.webContents) {
+          win.webContents.send('essence-generated', { inventory, craftResults });
+        }
+      });
+      return { success: true, inventory, craftResults };
+    } catch (error) {
+      console.error('Erro no cheat de essências:', error);
+      return { success: false, error: String(error) };
+    }
   });
 
   /**

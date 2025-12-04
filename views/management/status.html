@@ -487,14 +487,52 @@
 
         /* Ajustes para a lista de equipamentos */
         #equip-items-container {
-            max-height: 150px;
-            overflow-y: unset;
+            max-height: 180px;
+            overflow-y: auto !important;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #3a4250 #101218; /* Firefox */
         }
-
         #equip-items-container .small-button {
             width: auto;
             font-size: 12px;
             padding: 4px 8px;
+        }
+        /* Scrollbar WebKit */
+        #equip-items-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #equip-items-container::-webkit-scrollbar-track {
+            background: #101218;
+            border-radius: 4px;
+        }
+        #equip-items-container::-webkit-scrollbar-thumb {
+            background: #3a4250;
+            border: 1px solid #2a323e;
+            border-radius: 4px;
+        }
+        #equip-items-container::-webkit-scrollbar-thumb:hover {
+            background: #4a5260;
+        }
+        /* Botão X do modal de equipamentos (igual ao X da janela de status) */
+        #close-equip-x {
+            width: 20px;
+            height: 20px;
+            background-color: #ff4444;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #813a3a;
+            font-family: cursive;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: none;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            z-index: 10;
         }
     </style>
 </head>
@@ -631,15 +669,12 @@
         </div>
     </div>
 
-    <div id="equipment-modal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000; overflow:hidden;">
-        <div
-            style="background:#2a323e; border:2px solid #fff; padding:10px; border-radius:8px; text-align:center; width:320px; box-sizing:border-box; max-width:90%;">
-            <div id="equip-items-container" class="scroll-container"
-                style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;"></div>
+    <div id="equipment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000;">
+        <div style="position:relative; background:#2a323e; border:2px solid #fff; padding:10px 10px 14px; border-radius:8px; text-align:center; width:340px; box-sizing:border-box; max-width:90%;">
+            <div id="close-equip-x" title="Fechar">X</div>
+            <div id="equip-items-container" class="scroll-container" style="display:flex; flex-direction:column; gap:5px; margin-top:28px; margin-bottom:8px; overflow-x: hidden;"></div>
             <div style="display:flex; justify-content:center; gap:10px;">
                 <button id="unequip-item-button" class="button small-button">Remover</button>
-                <button id="close-equip-modal" class="button small-button">Fechar</button>
             </div>
         </div>
     </div>

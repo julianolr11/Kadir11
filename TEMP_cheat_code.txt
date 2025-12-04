@@ -1,0 +1,33 @@
+// ===== ADICIONAR NO FINAL DE scripts/start.js =====
+
+// Cheat code para abrir tela de dev (digitar "DEVMODE")
+let cheatBuffer = '';
+const cheatCode = 'DEVMODE';
+let cheatTimeout = null;
+
+document.addEventListener('keydown', (e) => {
+  // Adicionar tecla ao buffer
+  cheatBuffer += e.key.toUpperCase();
+  
+  // Limpar buffer após 2 segundos de inatividade
+  clearTimeout(cheatTimeout);
+  cheatTimeout = setTimeout(() => {
+    cheatBuffer = '';
+  }, 2000);
+  
+  // Verificar se o código foi digitado
+  if (cheatBuffer.includes(cheatCode)) {
+    cheatBuffer = '';
+    console.log('🔧 Dev Mode ativado!');
+    
+    // Enviar evento para abrir tela de dev
+    if (window.electronAPI) {
+      window.electronAPI.send('open-pet-manager');
+    }
+  }
+  
+  // Limitar tamanho do buffer
+  if (cheatBuffer.length > 20) {
+    cheatBuffer = cheatBuffer.slice(-10);
+  }
+});

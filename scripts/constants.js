@@ -66,10 +66,11 @@ export const specieData = {
   Leoracal: { dir: 'Fera', race: 'Kael', element: 'terra' },
   Drazraq: { dir: 'Draconideo', race: 'drazraq', element: 'puro' },
   Foxyl: { dir: 'Fera/Foxyl', race: 'foxyl', element: 'ar' }, // Espécie de ar
+  Griffor: { dir: 'Ave', race: 'Griffor', element: 'puro', sizeMeters: 2.7 },
 };
 
 export const eggSpecieMap = {
-  eggAve: ['Pidgly', 'Ignis'],
+  eggAve: ['Pidgly', 'Ignis', 'Griffor'],
   eggCriaturaMistica: ['Owlberoth', 'Digitama'],
   eggCriaturaSombria: ['Criatura Sombria'],
   eggDraconideo: ['Draconídeo', 'Drazraq'],

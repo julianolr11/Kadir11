@@ -1,34 +1,36 @@
-// Bestiário - Frontend
-const specieData = {
-  1: { name: 'Draconídeo', race: 'draak', dir: 'Draconideo/puro/draak', element: 'puro', attackType: 'Híbrido', description: 'Senhor ancestral das montanhas, combina força bruta com energia arcana inata.' },
-  2: { name: 'Drazraq', race: 'drazraq', dir: 'Draconideo/puro/drazraq', element: 'puro', attackType: 'Físico', description: 'Guerreiro dracônico de reflexos rápidos e investidas cortantes.' },
-  3: { name: 'Reptiloide', race: 'viborom', dir: 'Reptiloide/puro/viborom', element: 'puro', attackType: 'Físico', description: 'Predador rastejante que observa silencioso antes de atacar.' },
-  4: { name: 'Pidgly', race: 'Pidgly', dir: 'Ave/terra/Pidgly', element: 'terra', attackType: 'Físico', description: 'Ave territorial que defende seu ninho com bicadas certeiras.' },
-  5: { name: 'Ignis', race: 'ignis', dir: 'Ave/fogo/ignis', element: 'fogo', attackType: 'Mágico', description: 'Espírito ígneo emplumado; suas chamas nunca se apagam.' },
-  6: { name: 'Mawthorn', race: 'Mawthorn', dir: 'Monstro/agua/Mawthorn', element: 'agua', attackType: 'Físico', description: 'Criatura lacustre coberta por placas e espinhos orgânicos.' },
-  7: { name: 'Owlberoth', race: 'Owlberoth', dir: 'CriaturaMistica/terra/Owlberoth', element: 'terra', attackType: 'Mágico', description: 'Guardião da clareira; olhos que enxergam através da névoa.' },
-  8: { name: 'Digitama', race: 'Digitama', dir: 'CriaturaMistica/fogo/digitama', element: 'fogo', attackType: 'Mágico', description: 'Essência incubada de fogo puro em forma de casulo vivo.' },
-  9: { name: 'Kael', race: 'Kael', dir: 'Fera/agua/Kael', element: 'agua', attackType: 'Mágico', description: 'Ser fluido e sereno, domina correntes e névoas profundas.' },
-  10: { name: 'Leoracal', race: 'Kael', dir: 'Fera/terra/Leoracal', element: 'terra', attackType: 'Físico', description: 'Felino oracular que ruge antes de qualquer mudança climática.' },
-};
-
-const elementIcons = {
-  fogo: '🔥',
-  agua: '💧',
-  terra: '🌍',
-  ar: '💨',
-  puro: '✨',
-};
-
+// Bestiário - Frontend (dinâmico usando dados do backend)
 let bestiaryData = {};
+let dynamicSpeciesList = [];
 
 function closeWindow() {
   window.close();
 }
 
 function loadBestiary() {
-  window.electronAPI.invoke('get-bestiary').then(data => {
-    bestiaryData = data || {};
+  // Busca status (seen/owned) e dados de espécies do backend
+  Promise.all([
+    window.electronAPI.invoke('get-bestiary'),
+    window.electronAPI.invoke('get-species-info'),
+  ]).then(([bData, sInfo]) => {
+    bestiaryData = bData || {};
+    const specieData = sInfo && sInfo.specieData ? sInfo.specieData : {};
+    // Converte em lista e ordena por dexNumber
+    dynamicSpeciesList = Object.values(specieData)
+      .map(s => ({
+        name: s.name || s.race,
+        race: s.race,
+        dir: `${s.dir}/${s.element}/${s.race}`,
+        element: s.element,
+        attackType: s.attackType,
+        description: s.description,
+        dexNumber: s.dexNumber || 0,
+      }))
+      .sort((a, b) => (a.dexNumber || 0) - (b.dexNumber || 0));
+    renderGrid();
+    updateProgress();
+  }).catch(() => {
+    // fallback: limpa grid
+    dynamicSpeciesList = [];
     renderGrid();
     updateProgress();
   });
@@ -37,13 +39,12 @@ function loadBestiary() {
 function renderGrid() {
   const grid = document.getElementById('bestiary-grid');
   grid.innerHTML = '';
-
-  for (let i = 1; i <= 10; i++) {
-    const creature = specieData[i];
+  dynamicSpeciesList.forEach((creature, idx) => {
+    const number = creature.dexNumber || (idx + 1);
     const status = bestiaryData[creature.name];
-    const card = createCreatureCard(i, creature, status);
+    const card = createCreatureCard(number, creature, status);
     grid.appendChild(card);
-  }
+  });
 }
 
 function createCreatureCard(number, creature, status) {
@@ -66,11 +67,13 @@ function createCreatureCard(number, creature, status) {
     // Descoberto (seen ou owned)
     visualBlock = document.createElement('img');
     visualBlock.className = 'creature-image';
-    visualBlock.src = `../../Assets/Mons/${creature.dir}/front.gif`;
+    // tenta PNG/GIF com fallback para portrait
+    const base = `../../Assets/Mons/${creature.dir}/`;
+    visualBlock.src = `${base}front.png`;
     visualBlock.onerror = () => {
-      visualBlock.src = `../../Assets/Mons/${creature.dir}/front.png`;
+      visualBlock.src = `${base}front.gif`;
       visualBlock.onerror = () => {
-        visualBlock.src = `../../Assets/Mons/${creature.dir}/${creature.race}.png`;
+        visualBlock.src = `${base}${creature.race}.png`;
       };
     };
     if (status.status === 'seen') {
@@ -126,13 +129,34 @@ function openModal(number, creature, status) {
     
     const cardImg = document.getElementById('modal-image');
     cardImg.style.display = 'block';
-    cardImg.src = `../../Assets/Mons/${creature.dir}/${creature.race}.png`;
+    const base = `../../Assets/Mons/${creature.dir}/`;
+    cardImg.src = `${base}${creature.race}.png`;
     cardImg.onerror = () => {
-      cardImg.src = `../../Assets/Mons/${creature.dir}/front.png`;
+      cardImg.src = `${base}front.png`;
+      cardImg.onerror = () => {
+        cardImg.src = `${base}front.gif`;
+      };
     };
     
-    const elementIcon = elementIcons[creature.element] || '';
-    document.getElementById('modal-element').textContent = `${elementIcon} ${creature.element}`;
+      // Criar imagem do elemento
+      const elementContainer = document.getElementById('modal-element');
+      elementContainer.innerHTML = '';
+    
+      const elementImg = document.createElement('img');
+      elementImg.src = `../../Assets/Elements/${creature.element}.png`;
+      elementImg.alt = creature.element;
+      elementImg.style.width = '20px';
+      elementImg.style.height = '20px';
+      elementImg.style.marginRight = '8px';
+      elementImg.style.verticalAlign = 'middle';
+      elementImg.onerror = () => {
+        elementImg.src = '../../Assets/Elements/default.png';
+      };
+    
+      const elementText = document.createTextNode(creature.element);
+      elementContainer.appendChild(elementImg);
+      elementContainer.appendChild(elementText);
+    
     document.getElementById('modal-attack-type').textContent = creature.attackType;
     
     if (status.status === 'owned') {
@@ -154,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadBestiary();
 
   document.getElementById('back-button').addEventListener('click', () => {
-    window.electronAPI.send('open-start-window');
+    // Apenas fecha o bestiário, não reabre a tela inicial
     closeWindow();
   });
 
@@ -172,26 +196,31 @@ document.addEventListener('DOMContentLoaded', () => {
   window.electronAPI.on('bestiary-updated', () => {
     loadBestiary();
   });
+
+  // Também atualizar quando espécies forem alteradas no Dev Mode
+  window.electronAPI.on('species-updated', () => {
+    loadBestiary();
+  });
 });
 
 function updateProgress() {
   let seen = 0;
   let owned = 0;
-  for (let i = 1; i <= 10; i++) {
-    const creature = specieData[i];
+  dynamicSpeciesList.forEach((creature) => {
     const status = bestiaryData[creature.name];
     if (status && status.status) {
       if (status.status === 'owned') {
         owned++;
-        seen++; // capturado implica visto
+        seen++;
       } else if (status.status === 'seen') {
         seen++;
       }
     }
-  }
-  const percent = ((owned / 10) * 100).toFixed(0);
+  });
+  const total = dynamicSpeciesList.length || 0;
+  const percent = total > 0 ? ((owned / total) * 100).toFixed(0) : '0';
   const progressEl = document.getElementById('bestiary-progress');
   if (progressEl) {
-    progressEl.textContent = `Progresso: ${seen}/10 vistos | ${owned}/10 capturados (${percent}%)`;
+    progressEl.textContent = `Progresso: ${seen}/${total} vistos | ${owned}/${total} capturados (${percent}%)`;
   }
 }

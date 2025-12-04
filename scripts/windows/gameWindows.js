@@ -18,6 +18,8 @@ function initGameWindows({ windowManager }) {
   let nestsWindow = null;
   let hatchWindow = null;
   let bestiaryWindow = null;
+  let petManagerWindow = null;
+  let miniWindow = null;
 
   function preloadPath() {
     return path.join(__dirname, '..', '..', 'preload.js');
@@ -342,6 +344,51 @@ function initGameWindows({ windowManager }) {
     return hatchWindow;
   }
 
+  function createMiniWindow() {
+    if (miniWindow) {
+      miniWindow.show();
+      miniWindow.focus();
+      return miniWindow;
+    }
+    
+    const { screen } = require('electron');
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width, height } = primaryDisplay.workAreaSize;
+    
+    miniWindow = new BrowserWindow({
+      width: 50,
+      height: 350,
+      x: width - 50,
+      y: height - 350,
+      frame: false,
+      transparent: true,
+      resizable: false,
+      movable: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      show: false,
+      webPreferences: { 
+        preload: preloadPath(), 
+        nodeIntegration: false, 
+        contextIsolation: true 
+      },
+    });
+    
+    miniWindow.loadFile('mini-mode.html');
+    miniWindow.setAlwaysOnTop(true, 'floating');
+    
+    // Não usa fade handlers para manter sempre visível
+    miniWindow.once('ready-to-show', () => {
+      miniWindow.show();
+    });
+    
+    miniWindow.on('closed', () => {
+      miniWindow = null;
+    });
+    
+    return miniWindow;
+  }
+
   function updateNestsPosition() {
     if (nestsWindow && windowManager.penWindow) {
       const bounds = windowManager.penWindow.getBounds();
@@ -372,6 +419,29 @@ function initGameWindows({ windowManager }) {
     return bestiaryWindow;
   }
 
+  function createPetManagerWindow() {
+    if (petManagerWindow) {
+      petManagerWindow.show();
+      petManagerWindow.focus();
+      return petManagerWindow;
+    }
+    petManagerWindow = new BrowserWindow({
+      width: 1000,
+      height: 800,
+      frame: false,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: { preload: preloadPath(), nodeIntegration: false, contextIsolation: true },
+    });
+    petManagerWindow.loadFile(path.join('views', 'admin', 'pet-manager.html'));
+    windowManager.attachFadeHandlers(petManagerWindow);
+    petManagerWindow.on('closed', () => {
+      petManagerWindow = null;
+    });
+    return petManagerWindow;
+  }
+
   function closeNestsWindow() {
     if (nestsWindow && !nestsWindow.isDestroyed()) {
       nestsWindow.close();
@@ -383,6 +453,7 @@ function initGameWindows({ windowManager }) {
   const getItemsWindow = () => itemsWindow;
   const getHatchWindow = () => hatchWindow;
   const getBestiaryWindow = () => bestiaryWindow;
+  const getMiniWindow = () => miniWindow;
 
   function closeAllGameWindows() {
     [
@@ -400,6 +471,8 @@ function initGameWindows({ windowManager }) {
       nestsWindow,
       hatchWindow,
       bestiaryWindow,
+      petManagerWindow,
+      miniWindow,
     ].forEach((w) => {
       if (w) w.close();
     });
@@ -420,12 +493,15 @@ function initGameWindows({ windowManager }) {
     createNestsWindow,
     createHatchWindow,
     createBestiaryWindow,
+    createPetManagerWindow,
+    createMiniWindow,
     updateNestsPosition,
     closeNestsWindow,
     getStoreWindow,
     getItemsWindow,
     getHatchWindow,
     getBestiaryWindow,
+    getMiniWindow,
     closeAllGameWindows,
   };
 }

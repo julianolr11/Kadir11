@@ -184,8 +184,13 @@ function setupWindowPositioningHandlers(options = {}) {
   ipcMain.on('resize-pen-window', (event, size) => {
     const penWindow = BrowserWindow.getAllWindows().find((w) => w.getTitle().includes('Pen'));
     if (penWindow && size && size.width && size.height) {
-      penWindow.setSize(Math.round(size.width), Math.round(size.height));
-      logger.debug(`Pen window resized to ${size.width}x${size.height}`);
+      const targetW = Math.round(size.width);
+      const targetH = Math.round(size.height);
+      const { width: curW, height: curH } = penWindow.getBounds();
+      if (curW !== targetW || curH !== targetH) {
+        penWindow.setSize(targetW, targetH);
+        logger.debug(`Pen window resized to ${targetW}x${targetH}`);
+      }
       // Notify pen script to update nests position
       penWindow.webContents.send('update-nests-position');
     }

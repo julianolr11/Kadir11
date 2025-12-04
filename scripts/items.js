@@ -127,20 +127,37 @@ async function useEssenceOnPet(petId, essenceRarity, imageContainer) {
     const result = await window.electronAPI.invoke('use-essence-on-pet', { petId, essenceRarity });
     
     if (result.success) {
-      // Animar a mudança de raridade no fundo
+      // Animar a mudança de raridade no fundo do card
       const rarityBg = imageContainer.querySelector('.essence-pet-rarity-bg');
+      const petName = imageContainer.parentElement.querySelector('.essence-pet-name');
+      const petRarity = imageContainer.parentElement.querySelector('.essence-pet-rarity');
+      
       if (rarityBg) {
-        rarityBg.style.transition = 'background 1s ease';
-        rarityBg.style.background = rarityGradients[result.newRarity];
+        rarityBg.style.animation = 'rarityGlow 2s ease-in-out';
+        setTimeout(() => {
+          rarityBg.style.transition = 'background 1s ease';
+          rarityBg.style.background = rarityGradients[result.newRarity];
+        }, 1000);
       }
 
-      // Mostrar mensagem de sucesso
+      // Animar texto da raridade
+      if (petRarity) {
+        petRarity.style.animation = 'textPulse 1.5s ease-in-out';
+        setTimeout(() => {
+          petRarity.textContent = `${formatRarity(result.oldRarity)} → ${formatRarity(result.newRarity)}`;
+        }, 750);
+      }
+
+      // Fechar modal de seleção após animação
       setTimeout(() => {
-        alert(`Sucesso! ${result.oldRarity} → ${result.newRarity}`);
         closeEssenceModal();
-        // Recarregar itens
-        window.electronAPI.send('request-pet-data');
-      }, 1000);
+        // Mostrar toast de sucesso
+        showToast(`✨ Upgrade concluído: ${formatRarity(result.newRarity)}!`);
+        // Recarregar itens após 1 segundo
+        setTimeout(() => {
+          window.electronAPI.send('request-pet-data');
+        }, 1000);
+      }, 2000);
     } else {
       alert(result.error || 'Erro ao usar essência');
     }
@@ -148,6 +165,44 @@ async function useEssenceOnPet(petId, essenceRarity, imageContainer) {
     console.error('Erro ao usar essência:', error);
     alert('Erro ao usar essência no pet');
   }
+}
+
+function showToast(message) {
+  // Criar toast se não existir
+  let toast = document.getElementById('essence-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'essence-toast';
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #6a4c93, #533a71);
+      border: 2px solid #8b6fb0;
+      border-radius: 8px;
+      padding: 15px 25px;
+      color: #fff;
+      font-family: 'PixelOperator', sans-serif;
+      font-size: 16px;
+      box-shadow: 0 5px 20px rgba(106, 76, 147, 0.6);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(400px);
+      transition: all 0.4s ease;
+      pointer-events: none;
+    `;
+    document.body.appendChild(toast);
+  }
+  
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(0)';
+  
+  // Remover após 3 segundos
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(400px)';
+  }, 3000);
 }
 
 function closeEssenceModal() {
@@ -204,6 +259,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fechar modal de essências
   document.getElementById('essence-modal-close')?.addEventListener('click', closeEssenceModal);
 
+  // Fechar modal de sucesso
+  document.getElementById('essence-success-ok')?.addEventListener('click', () => {
+    const modal = document.getElementById('essence-success-modal');
+    if (modal) modal.style.display = 'none';
+    // Recarregar itens
+    window.electronAPI.send('request-pet-data');
+  });
+
   // Comando secreto para adicionar moedas
   let cheatBuffer = '';
   document.addEventListener('keydown', (e) => {
@@ -259,7 +322,7 @@ async function loadItemsInfo() {
         name: `Essência ${formatRarity(rarity)}`,
         type: 'essence',
         icon: 'Assets/Icons/soul-essence.png',
-        description: `Colete 10 para evoluir a raridade de um pet para ${formatRarity(rarity)}`,
+        description: `Evolui um pet com raridade menor para ${formatRarity(rarity)} (consome 1)`,
         rarity: rarity
       };
     });
@@ -372,12 +435,8 @@ function updateItems() {
     const qtyLabel = document.createElement('span');
     
     if (info.type === 'essence') {
-      qtyLabel.textContent = `${qty}/10`;
-      qtyLabel.className = 'item-qty essence-progress';
-      if (qty >= 10) {
-        qtyLabel.style.color = '#4CAF50';
-        qtyLabel.style.fontWeight = 'bold';
-      }
+      qtyLabel.textContent = `x${qty}`;
+      qtyLabel.className = 'item-qty';
     } else {
       qtyLabel.textContent = `x${qty}`;
       qtyLabel.className = 'item-qty';
@@ -405,40 +464,30 @@ function updateItems() {
     useBtn.className = 'button small-button use-item-btn';
 
     if (info.type === 'essence') {
-      if (qty >= 10) {
-        useBtn.textContent = 'Usar';
-        useBtn.disabled = false;
-        useBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const essenceRarity = id.replace('essence_', '');
-          openEssenceModal(essenceRarity);
-        });
+      useBtn.textContent = 'Usar';
+      useBtn.disabled = qty <= 0;
+      if (qty <= 0) {
+        useBtn.style.opacity = '0.5';
+        useBtn.style.cursor = 'not-allowed';
+      }
+      useBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const essenceRarity = id.replace('essence_', '');
+        openEssenceModal(essenceRarity);
+      });
 
+      // Manter opção de converter quando houver 10+ para subir de tier
+      if (qty >= 10) {
         const convertBtn = document.createElement('button');
         convertBtn.className = 'button small-button use-item-btn';
         convertBtn.textContent = 'Converter';
         convertBtn.style.marginLeft = '8px';
-        convertBtn.addEventListener('click', async (e) => {
+        convertBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const essenceRarity = id.replace('essence_', '');
-          try {
-            const result = await window.electronAPI.invoke('craft-essence', { rarity: essenceRarity });
-            if (result.success) {
-              alert('Essências convertidas com sucesso!');
-              window.electronAPI.send('request-pet-data');
-            } else {
-              alert(result.error || 'Erro ao converter essência');
-            }
-          } catch (err) {
-            alert('Erro ao converter essência');
-          }
+          window.electronAPI.send('craft-essence', essenceRarity);
         });
         headerActions.insertBefore(convertBtn, useBtn);
-      } else {
-        useBtn.textContent = `${qty}/10`;
-        useBtn.disabled = true;
-        useBtn.style.opacity = '0.5';
-        useBtn.style.cursor = 'not-allowed';
       }
     } else if (id.startsWith('egg')) {
       useBtn.textContent = 'Chocar';

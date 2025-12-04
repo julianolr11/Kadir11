@@ -191,6 +191,24 @@ async function listPets() {
           return pet;
         } catch (err) {
           console.error(`Erro ao ler pet do arquivo ${file}:`, err);
+          // Tentativa de reparo simples: truncar até o último '}' válido
+          try {
+            const raw = await fs.readFile(filePath, 'utf8');
+            const lastBrace = raw.lastIndexOf('}');
+            if (lastBrace !== -1) {
+              const cleaned = raw.slice(0, lastBrace + 1);
+              const repaired = JSON.parse(cleaned);
+              ensureStatusImage(repaired);
+              if (!repaired.knownMoves) {
+                repaired.knownMoves = repaired.moves ? [...repaired.moves] : [];
+              }
+              await fs.writeFile(filePath, JSON.stringify(repaired, null, 2), 'utf8');
+              console.warn(`Arquivo ${file} reparado automaticamente.`);
+              return repaired;
+            }
+          } catch (repairErr) {
+            console.error(`Falha ao reparar arquivo ${file}:`, repairErr);
+          }
           return null;
         }
       })
@@ -203,47 +221,49 @@ async function listPets() {
   }
 }
 
-// Função para carregar um pet específico
+// Função para carregar um pet específico (usa lock para evitar escrita concorrente)
 async function loadPet(petId) {
   const petFileName = `pet_${petId}.json`;
   const petFilePath = path.join(petsDir, petFileName);
 
-  try {
-    const data = await fs.readFile(petFilePath, 'utf8');
-    const pet = JSON.parse(data);
-    if (pet.kadirPoints === undefined) {
-      pet.kadirPoints = 10;
+  return withLock(petId, async () => {
+    try {
+      const data = await fs.readFile(petFilePath, 'utf8');
+      const pet = JSON.parse(data);
+      if (pet.kadirPoints === undefined) {
+        pet.kadirPoints = 10;
+      }
+      if (pet.bravura === undefined) {
+        pet.bravura = 10;
+      }
+      if (pet.items === undefined) {
+        pet.items = {};
+      }
+      if (pet.statusEffects === undefined) {
+        pet.statusEffects = [];
+      }
+      if (pet.equippedItem === undefined) {
+        pet.equippedItem = null;
+      }
+      if (pet.winStreak === undefined) {
+        pet.winStreak = 0;
+      }
+      if (pet.lossStreak === undefined) {
+        pet.lossStreak = 0;
+      }
+      ensureStatusImage(pet);
+      if (!pet.knownMoves) {
+        pet.knownMoves = pet.moves ? [...pet.moves] : [];
+      }
+      pet.lastAccessed = new Date().toISOString();
+      pet.fileName = petFileName; // Garantir que o fileName esteja atualizado
+      await fs.writeFile(petFilePath, JSON.stringify(pet, null, 2), 'utf8');
+      return pet;
+    } catch (err) {
+      console.error(`Erro ao carregar pet ${petId}:`, err);
+      throw err;
     }
-    if (pet.bravura === undefined) {
-      pet.bravura = 10;
-    }
-    if (pet.items === undefined) {
-      pet.items = {};
-    }
-    if (pet.statusEffects === undefined) {
-      pet.statusEffects = [];
-    }
-    if (pet.equippedItem === undefined) {
-      pet.equippedItem = null;
-    }
-    if (pet.winStreak === undefined) {
-      pet.winStreak = 0;
-    }
-    if (pet.lossStreak === undefined) {
-      pet.lossStreak = 0;
-    }
-    ensureStatusImage(pet);
-    if (!pet.knownMoves) {
-      pet.knownMoves = pet.moves ? [...pet.moves] : [];
-    }
-    pet.lastAccessed = new Date().toISOString();
-    pet.fileName = petFileName; // Garantir que o fileName esteja atualizado
-    await fs.writeFile(petFilePath, JSON.stringify(pet, null, 2), 'utf8');
-    return pet;
-  } catch (err) {
-    console.error(`Erro ao carregar pet ${petId}:`, err);
-    throw err;
-  }
+  });
 }
 
 const locks = {};

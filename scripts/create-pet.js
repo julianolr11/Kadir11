@@ -44,69 +44,74 @@ function generateRarity() {
   return 'Lendario';
 }
 
-// Função ajustada para definir a espécie de forma mais aleatória
-function generateSpecie(attributes, element) {
+// Função equilibrada para definir a espécie com base no elemento escolhido
+async function generateSpecie(attributes, element) {
   const { attack, defense, speed, magic, life } = attributes;
 
-  // 1. Tentar filtrar espécies pelo elemento selecionado
-  let species = Object.keys(specieData).filter((s) => specieData[s].element === element);
-
-  // 2. Se não houver espécies para o elemento, usar espécies sem elemento definido
-  if (species.length === 0) {
-    console.log(
-      `Nenhuma espécie encontrada para elemento '${element}', tentando espécies neutras...`
-    );
-    species = Object.keys(specieData).filter((s) => !specieData[s].element);
+  // Carregar afinidades do JSON
+  let affinities = {};
+  try {
+    const response = await fetch('../../data/species-affinities.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    affinities = await response.json();
+    console.log('Afinidades carregadas do JSON:', Object.keys(affinities).length, 'espécies');
+  } catch (error) {
+    console.error('Erro ao carregar species-affinities.json:', error);
+    // Fallback: afinidades padrão
+    affinities = {
+      'Ignis': { attack: 2, defense: 0, speed: 3, magic: 2, life: 0 },
+      'Digitama': { attack: 0, defense: 1, speed: 0, magic: 3, life: 2 },
+      'Pidgly': { attack: 2, defense: 1, speed: 2, magic: 0, life: 1 },
+      'Leoracal': { attack: 3, defense: 2, speed: 1, magic: 0, life: 2 },
+      'Owlberoth': { attack: 0, defense: 1, speed: 1, magic: 3, life: 2 },
+      'Virideer': { attack: 1, defense: 2, speed: 1, magic: 1, life: 3 },
+      'Kael': { attack: 1, defense: 1, speed: 2, magic: 3, life: 1 },
+      'Mawthorn': { attack: 2, defense: 3, speed: 0, magic: 0, life: 3 },
+      'Draak': { attack: 3, defense: 1, speed: 1, magic: 2, life: 2 },
+      'Drazraq': { attack: 3, defense: 2, speed: 2, magic: 0, life: 1 },
+      'Reptiloide': { attack: 2, defense: 2, speed: 1, magic: 0, life: 2 }
+    };
+    console.warn('Usando afinidades fallback:', Object.keys(affinities).length, 'espécies');
   }
 
-  // 3. Se ainda não houver, usar TODAS as espécies disponíveis (fallback garantido)
-  if (species.length === 0) {
-    console.warn('Nenhuma espécie neutra encontrada, usando todas as espécies disponíveis');
-    species = Object.keys(specieData);
-  }
-
-  // 4. Último fallback: se specieData estiver vazio (erro crítico), usar lista hardcoded
-  if (species.length === 0) {
-    console.error('ERRO CRÍTICO: specieData está vazio! Usando fallback de emergência.');
-    species = ['Draconídeo', 'Reptilóide', 'Ave', 'Fera', 'Monstro', 'Criatura Mística'];
-  }
-
-  // Calcular um "peso" baseado nos atributos pra influenciar levemente a escolha
-  const weights = {
-    Draconídeo: attack + magic, // Favorece ataque e magia
-    Reptilóide: defense + speed, // Favorece defesa e velocidade
-    Ave: speed + magic, // Favorece velocidade e magia
-    'Criatura Mística': magic + life, // Favorece magia e vida
-    'Criatura Sombria': defense + magic, // Favorece defesa e magia
-    Monstro: defense + life, // Favorece defesa e vida
-    Fera: attack + defense, // Favorece ataque e defesa
-    // Fallback para espécies específicas (Pidgly, Ashfang, etc)
-    Pidgly: speed + magic,
-    Ashfang: attack + defense,
-    Ignis: speed + attack,
-    Mawthorn: defense + life,
-    Owlberoth: magic + life,
-    Digitama: magic + attack,
-    Kael: speed + defense,
-    Leoracal: attack + defense,
-    Drazraq: attack + magic,
-    Foxyl: speed + magic, // Elemento ar: velocidade e magia
+  // Mapeamento de espécies por elemento (todos os 11 pets disponíveis)
+  const speciesByElement = {
+    fogo: ['Ignis', 'Digitama'],
+    terra: ['Pidgly', 'Leoracal', 'Owlberoth', 'Virideer'],
+    agua: ['Kael', 'Mawthorn'],
+    puro: ['Draak', 'Drazraq', 'Reptiloide'],
+    ar: []
   };
 
-  // Gerar uma pontuação base aleatória pra cada espécie (0 a 10)
-  const scores = species.map((specie) => {
-    const baseScore = Math.floor(Math.random() * 10); // Aleatoriedade base
-    const attributeBonus = weights[specie] || 0; // Bônus dos atributos
-    return { specie, score: baseScore + Math.min(attributeBonus, 5) }; // Limita o bônus a 5 pra equilibrar
+  // 1. Obter espécies do elemento escolhido
+  let availableSpecies = speciesByElement[element] || [];
+
+  // 2. Se não houver espécies para o elemento (ar), distribuir entre todos
+  if (availableSpecies.length === 0) {
+    console.warn(`Elemento '${element}' sem espécies. Usando todos.`);
+    availableSpecies = ['Pidgly', 'Ignis', 'Kael', 'Leoracal', 'Draak', 'Drazraq', 'Owlberoth', 'Digitama', 'Virideer', 'Mawthorn', 'Reptiloide'];
+  }
+
+  // 3. Calcular pontuação para cada espécie disponível
+  const defaultAffinity = { attack: 1, defense: 1, speed: 1, magic: 1, life: 1 };
+  const scores = availableSpecies.map((specie) => {
+    const affinity = affinities[specie] || defaultAffinity;
+    let score = 0;
+    score += attack * (affinity.attack || 0);
+    score += defense * (affinity.defense || 0);
+    score += speed * (affinity.speed || 0);
+    score += magic * (affinity.magic || 0);
+    score += (life / 10) * (affinity.life || 0);
+    const randomBonus = Math.random() * score * 0.3;
+    return { specie, score: score + randomBonus, base: score };
   });
 
-  // Ordenar por pontuação (maior primeiro) e pegar a vencedora
+  // 4. Ordenar e escolher
   scores.sort((a, b) => b.score - a.score);
-  console.log(
-    `Elemento '${element}' - Espécies disponíveis: ${species.length} - Escolhida: ${scores[0].specie}`
-  );
-
-  return scores[0].specie; // Retorna a espécie com maior pontuação (sempre retorna algo)
+  console.log(`${element} - A${attack} D${defense} S${speed} M${magic} V${life/10} → ${scores[0].specie}`);
+  return scores[0].specie;
 }
 
 // Função para resetar o quiz
@@ -285,7 +290,7 @@ function showNameSelection(element) {
 }
 
 // Função para lidar com a criação do pet
-function handleCreatePet() {
+async function handleCreatePet() {
   const name = document.getElementById('pet-name').value.trim();
   if (!name) {
     alert('Por favor, insira um nome para o pet!');
@@ -306,7 +311,7 @@ function handleCreatePet() {
   stats.life *= 10;
 
   // Gerar espécie e raridade usando o elemento armazenado
-  const specie = generateSpecie(stats, selectedElement);
+  const specie = await generateSpecie(stats, selectedElement);
   const rarity = generateRarity();
 
   console.log(`Pet gerado: Espécie=${specie}, Elemento=${selectedElement}, Raridade=${rarity}`);

@@ -3,6 +3,9 @@ import { getElementMultiplier } from './elements.js';
 import { computeDisplayPower, computeBattlePower } from './moveEffectiveness.js';
 import { calculateXpGain } from './xpUtils.js';
 
+// Variável global para rastrear a origem da batalha (journey ou lair)
+let battleSource = 'journey';
+
 function closeWindow() {
   window.close();
 }
@@ -124,14 +127,19 @@ function getJourneyKey(base) {
   return pet && pet.petId ? `${base}_${pet.petId}` : base;
 }
 let itemsInfo = {};
+let currentItemsTab = 'consumables';
 let statusEffectsInfo = {};
+let movesData = [];
 let playerStatusEffects = [];
 let playerHealth = 100;
 let playerMaxHealth = 100;
 let enemyHealth = 100;
 let enemyMaxHealth = 100;
+let enemyBars = 1;
+let enemyCurrentBar = 1;
 let enemyEnergy = 100;
 let enemyAttributes = { attack: 5, defense: 5, magic: 5, speed: 5 };
+let enemyMoves = [];
 let currentTurn = 'player';
 let actionInProgress = false;
 let playerIdleSrc = '';
@@ -139,7 +147,7 @@ let playerAttackSrc = '';
 let enemyIdleSrc = '';
 let enemyAttackSrc = '';
 let enemyElement = 'puro';
-const enemyAttackCost = 10;
+// custo agora vem do próprio move selecionado
 let difficulty = 1;
 
 if (window.electronAPI?.getDifficulty) {
@@ -148,7 +156,7 @@ if (window.electronAPI?.getDifficulty) {
     .then(async (val) => {
       difficulty = typeof val === 'number' ? val : 1;
       if (difficulty === 1 && window.electronAPI?.setDifficulty) {
-        difficulty = 0.8;
+        difficulty = 1.5;
         try {
           await window.electronAPI.setDifficulty(difficulty);
         } catch (err) {
@@ -157,100 +165,113 @@ if (window.electronAPI?.getDifficulty) {
       }
     })
     .catch(() => {
-      difficulty = 1;
+      difficulty = 1.5;
     });
 }
 
 async function loadItemsInfo() {
   try {
-    const resp = await fetch('../../data/items.json');
-    const data = await resp.json();
+    const response = await fetch('../../data/items.json');
+    const itemsArray = await response.json();
+    // Converter array em objeto mapeado por ID
     itemsInfo = {};
-    data.forEach((it) => {
-      itemsInfo[it.id] = it;
-    });
-    updateItems();
-  } catch (err) {
-    console.error('Erro ao carregar info dos itens:', err);
+    if (Array.isArray(itemsArray)) {
+      itemsArray.forEach(item => {
+        if (item.id) {
+          itemsInfo[item.id] = item;
+        }
+      });
+    }
+    console.log('Items loaded:', Object.keys(itemsInfo).length);
+  } catch (error) {
+    console.error('Erro ao carregar items:', error);
+    itemsInfo = {};
   }
 }
 
 async function loadStatusEffectsInfo() {
   try {
-    const resp = await fetch('../../data/status-effects.json');
-    const data = await resp.json();
+    const response = await fetch('../../data/status-effects.json');
+    statusEffectsInfo = await response.json();
+  } catch (error) {
+    console.error('Erro ao carregar status effects:', error);
     statusEffectsInfo = {};
-    data.forEach((se) => {
-      statusEffectsInfo[se.id] = se;
-    });
-  } catch (err) {
-    console.error('Erro ao carregar info dos status effects:', err);
   }
 }
 
-function hideMenus() {
-  document.getElementById('moves-menu').style.display = 'none';
-  document.getElementById('items-menu').style.display = 'none';
+async function loadMovesData() {
+  try {
+    const response = await fetch('../../data/moves.json');
+    movesData = await response.json();
+  } catch (error) {
+    console.error('Erro ao carregar moves:', error);
+    movesData = [];
+  }
 }
 
 function showMessage(text) {
-  const box = document.getElementById('message-box');
-  if (!box) return;
-  box.textContent = text;
-  box.style.display = 'block';
+  const messageBox = document.getElementById('message-box');
+  if (!messageBox) return;
+  messageBox.textContent = text;
+  messageBox.style.opacity = '1';
   setTimeout(() => {
-    box.style.display = 'none';
+    messageBox.style.opacity = '0';
   }, 2000);
+}
+
+function hideMenus() {
+  const movesMenu = document.getElementById('moves-menu');
+  const itemsMenu = document.getElementById('items-menu');
+  if (movesMenu) movesMenu.style.display = 'none';
+  if (itemsMenu) itemsMenu.style.display = 'none';
 }
 
 function updateMoves() {
   const menu = document.getElementById('moves-menu');
   if (!menu) return;
   menu.innerHTML = '';
-  if (!pet || !Array.isArray(pet.moves) || pet.moves.length === 0) {
+  
+  if (!pet || !pet.moves || pet.moves.length === 0) {
     const span = document.createElement('span');
-    span.textContent = 'Você não aprendeu nenhum movimento! Tente fugir!';
+    span.textContent = 'Sem golpes disponíveis!';
     span.style.gridColumn = '1 / -1';
     span.style.textAlign = 'center';
     span.style.padding = '20px';
     menu.appendChild(span);
     return;
   }
+
   pet.moves.forEach((move) => {
     const btn = document.createElement('button');
-    btn.className = 'button small-button';
-    btn.title = move.description || move.name;
-    const cost = move.cost || 0;
-    const power = computeDisplayPower(move, pet);
-
-    const moveElement = Array.isArray(move.elements)
-      ? move.elements.includes(pet.element)
-        ? pet.element
-        : move.elements[0]
-      : move.element || pet.element || 'puro';
-    const mult = getElementMultiplier(moveElement, enemyElement);
-
-    let indicator = '';
-    let effectivenessClass = '';
-    if (mult > 1) {
-      indicator = '<span class="move-indicator up">▲</span>';
-      effectivenessClass = 'super-effective';
-    } else if (mult < 1) {
-      indicator = '<span class="move-indicator down">▼</span>';
-      effectivenessClass = 'not-effective';
+    btn.className = 'move-button';
+    
+    if (pet.energy < move.cost) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
     }
 
-    const moveName = document.createElement('div');
-    moveName.style.fontWeight = 'bold';
-    moveName.style.fontSize = '12px';
-    moveName.innerHTML = `${move.name} ${indicator}`;
-
     const moveInfo = document.createElement('div');
-    moveInfo.style.fontSize = '10px';
-    moveInfo.style.color = '#aaa';
-    moveInfo.textContent = `Poder: ${power} | Custo: ${cost}`;
+    moveInfo.className = 'move-info';
+    
+    const moveName = document.createElement('div');
+    moveName.className = 'move-name';
+    moveName.textContent = move.name;
+    
+    const moveDetails = document.createElement('div');
+    moveDetails.className = 'move-details';
+    moveDetails.textContent = `Poder: ${move.power} | Custo: ${move.cost}`;
+    
+    moveInfo.appendChild(moveName);
+    moveInfo.appendChild(moveDetails);
 
-    btn.appendChild(moveName);
+    let effectivenessClass = '';
+    if (enemyElement && move.element) {
+      const multiplier = getElementMultiplier(move.element, enemyElement);
+      if (multiplier > 1) effectivenessClass = 'effective';
+      else if (multiplier < 1) effectivenessClass = 'not-effective';
+    }
+
     btn.appendChild(moveInfo);
 
     if (effectivenessClass) {
@@ -265,20 +286,43 @@ function updateMoves() {
 }
 
 function updateItems() {
-  const menu = document.getElementById('items-menu');
-  if (!menu) return;
-  menu.innerHTML = '';
+  const listEl = document.getElementById('items-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  
   if (!pet || !pet.items || Object.keys(pet.items).length === 0) {
     const span = document.createElement('span');
     span.textContent = 'Você não tem itens! Tente fugir!';
-    span.style.gridColumn = '1 / -1';
     span.style.textAlign = 'center';
     span.style.padding = '20px';
-    menu.appendChild(span);
+    listEl.appendChild(span);
     return;
   }
 
-  const itemKeys = Object.keys(pet.items);
+  const items = pet.items;
+  const ids = Object.keys(items).filter((id) => items[id] > 0);
+  
+  // Categorizar itens
+  const categories = { equipments: [], consumables: [], eggs: [], others: [] };
+  ids.forEach((id) => {
+    const info = itemsInfo[id] || {};
+    if (info.type === 'equipment') categories.equipments.push(id);
+    else if (id.startsWith('egg')) categories.eggs.push(id);
+    else if (info.type === 'consumable' || (!info.type && (id.includes('Potion') || id === 'meat' || id === 'chocolate'))) categories.consumables.push(id);
+    else categories.others.push(id);
+  });
+  
+  const itemKeys = categories[currentItemsTab] || [];
+  
+  if (itemKeys.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.style.padding = '20px';
+    emptyMsg.style.textAlign = 'center';
+    emptyMsg.style.color = '#888';
+    emptyMsg.textContent = 'Sem itens nesta categoria';
+    listEl.appendChild(emptyMsg);
+    return;
+  }
   itemKeys.forEach((id, index) => {
     const qty = pet.items[id];
     if (qty <= 0) return;
@@ -293,11 +337,16 @@ function updateItems() {
     itemHeader.className = 'item-header';
 
     const img = document.createElement('img');
-    const iconPath = info.icon && info.icon.startsWith('../../') ? info.icon : `../../${info.icon || 'Assets/Shop/health-potion.png'}`;
+    // Garantir que o caminho esteja correto
+    let iconPath = info.icon || 'Assets/Shop/health-potion.png';
+    if (!iconPath.startsWith('../../') && !iconPath.startsWith('http')) {
+      iconPath = '../../' + iconPath;
+    }
     img.src = iconPath;
-    img.alt = info.name;
+    img.alt = info.name || id;
     img.className = 'item-icon';
     img.onerror = () => {
+      console.warn('Failed to load icon:', iconPath, 'for item:', id);
       img.src = '../../Assets/Shop/health-potion.png';
     };
 
@@ -415,7 +464,7 @@ function updateItems() {
       itemContainer.appendChild(divider);
     }
 
-    menu.appendChild(itemContainer);
+    listEl.appendChild(itemContainer);
   });
 }
 
@@ -468,6 +517,31 @@ function updateHealthBars() {
   const enemyFill = document.getElementById('enemy-health-fill');
   if (enemyFill) {
     const percent = (enemyHealth / enemyMaxHealth) * 100;
+    if (window.__BOSS_MULTIPLIERS__) {
+      // Cor de barra: roxa na 1ª, vermelha na 2ª+
+      enemyFill.style.backgroundColor = enemyCurrentBar === 1 ? '#800080' : '#B00020';
+      // Indicador "x2" na segunda barra (direita do preenchimento)
+      let multSpan = enemyFill.querySelector('.health-mult');
+      if (enemyCurrentBar > 1) {
+        if (!multSpan) {
+          multSpan = document.createElement('span');
+          multSpan.className = 'health-mult';
+          multSpan.textContent = 'x2';
+          multSpan.style.position = 'absolute';
+          multSpan.style.right = '4px';
+          multSpan.style.top = '50%';
+          multSpan.style.transform = 'translateY(-50%)';
+          multSpan.style.color = '#fff';
+          multSpan.style.fontWeight = '700';
+          multSpan.style.fontSize = '12px';
+          multSpan.style.textShadow = '0 1px 2px rgba(0,0,0,0.6)';
+          enemyFill.style.position = 'relative';
+          enemyFill.appendChild(multSpan);
+        }
+      } else {
+        if (multSpan) multSpan.remove();
+      }
+    }
     enemyFill.style.width = `${percent}%`;
   }
   const playerEnergy = pet ? pet.energy || 0 : 0;
@@ -522,10 +596,110 @@ function showHitEffect(target) {
   }, 300);
 }
 
+function selectEnemyMoves(element, level, rarity) {
+  if (!movesData || movesData.length === 0) {
+    console.warn('movesData não carregado, usando golpes padrão');
+    // Golpes padrão por elemento
+    const defaultMoves = {
+      terra: [
+        { name: 'Terremoto', power: 45, cost: 15, element: 'terra', elements: ['terra'], level: 1, type: 'physical' },
+        { name: 'Pedrada', power: 30, cost: 10, element: 'terra', elements: ['terra'], level: 1, type: 'physical' },
+        { name: 'Lâmina de Pedra', power: 35, cost: 12, element: 'terra', elements: ['terra'], level: 1, type: 'physical' }
+      ],
+      fogo: [
+        { name: 'Chamas', power: 40, cost: 15, element: 'fogo', elements: ['fogo'], level: 1, type: 'special' },
+        { name: 'Bola de Fogo', power: 35, cost: 12, element: 'fogo', elements: ['fogo'], level: 1, type: 'special' },
+        { name: 'Incineração', power: 45, cost: 18, element: 'fogo', elements: ['fogo'], level: 1, type: 'special' }
+      ],
+      agua: [
+        { name: 'Jato d\'Água', power: 40, cost: 15, element: 'agua', elements: ['agua'], level: 1, type: 'special' },
+        { name: 'Bolha', power: 30, cost: 10, element: 'agua', elements: ['agua'], level: 1, type: 'special' },
+        { name: 'Tsunami', power: 45, cost: 18, element: 'agua', elements: ['agua'], level: 1, type: 'special' }
+      ],
+      ar: [
+        { name: 'Tornado', power: 40, cost: 15, element: 'ar', elements: ['ar'], level: 1, type: 'special' },
+        { name: 'Ventania', power: 35, cost: 12, element: 'ar', elements: ['ar'], level: 1, type: 'special' },
+        { name: 'Corte Aéreo', power: 38, cost: 14, element: 'ar', elements: ['ar'], level: 1, type: 'physical' }
+      ],
+      puro: [
+        { name: 'Impacto', power: 35, cost: 12, element: 'puro', elements: ['puro'], level: 1, type: 'physical' },
+        { name: 'Energia Pura', power: 40, cost: 15, element: 'puro', elements: ['puro'], level: 1, type: 'special' },
+        { name: 'Rajada', power: 30, cost: 10, element: 'puro', elements: ['puro'], level: 1, type: 'physical' }
+      ]
+    };
+    return defaultMoves[element] || defaultMoves.puro;
+  }
+  
+  // Filtrar moves compatíveis com o elemento do inimigo
+  const compatibleMoves = movesData.filter(move => {
+    if (!move.elements || !Array.isArray(move.elements)) return false;
+    return move.elements.includes(element);
+  });
+  
+  if (compatibleMoves.length === 0) {
+    console.warn('Nenhum move compatível encontrado para elemento:', element, 'usando golpes padrão');
+    const defaultMoves = {
+      terra: [
+        { name: 'Terremoto', power: 45, cost: 15, element: 'terra', elements: ['terra'], level: 1, type: 'physical' },
+        { name: 'Pedrada', power: 30, cost: 10, element: 'terra', elements: ['terra'], level: 1, type: 'physical' }
+      ],
+      fogo: [
+        { name: 'Chamas', power: 40, cost: 15, element: 'fogo', elements: ['fogo'], level: 1, type: 'special' },
+        { name: 'Bola de Fogo', power: 35, cost: 12, element: 'fogo', elements: ['fogo'], level: 1, type: 'special' }
+      ],
+      agua: [
+        { name: 'Jato d\'Água', power: 40, cost: 15, element: 'agua', elements: ['agua'], level: 1, type: 'special' },
+        { name: 'Bolha', power: 30, cost: 10, element: 'agua', elements: ['agua'], level: 1, type: 'special' }
+      ],
+      ar: [
+        { name: 'Tornado', power: 40, cost: 15, element: 'ar', elements: ['ar'], level: 1, type: 'special' },
+        { name: 'Ventania', power: 35, cost: 12, element: 'ar', elements: ['ar'], level: 1, type: 'special' }
+      ],
+      puro: [
+        { name: 'Impacto', power: 35, cost: 12, element: 'puro', elements: ['puro'], level: 1, type: 'physical' },
+        { name: 'Rajada', power: 30, cost: 10, element: 'puro', elements: ['puro'], level: 1, type: 'physical' }
+      ]
+    };
+    return defaultMoves[element] || defaultMoves.puro;
+  }
+  
+  // Selecionar moves apropriados para o nível (até 3 moves mais fortes)
+  const suitableMoves = compatibleMoves
+    .filter(move => (move.level || 1) <= level)
+    .sort((a, b) => (b.power || 0) - (a.power || 0))
+    .slice(0, 3);
+  
+  console.log('Selected enemy moves:', suitableMoves.map(m => m.name));
+  return suitableMoves;
+}
+
 function initializeBattle() {
-  if (battleInitialized || !pet) return;
+  if (battleInitialized || !pet) {
+    console.log('Battle already initialized or no pet:', { battleInitialized, hasPet: !!pet });
+    return;
+  }
   battleInitialized = true;
+  console.log('Initializing battle with pet:', pet.name, 'speed:', pet.attributes?.speed, 'vs enemy speed:', enemyAttributes.speed);
   const lvl = pet.level || 1;
+
+  // Multiplicador baseado na raridade do pet (inimigos escalam com pets fortes)
+  const rarityMultiplier = {
+    'Comum': 1.0,
+    'Incomum': 1.10,
+    'Raro': 1.15,
+    'MuitoRaro': 1.25,
+    'Epico': 1.40,
+    'Lendario': 1.65
+  };
+  const petRarityMult = rarityMultiplier[pet.rarity] || 1.0;
+
+  // Selecionar movimentos do inimigo com base no elemento e nível
+  try {
+    enemyMoves = selectEnemyMoves(enemyElement, lvl, pet.rarity);
+  } catch (err) {
+    console.warn('Falha ao selecionar movimentos do inimigo:', err);
+    enemyMoves = [];
+  }
 
   // Escala de vida do inimigo
   // Para encontros normais: curva leve por nível
@@ -537,29 +711,49 @@ function initializeBattle() {
     if (window.__BOSS_MULTIPLIERS__.hp) {
       enemyMaxHealth = Math.round(enemyMaxHealth * window.__BOSS_MULTIPLIERS__.hp);
     }
+    // Boss com duas barras de vida
+    enemyBars = 2;
+    enemyCurrentBar = 1;
   } else {
-    enemyMaxHealth = 20 + lvl * 10;
+    // HP base aumentado e escalado com raridade: pets fortes enfrentam inimigos fortes
+    const baseHp = 60 + lvl * 20;
+    enemyMaxHealth = Math.round(baseHp * petRarityMult);
   }
   enemyHealth = enemyMaxHealth;
 
+  // Atributos do inimigo escalados com raridade do pet
+  // Reduzir atributos base para evitar one-shot
+  const baseAttack = Math.round((lvl * 2.0 + 3) * petRarityMult);
+  const baseDef = Math.round((lvl * 2.0 + 2) * petRarityMult);
+  const baseMagic = Math.round((lvl * 2.0 + 3) * petRarityMult);
+  const baseSpeed = Math.round((lvl * 1.2 + 1) * petRarityMult);
+
   enemyAttributes = {
-    attack: lvl * 2,
-    defense: lvl,
-    magic: lvl * 2,
-    speed: lvl * 1.5,
+    attack: baseAttack,
+    defense: baseDef,
+    magic: baseMagic,
+    speed: baseSpeed,
   };
+  
   // Ajuste de defesa do boss: considera defesa do jogador para escalar
   if (window.__BOSS_MULTIPLIERS__) {
-    const baseDef = Math.round(lvl * 1.5 + (pet.attributes?.defense || 0) * 0.6);
-    enemyAttributes.defense = baseDef;
+    // Reduzir ainda mais os atributos do boss
+    enemyAttributes.attack = Math.round(baseAttack * 0.7);
+    enemyAttributes.magic = Math.round(baseMagic * 0.7);
+    enemyAttributes.speed = Math.round(baseSpeed * 0.9);
+    
+    const bossDef = Math.round(lvl * 1.2 + (pet.attributes?.defense || 0) * 0.4);
+    enemyAttributes.defense = bossDef;
     if (window.__BOSS_MULTIPLIERS__.defense) {
       enemyAttributes.defense = Math.round(enemyAttributes.defense * window.__BOSS_MULTIPLIERS__.defense);
     }
   }
   if ((pet.attributes?.speed || 0) < enemyAttributes.speed) {
+    console.log('Enemy is faster! Starting enemy turn');
     currentTurn = 'enemy';
     setTimeout(enemyAction, 800);
   } else {
+    console.log('Player is faster! Starting player turn');
     currentTurn = 'player';
   }
 }
@@ -582,20 +776,46 @@ function applyStatusEffects() {
 }
 
 function generateReward() {
-  const types = ['experience', 'kadirPoints', 'coins', 'item'];
-  const choice = types[Math.floor(Math.random() * types.length)];
+  // Probabilidades ajustadas para reduzir item (ovo) e kadirPoints em modo jornada
+  const weightedTypes = [
+    { t: 'experience', w: 0.50 },
+    { t: 'kadirPoints', w: 0.10 }, // reduzida de 0.25 para 0.10
+    { t: 'coins', w: 0.35 }, // aumentada para compensar
+    { t: 'item', w: 0.05 }, // reduz chance de item (e consequentemente de ovo)
+  ];
+  let totalW = weightedTypes.reduce((s, x) => s + x.w, 0);
+  let r = Math.random() * totalW;
+  let choice = weightedTypes[0].t;
+  for (const x of weightedTypes) {
+    r -= x.w;
+    if (r <= 0) { choice = x.t; break; }
+  }
   if (choice === 'experience') {
     return { experience: Math.floor(Math.random() * 10) + 5 };
   }
   if (choice === 'kadirPoints') {
-    return { kadirPoints: Math.floor(Math.random() * 5) + 1 };
+    return { kadirPoints: Math.floor(Math.random() * 3) + 1 }; // reduzido de 1-5 para 1-3
   }
   if (choice === 'coins') {
     return { coins: Math.floor(Math.random() * 5) + 1 };
   }
   const ids = Object.keys(itemsInfo);
   if (ids.length === 0) return { coins: 1 };
-  const id = ids[Math.floor(Math.random() * ids.length)];
+  // Ao escolher item, reduzir ainda mais a probabilidade de ovos
+  const isEgg = (id) => /^egg/i.test(id) || /ovo/i.test(id) || /egg/i.test(itemsInfo[id]?.name || '');
+  const nonEggs = ids.filter((id) => !isEgg(id));
+  const eggs = ids.filter((id) => isEgg(id));
+  if (nonEggs.length === 0 && eggs.length === 0) return { coins: 1 };
+  // 90% chance de não-ovo, 10% de ovo
+  let pickPool;
+  if (nonEggs.length > 0 && Math.random() < 0.9) {
+    pickPool = nonEggs;
+  } else if (eggs.length > 0) {
+    pickPool = eggs;
+  } else {
+    pickPool = nonEggs.length ? nonEggs : eggs;
+  }
+  const id = pickPool[Math.floor(Math.random() * pickPool.length)];
   return { item: id, qty: 1 };
 }
 
@@ -640,7 +860,12 @@ function showVictoryModal(reward, xp) {
   modal.style.display = 'flex';
   closeBtn.onclick = () => {
     modal.style.display = 'none';
-    window.electronAPI.send('open-journey-mode-window');
+    // Abre a janela correta baseada na origem da batalha
+    if (battleSource === 'lair') {
+      window.electronAPI.send('open-lair-mode-window');
+    } else {
+      window.electronAPI.send('open-journey-mode-window');
+    }
     closeWindow();
   };
 }
@@ -652,7 +877,12 @@ function showDefeatModal() {
   modal.style.display = 'flex';
   closeBtn.onclick = () => {
     modal.style.display = 'none';
-    window.electronAPI.send('open-tray-window');
+    // Abre a janela correta baseada na origem da batalha
+    if (battleSource === 'lair') {
+      window.electronAPI.send('open-lair-mode-window');
+    } else {
+      window.electronAPI.send('open-tray-window');
+    }
     closeWindow();
   };
 }
@@ -684,11 +914,13 @@ function concludeBattle(playerWon) {
 }
 
 function endPlayerTurn() {
+  console.log('End player turn, enemy health:', enemyHealth);
   actionInProgress = false;
   applyStatusEffects();
   if (playerHealth <= 0) {
     concludeBattle(false);
   } else {
+    console.log('Setting turn to enemy, calling enemyAction in 800ms');
     currentTurn = 'enemy';
     setTimeout(enemyAction, 800);
   }
@@ -753,7 +985,14 @@ function performPlayerMove(move) {
     showHitEffect('enemy');
     updateHealthBars();
     if (enemyHealth <= 0) {
-      concludeBattle(true);
+      if (window.__BOSS_MULTIPLIERS__ && enemyCurrentBar < enemyBars) {
+        enemyCurrentBar += 1;
+        enemyHealth = enemyMaxHealth;
+        updateHealthBars();
+        endPlayerTurn();
+      } else {
+        concludeBattle(true);
+      }
     } else {
       endPlayerTurn();
     }
@@ -761,13 +1000,52 @@ function performPlayerMove(move) {
 }
 
 function enemyAction() {
+  console.log('enemyAction called! currentTurn:', currentTurn, 'actionInProgress:', actionInProgress);
+  console.log('Enemy moves:', enemyMoves, 'Enemy energy:', enemyEnergy);
   actionInProgress = true;
   const enemyImg = document.getElementById('enemy-pet');
+
+  // Escolher move com base em energia e situação de HP
+  const availableMoves = enemyMoves.filter((m) => (m.cost || 0) <= enemyEnergy);
+  console.log('Available moves after energy filter:', availableMoves);
+  let selectedMove = null;
+  if (availableMoves.length > 0) {
+    if (enemyHealth < enemyMaxHealth * 0.5) {
+      const sorted = [...availableMoves].sort((a, b) => (b.power || 0) - (a.power || 0));
+      const top = sorted.slice(0, Math.min(2, sorted.length));
+      selectedMove = top[Math.floor(Math.random() * top.length)];
+    } else {
+      const total = availableMoves.reduce((sum, m) => sum + (m.power || 10), 0);
+      let rnd = Math.random() * total;
+      for (const m of availableMoves) {
+        rnd -= (m.power || 10);
+        if (rnd <= 0) { selectedMove = m; break; }
+      }
+    }
+  }
+
+  if (!selectedMove) {
+    console.log('No move selected! Resting...');
+    // Sem energia: descansar
+    enemyEnergy = Math.min(100, enemyEnergy + 25);
+    showMessage('Inimigo está descansando...');
+    updateHealthBars();
+    setTimeout(() => {
+      currentTurn = 'player';
+      actionInProgress = false;
+      applyStatusEffects();
+    }, 800);
+    return;
+  }
+
+  console.log('Selected move:', selectedMove.name);
+  showMessage(`Inimigo usou ${selectedMove.name}!`);
   playAttackAnimation(enemyImg, enemyIdleSrc, enemyAttackSrc, () => {
-    enemyEnergy = Math.max(0, enemyEnergy - enemyAttackCost);
+    const cost = selectedMove.cost || 0;
+    enemyEnergy = Math.max(0, enemyEnergy - cost);
     updateHealthBars();
 
-    const accuracy = 0.9;
+    const accuracy = typeof selectedMove.accuracy === 'number' ? selectedMove.accuracy : 0.9;
     const speedDiff = (pet.attributes?.speed || 0) - (enemyAttributes.speed || 0);
     const dodge = Math.max(0, Math.min(0.3, speedDiff / 100));
     if (Math.random() > accuracy * (1 - dodge)) {
@@ -778,35 +1056,51 @@ function enemyAction() {
       return;
     }
 
-    // Simulate enemy moves
-    const roll = Math.random();
-    let movePower = 10; // Normal attack
-    let moveName = 'Ataque Normal';
-
-    if (roll < 0.2) {
-      movePower = 5;
-      moveName = 'Ataque Rápido';
-      showMessage(`Inimigo usou ${moveName}!`);
-    } else if (roll > 0.8) {
-      movePower = 15;
-      moveName = 'Ataque Poderoso';
-      showMessage(`Inimigo usou ${moveName}!`);
-    }
-
     const enemyPetStub = { level: (window.__ENEMY_LEVEL || (pet?.level || 1)), element: enemyElement };
-    const enemyMove = {
-      power: movePower,
-      elements: [enemyElement],
-      rarity: roll < 0.2 ? 'Comum' : roll > 0.8 ? 'Raro' : 'Incomum',
-      effect: 'nenhum',
-      species: [],
-    };
-    const base = computeBattlePower(enemyMove, enemyPetStub) + enemyAttributes.attack * 0.5;
-    const mult = getElementMultiplier(enemyElement, pet.element || 'puro');
+    const base = computeBattlePower(selectedMove, enemyPetStub);
+    const isSpecial = (selectedMove.type || 'physical') === 'special';
+    const atkStat = isSpecial ? enemyAttributes.magic : enemyAttributes.attack;
+    let mult = getElementMultiplier(enemyElement, pet.element || 'puro');
+    // Clamp de vantagem elemental na jornada para evitar picos
+    mult = Math.min(mult, 1.2);
     const defStat = pet.attributes?.defense || 0;
-    const dmgMult = (window.__BOSS_MULTIPLIERS__ && window.__BOSS_MULTIPLIERS__.dmgOut) ? window.__BOSS_MULTIPLIERS__.dmgOut : 1;
-    const scaled = base * mult * difficulty * dmgMult * (100 / (100 + defStat));
-    const dmg = Math.max(1, Math.round(scaled));
+    
+    // Reduzir drasticamente o multiplicador de dano do boss
+    let dmgMult = difficulty;
+    if (window.__BOSS_MULTIPLIERS__ && window.__BOSS_MULTIPLIERS__.dmgOut) {
+      dmgMult = window.__BOSS_MULTIPLIERS__.dmgOut * 0.4; // Reduz para 40% do valor original
+    } else {
+      dmgMult = dmgMult * 0.6; // Reduz para 60% em encontros normais
+    }
+    
+    const scaled = (base + atkStat * 0.3) * mult * dmgMult * (100 / (100 + defStat));
+    let dmg = Math.max(1, Math.round(scaled));
+    
+    // Mitigação adicional para boss
+    if (window.__BOSS_MULTIPLIERS__) {
+      // Boss: máximo de 20% da vida por golpe
+      const bossCap = Math.max(5, Math.ceil(playerMaxHealth * 0.20));
+      dmg = Math.min(dmg, bossCap);
+      // Redução adicional de 30%
+      dmg = Math.round(dmg * 0.7);
+    } else {
+      // Mitigação para evitar "one-shot" em encontros normais
+      const rarityMitigation = {
+        'Comum': 0.70,
+        'Incomum': 0.65,
+        'Raro': 0.60,
+        'MuitoRaro': 0.55,
+        'Epico': 0.50,
+        'Lendario': 0.45,
+      };
+      const mit = rarityMitigation[pet.rarity] || 0.70;
+      dmg = Math.round(dmg * mit);
+      // Teto: no máximo 25% da vida máxima por golpe
+      const cap = Math.max(5, Math.ceil(playerMaxHealth * 0.25));
+      dmg = Math.min(dmg, cap);
+    }
+    
+    console.log('Enemy damage:', dmg, 'from', playerHealth, '/', playerMaxHealth);
     playerHealth = Math.max(0, playerHealth - dmg);
     showHitEffect('player');
     updateHealthBars();
@@ -833,8 +1127,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const enemyElementImg = document.getElementById('enemy-element');
   const playerLevelTxt = document.getElementById('player-level');
   const enemyLevelTxt = document.getElementById('enemy-level');
-  loadItemsInfo();
-  loadStatusEffectsInfo().then(updateStatusIcons);
+  
+  // Carregar dados antes de iniciar
+  Promise.all([
+    loadItemsInfo(),
+    loadStatusEffectsInfo(),
+    loadMovesData()
+  ]).then(() => {
+    console.log('All data loaded, ready for battle');
+    updateStatusIcons();
+  }).catch(err => {
+    console.error('Error loading data:', err);
+  });
 
   document.getElementById('close-journey-scene')?.addEventListener('click', closeWindow);
   document.getElementById('back-journey-scene')?.addEventListener('click', () => {
@@ -871,6 +1175,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (menu.style.display === 'none' || menu.style.display === '') {
       hideMenus();
+      // Inicializa abas
+      const tabs = menu.querySelectorAll('.items-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentItemsTab = tab.dataset.tab;
+          updateItems();
+        });
+      });
+      // ativa aba padrão Consumíveis
+      const defaultTab = menu.querySelector('.items-tab[data-tab="consumables"]');
+      if (defaultTab) {
+        tabs.forEach(t => t.classList.remove('active'));
+        defaultTab.classList.add('active');
+        currentItemsTab = 'consumables';
+      }
       updateItems();
       menu.style.display = 'flex';
     } else {
@@ -881,6 +1202,9 @@ document.addEventListener('DOMContentLoaded', () => {
   runBtn?.addEventListener('click', attemptFlee);
 
   window.electronAPI.on('scene-data', async (event, data) => {
+    // Armazena a origem da batalha
+    battleSource = data.source || 'journey';
+    
     // Atualiza o título da janela com base na origem
     const sceneTitle = document.getElementById('scene-title');
     if (sceneTitle) {
@@ -907,12 +1231,72 @@ document.addEventListener('DOMContentLoaded', () => {
       playerIdleSrc = await computeIdleSrc(data.playerPet);
       playerAttackSrc = await computeAttackSrc(data.playerPet);
       player.src = playerIdleSrc;
+      try {
+        const speciesInfo = await window.electronAPI.invoke('get-species-info');
+        const speciesList = speciesInfo?.specieData || speciesInfo || {};
+        const metersPerPx = 150; // 3m = 450px → 1m = 150px
+        const deriveRace = (rel) => {
+          if (!rel) return null;
+          const normalized = rel.replace(/\\/g, '/');
+          const parts = normalized.split('/');
+          for (let i = 0; i < parts.length; i++) {
+            if (/idle\.(gif|png)$/i.test(parts[i])) {
+              return parts[i - 1] || null;
+            }
+          }
+          const last = parts[parts.length - 1];
+          return last && !/\.(gif|png)$/i.test(last) ? last : (parts[parts.length - 2] || null);
+        };
+        const playerRace = deriveRace(data.playerPet);
+        let playerSize = null;
+        for (const [specieName, meta] of Object.entries(speciesList)) {
+          if (meta && (meta.race === playerRace || meta.race?.toLowerCase() === playerRace?.toLowerCase())) {
+            playerSize = typeof meta.sizeMeters === 'number' ? meta.sizeMeters : null;
+            break;
+          }
+        }
+        if (typeof playerSize === 'number' && playerSize > 0) {
+          player.style.width = `${Math.round(playerSize * metersPerPx)}px`;
+        }
+      } catch (err) {
+        console.warn('Falha ao aplicar tamanho do player-pet:', err);
+      }
     }
     if (data.enemyPet && enemy) {
       enemyIdleSrc = await computeIdleSrc(data.enemyPet);
       enemyAttackSrc = await computeAttackSrc(data.enemyPet);
       enemy.src = enemyIdleSrc;
       enemyEnergy = 100;
+      try {
+        const speciesInfo = await window.electronAPI.invoke('get-species-info');
+        const speciesList = speciesInfo?.specieData || speciesInfo || {};
+        const metersPerPx = 150; // 3m = 450px → 1m = 150px
+        const deriveRace = (rel) => {
+          if (!rel) return null;
+          const normalized = rel.replace(/\\/g, '/');
+          const parts = normalized.split('/');
+          for (let i = 0; i < parts.length; i++) {
+            if (/idle\.(gif|png)$/i.test(parts[i])) {
+              return parts[i - 1] || null;
+            }
+          }
+          const last = parts[parts.length - 1];
+          return last && !/\.(gif|png)$/i.test(last) ? last : (parts[parts.length - 2] || null);
+        };
+        const enemyRace = deriveRace(data.enemyPet);
+        let enemySize = null;
+        for (const [specieName, meta] of Object.entries(speciesList)) {
+          if (meta && (meta.race === enemyRace || meta.race?.toLowerCase() === enemyRace?.toLowerCase())) {
+            enemySize = typeof meta.sizeMeters === 'number' ? meta.sizeMeters : null;
+            break;
+          }
+        }
+        if (typeof enemySize === 'number' && enemySize > 0) {
+          enemy.style.width = `${Math.round(enemySize * metersPerPx)}px`;
+        }
+      } catch (err) {
+        console.warn('Falha ao aplicar tamanho do enemy-pet:', err);
+      }
     }
 
     if (data.playerPet && playerFront) {

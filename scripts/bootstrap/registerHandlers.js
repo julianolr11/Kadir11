@@ -46,12 +46,15 @@ function registerAllHandlers(config) {
     createNestsWindow,
     createHatchWindow,
     createBestiaryWindow,
+    createPetManagerWindow,
+    createMiniWindow,
     updateNestsPosition,
     closeNestsWindow,
     getStoreWindow,
     getItemsWindow,
     getHatchWindow,
     getBestiaryWindow,
+    getMiniWindow,
     closeAllGameWindows;
   let xpUtils;
   let registerWindowHandlers,
@@ -63,6 +66,7 @@ function registerAllHandlers(config) {
     registerAssetsHandlers,
     registerLifecycleHandlers,
     registerBestiaryHandlers,
+    registerPetManagerHandlers,
     setupWindowPositioningHandlers,
     setupNestHandlers,
     setupBattleMechanicsHandlers;
@@ -103,12 +107,15 @@ function registerAllHandlers(config) {
       createNestsWindow,
       createHatchWindow,
       createBestiaryWindow,
+      createPetManagerWindow,
+      createMiniWindow,
       updateNestsPosition,
       closeNestsWindow,
       getStoreWindow,
       getItemsWindow,
       getHatchWindow,
       getBestiaryWindow,
+      getMiniWindow,
       closeAllGameWindows,
     } = config.windows);
     ({ xpUtils } = config.xp);
@@ -122,6 +129,7 @@ function registerAllHandlers(config) {
       registerAssetsHandlers,
       registerLifecycleHandlers,
       registerBestiaryHandlers,
+      registerPetManagerHandlers,
       setupWindowPositioningHandlers,
       setupNestHandlers,
       setupBattleMechanicsHandlers,
@@ -316,6 +324,17 @@ function registerAllHandlers(config) {
     electron: { ipcMain, BrowserWindow },
     managers: { appState, petManager },
     store: { store }
+  });
+
+  // 14. Pet Manager (modo desenvolvedor)
+  registerPetManagerHandlers({ windows: { createPetManagerWindow } });
+
+  // 15. Mini Mode (barra lateral)
+  const { registerMiniModeHandlers } = require('../handlers/miniModeHandlers');
+  registerMiniModeHandlers({
+    windows: { createMiniWindow, getMiniWindow },
+    managers: { appState, windowManager },
+    stateAccessors: { getItems },
   });
 
   return { resetTimers };

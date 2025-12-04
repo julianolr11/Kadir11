@@ -9,6 +9,7 @@ module.exports = {
   registerAssetsHandlers: require('./assetsHandlers').registerAssetsHandlers,
   registerLifecycleHandlers: require('./lifecycleHandlers').registerLifecycleHandlers,
   registerBestiaryHandlers: require('./bestiaryHandlers').registerBestiaryHandlers,
+  registerPetManagerHandlers: require('./petManagerHandlers').registerPetManagerHandlers,
   setupWindowPositioningHandlers: require('./windowPositioningHandlers')
     .setupWindowPositioningHandlers,
   setupNestHandlers: require('./nestHandlers').setupNestHandlers,

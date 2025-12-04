@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
   equipModal = document.getElementById('equipment-modal');
   equipItemsContainer = document.getElementById('equip-items-container');
   unequipButton = document.getElementById('unequip-item-button');
-  closeEquipButton = document.getElementById('close-equip-modal');
+  closeEquipButton = document.getElementById('close-equip-x');
   document.getElementById('status-equipped-item')?.addEventListener('click', openEquipModal);
   unequipButton?.addEventListener('click', () => {
     window.electronAPI.send('unequip-item');

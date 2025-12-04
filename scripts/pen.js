@@ -11,6 +11,8 @@ let sprites = [];
 let lastTime = 0;
 let animationId = null;
 let pet = null;
+let lastSentSize = null; // evita spam de IPC ao redimensionar
+let mustRedrawPen = true; // redesenha o cenário apenas quando necessário
 
 function hasEggInInventory() {
   if (!pet || !pet.items) return false;
@@ -38,7 +40,15 @@ function drawPen() {
     width: Math.round(w * scale) + border,
     height: Math.round(h * scale) + border,
   };
-  window.electronAPI?.send('resize-pen-window', size);
+  // Envia IPC apenas quando o tamanho mudou de fato
+  if (
+    !lastSentSize ||
+    lastSentSize.width !== size.width ||
+    lastSentSize.height !== size.height
+  ) {
+    window.electronAPI?.send('resize-pen-window', size);
+    lastSentSize = { ...size };
+  }
   penCtx.clearRect(0, 0, w, h);
   for (let y = 0; y < dims.h + 2; y++) {
     for (let x = 0; x < dims.w + 2; x++) {
@@ -74,7 +84,10 @@ function drawPen() {
   }
 }
 
-tileset.onload = drawPen;
+tileset.onload = () => {
+  mustRedrawPen = true;
+  drawPen();
+};
 
 function drawNests(count) {
   if (!nestsContainer) return;
@@ -128,7 +141,10 @@ function updateSprites(dt) {
 
 function render() {
   if (!penCtx) return;
-  drawPen();
+  if (mustRedrawPen) {
+    drawPen();
+    mustRedrawPen = false;
+  }
   sprites.forEach((sp) => {
     sp.img.style.left = sp.x + 'px';
     sp.img.style.top = sp.y + 'px';
@@ -176,6 +192,7 @@ function loadPen() {
     Promise.all([window.electronAPI.getPenInfo(), window.electronAPI.listPets()]).then(
       ([info, pets]) => {
         penInfo = info;
+        mustRedrawPen = true;
         drawPen();
         drawPets(pets);
       }

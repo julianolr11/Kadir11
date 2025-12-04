@@ -9,6 +9,18 @@
     <title>Kadir11 - Itens</title>
     <link rel="stylesheet" href="../../styles/main.css">
     <style>
+        @keyframes rarityGlow {
+            0% { filter: brightness(1); transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { filter: brightness(1.8); transform: scale(1.02); box-shadow: 0 0 30px rgba(255,255,255,0.8); }
+            100% { filter: brightness(1); transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+        }
+
+        @keyframes textPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         html,
         body {
             width: 100%;
@@ -189,27 +201,27 @@
 
         /* Cores de raridade para nomes dos itens */
         .item-name.rarity-Comum {
-            color: #a0a0a0;
+            color: #c0c0c0; /* Cinza claro */
         }
 
         .item-name.rarity-Incomum {
-            color: #2ecc71;
+            color: #808080; /* Cinza escuro */
         }
 
         .item-name.rarity-Raro {
-            color: #3498db;
+            color: #90ee90; /* Verde claro */
         }
 
         .item-name.rarity-MuitoRaro {
-            color: #1abc9c;
+            color: #228b22; /* Verde escuro */
         }
 
         .item-name.rarity-Epico {
-            color: #9b59b6;
+            color: #9b59b6; /* Roxo */
         }
 
         .item-name.rarity-Lendario {
-            color: #f39c12;
+            color: #ffd700; /* Amarelo */
         }
 
         .info-icon {
@@ -503,6 +515,11 @@
         #essence-modal-close:hover {
             background: linear-gradient(135deg, #ff5555, #dd4444);
             transform: scale(1.05);
+        }
+
+        /* Animação de transição de raridade para cards */
+        .pet-rarity-transition {
+            animation: rarityGlow 2s ease-in-out;
         }
     </style>
 </head>

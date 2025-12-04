@@ -179,17 +179,17 @@ function craftEssence(store, fromRarity) {
 
 /**
  * Verifica se há uma essência válida para usar no pet
- * (essência deve ter tier maior que o pet atual E ter pelo menos 10 unidades)
+ * Regra: essência deve ter tier maior que o pet atual e ter pelo menos 1 unidade
  */
 function getValidEssenceForPet(store, pet) {
   const petRarity = pet.rarity || 'Comum';
   const petTier = ESSENCE_TIERS[petRarity];
   const inventory = getEssenceInventory(store);
 
-  // Procura por essências de tier superior ao pet com pelo menos 10 unidades
+  // Procura por essências de tier superior ao pet com pelo menos 1 unidade
   for (let i = petTier + 1; i < ESSENCE_NAMES.length; i++) {
     const rarity = ESSENCE_NAMES[i];
-    if ((inventory[rarity] || 0) >= 10) {
+    if ((inventory[rarity] || 0) >= 1) {
       return rarity;
     }
   }
@@ -199,7 +199,7 @@ function getValidEssenceForPet(store, pet) {
 
 /**
  * Usa uma essência em um pet (evolui raridade)
- * Consome 10 essências para evoluir
+ * Consome 1 essência para evoluir o pet diretamente para a raridade da essência
  */
 function useEssenceOnPet(store, pet, essenceRarity) {
   const petRarity = pet.rarity || 'Comum';
@@ -219,12 +219,12 @@ function useEssenceOnPet(store, pet, essenceRarity) {
 
   const inventory = getEssenceInventory(store);
   
-  if ((inventory[essenceRarity] || 0) < 10) {
-    return { success: false, error: 'Você precisa de 10 essências para usar' };
+  if ((inventory[essenceRarity] || 0) < 1) {
+    return { success: false, error: 'Você precisa de 1 essência para usar' };
   }
 
-  // Remove 10 essências
-  inventory[essenceRarity] -= 10;
+  // Remove 1 essência
+  inventory[essenceRarity] -= 1;
   store.set('essences', inventory);
 
   // Retorna a nova raridade do pet

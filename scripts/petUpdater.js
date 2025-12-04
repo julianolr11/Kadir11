@@ -17,7 +17,7 @@ function resetTimers() {
 function startPetUpdater(getCurrentPet) {
   setInterval(async () => {
     const currentPet = getCurrentPet();
-    console.log('setInterval rodando, currentPet:', currentPet ? 'definido' : 'null');
+    // Log removido: só loga quando há pet selecionado
     if (currentPet) {
       const now = Date.now();
 
@@ -25,16 +25,17 @@ function startPetUpdater(getCurrentPet) {
       const elapsedHappinessSeconds = Math.floor((now - lastHappinessUpdate) / 1000);
       const elapsedRecoverySeconds = Math.floor((now - lastRecovery) / 1000);
 
-      console.log(
-        'Tempo decorrido (segundos) - Hunger:',
-        elapsedHungerSeconds,
-        'Happiness:',
-        elapsedHappinessSeconds
-      );
-      console.log('Valores antes do decaimento:', {
-        hunger: currentPet.hunger,
-        happiness: currentPet.happiness,
-      });
+      // Logs de debug comentados (descomente se precisar debugar)
+      // console.log(
+      //   'Tempo decorrido (segundos) - Hunger:',
+      //   elapsedHungerSeconds,
+      //   'Happiness:',
+      //   elapsedHappinessSeconds
+      // );
+      // console.log('Valores antes do decaimento:', {
+      //   hunger: currentPet.hunger,
+      //   happiness: currentPet.happiness,
+      // });
 
       const hungerDecay = Math.floor(elapsedHungerSeconds / 180);
       const happinessDecay = Math.floor(elapsedHappinessSeconds / 300);
@@ -142,9 +143,8 @@ function startPetUpdater(getCurrentPet) {
           }
         });
       }
-    } else {
-      console.log('Nenhum pet selecionado (currentPet é null)');
     }
+    // Log removido: não precisa logar quando não há pet selecionado
   }, 1000);
 }
 

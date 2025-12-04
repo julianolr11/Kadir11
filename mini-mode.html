@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kadir Mini</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: transparent;
+      overflow: hidden;
+      user-select: none;
+      -webkit-app-region: drag;
+    }
+
+    #mini-container {
+      width: 50px;
+      height: 350px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-left: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 8px 6px;
+      gap: 8px;
+      position: relative;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .menu-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      backdrop-filter: blur(5px);
+      -webkit-app-region: no-drag;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .menu-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .pet-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .stat-item {
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transform: rotate(-90deg);
+      white-space: nowrap;
+      text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .stat-value {
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 2px 4px rgba(0, 0, 0, 0.8);
+      transform: rotate(-90deg);
+      white-space: nowrap;
+    }
+
+    #pet-element-img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+      flex-shrink: 0;
+      transform: rotate(-90deg);
+    }
+
+    .pet-name-rotated {
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 2px 4px rgba(0, 0, 0, 0.8);
+      transform: rotate(-90deg);
+      white-space: nowrap;
+      writing-mode: horizontal-tb;
+      width:auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+
+    .menu-dropdown {
+      position: fixed;
+      top: 50px;
+      right: 55px;
+      background: rgba(20, 20, 30, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      min-width: 200px;
+      backdrop-filter: blur(10px);
+      -webkit-app-region: no-drag;
+    }
+
+    .menu-dropdown.active {
+      display: flex;
+    }
+
+    .menu-item {
+      padding: 12px 16px;
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+    }
+
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-item:hover {
+      background: rgba(102, 126, 234, 0.3);
+      color: white;
+      padding-left: 20px;
+    }
+
+    .menu-item:active {
+      background: rgba(102, 126, 234, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="mini-container">
+    <button class="menu-btn" id="menu-btn" title="Menu">☰</button>
+
+    <div class="pet-stats">
+      <div class="stat-item">
+        <div class="stat-label">Lvl</div>
+        <div class="stat-value" id="pet-level">1</div>
+      </div>
+
+      <div class="stat-item">
+        <div class="pet-name-rotated" id="pet-name-rotated">Eggsy</div>
+      </div>
+
+      <img id="pet-element-img" src="Assets/Elements/terra.png" alt="Elemento">
+    </div>
+
+    <div class="menu-dropdown" id="menu-dropdown">
+      <div class="menu-item" data-action="bestiary-pet">Bestiário</div>
+      <div class="menu-item" data-action="open-status">Status</div>
+      <div class="menu-item" data-action="gift-pet">Presentes</div>
+      <div class="menu-item" data-action="train-pet">Treinar</div>
+      <div class="menu-item" data-action="battle-pet">Batalhar</div>
+      <div class="menu-item" data-action="itens-pet">Itens</div>
+      <div class="menu-item" data-action="store-pet">Loja</div>
+      <div class="menu-item" data-action="load-pet">Pets</div>
+      <div class="menu-item" data-action="open-mini-mode">Modo Normal</div>
+      <div class="menu-item" data-action="exit">Sair</div>
+    </div>
+  </div>
+
+  <script src="scripts/mini-mode.js" type="module"></script>
+</body>
+</html>
+
+
+
