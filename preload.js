@@ -58,6 +58,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'mark-creature-seen',
       'mark-creature-owned',
       'open-items-window', // adicionado para corrigir erro de canal não permitido
+      'open-pet-manager',
       'use-move',
       'use-bravura',
       'update-health',
@@ -74,6 +75,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'craft-essence', // Fazer craft de essências
       'open-essence-window', // Abrir janela de inventário de essências
       'close-essence-window', // Fechar janela de inventário de essências
+      'open-mini-mode', // Abrir mini-mode
+      'close-mini-mode', // Fechar mini-mode
+      'mini-state-changed', // Mudança de estado do mini-mode (expanded/collapsed)
+      'request-pet-data', // Solicitar dados do pet para mini-mode
+      'set-ignore-mouse-events', // Controlar click-through do mini-mode
+      'resize-mini-mode', // Redimensionar mini-mode
+      'set-mini-mode-layout', // Transformar layout para mini-mode
+      'toggle-mini-mode', // Ativar/desativar mini-mode
+      'mini-menu-action', // Ação do menu do mini-mode
+      'open-mini-menu', // Abrir janela de menu do mini-mode
     ];
     if (validChannels.includes(channel)) {
       console.log(`Enviando canal IPC: ${channel}`, data);
@@ -97,6 +108,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'nest-updated',
       'nests-data-updated',
       'bestiary-updated',
+      'stat-updated', // Atualização de stat individual para mini-mode
       'activate-status-tab',
       'gift-redeemed', // Presente resgatado com sucesso
       'gift-error', // Erro ao resgatar presente
@@ -106,6 +118,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'essence-reward', // Recompensa de essência ao deletar pet
       'craft-essence-error', // Erro ao fazer craft
       'pet-deleted', // Pet deletado (broadcast)
+      'species-updated', // Espécies atualizadas (Dev Mode)
+      'nest-full-error', // Ninhos cheios ao tentar chocar ovo
+      'mini-menu-action', // Ação do menu mini-mode
     ];
     if (validChannels.includes(channel)) {
       console.log(`Registrando listener para o canal: ${channel}`);
@@ -214,6 +229,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       'get-valid-essence-for-pet',
       'get-all-pets',
       'use-essence-on-pet',
+      'cheat-add-essences',
+      'get-species-affinities',
+      'validate-pet-assets',
+      'save-new-pet',
+      'delete-species',
+      'rename-species',
+      'apply-species-changes',
+      'get-front-ext-batch',
     ];
     if (validChannels.includes(channel)) {
       console.log(`Invocando canal IPC: ${channel}`, ...args);

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'">
     <title>Kadir11 - Pet Tray (Teste)</title>
     <link rel="stylesheet" href="styles/main.css">
     <style>
@@ -386,6 +387,140 @@
             justify-content: center;
             gap: 10px;
         }
+
+        /* Mini Mode Styles */
+        body.mini-mode-active {
+            overflow: hidden;
+            border-radius: 100px;
+        }
+
+        body.mini-mode-active .tray-container {
+            display: none;
+        }
+
+        body.mini-mode-active .mini-mode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            width: 50px;
+            height: 350px;
+            background: var(--rarity-bg, linear-gradient(180deg, #444 0%, #222 100%));
+            padding: 0;
+            margin: 0;
+            position: relative;
+            border-radius: 100px;
+        }
+
+        .mini-mode-container {
+            display: none;
+        }
+
+        .mini-mode-menu-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-family: 'PixelOperator', sans-serif;
+            flex-shrink: 0;
+            -webkit-app-region: no-drag;
+        }
+
+        .mini-mode-menu-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .mini-mode-pet-img {
+            width: 47px;
+            height: 47px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            -webkit-app-region: drag;
+            margin-top: 3px;
+        }
+
+        .mini-mode-pet-img img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .mini-mode-infos {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 50px;
+            gap: 0;
+            -webkit-app-region: drag;
+        }
+
+        .mini-mode-level {
+            width: 50px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            writing-mode: vertical-rl;
+            transform: rotate(-180deg);
+            font-size: 16px;
+            font-weight: bold;
+            font-style: italic;
+            color: white;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            font-family: 'PixelOperator', sans-serif;
+            margin: 0;
+            padding: 2px 0;
+            line-height: 1;
+        }
+
+        .mini-mode-name {
+            width: 50px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            transform: rotate(-180deg);
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            font-family: 'PixelOperator', sans-serif;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin: 0;
+            padding: 2px 0;
+            line-height: 1;
+        }
+
+        .mini-mode-element {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            -webkit-app-region: drag;
+        }
+
+        .mini-mode-element img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
     </style>
 </head>
 
@@ -420,20 +555,37 @@
                     <div class="menu-item" data-action="itens-pet">Itens</div>
                     <div class="menu-item" data-action="store-pet">Loja</div>
                     <div class="menu-item" data-action="load-pet">Pets</div>
+                    <div class="menu-item" data-action="mini-mode">🖥️ Modo Miniatura</div>
                     <div class="menu-item" data-action="exit">Sair</div>
                 </div>
             </div>
             <!-- Imagens de alerta -->
-            <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png" onerror="this.src=this.dataset.fallback||'Assets/Shop/health-potion.png'" data-fallback="Assets/Shop/health-potion.png" alt="Fome baixa"
-                style="image-rendering: pixelated;">
-            <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png" onerror="this.src=this.dataset.fallback||'Assets/Shop/smile.png'" data-fallback="Assets/Shop/smile.png" alt="Felicidade baixa"
-                style="image-rendering: pixelated;">
+            <img id="hunger-warning" class="warning-image" src="Assets/Shop/meat1.png"
+                onerror="this.src=this.dataset.fallback||'Assets/Shop/health-potion.png'"
+                data-fallback="Assets/Shop/health-potion.png" alt="Fome baixa" style="image-rendering: pixelated;">
+            <img id="happiness-warning" class="warning-image" src="Assets/Shop/sad.png"
+                onerror="this.src=this.dataset.fallback||'Assets/Shop/smile.png'" data-fallback="Assets/Shop/smile.png"
+                alt="Felicidade baixa" style="image-rendering: pixelated;">
             <div id="item-found-bubble" class="item-bubble">
                 <img id="item-found-img" alt="Item" style="display:none;" />
             </div>
             <div id="pet-status-bubble"></div>
             <!-- Alerta de batalha -->
             <div id="battle-alert"></div>
+        </div>
+    </div>
+
+    <!-- Mini Mode Container -->
+    <div class="mini-mode-container">
+        <button class="mini-mode-menu-btn" id="mini-menu-toggle">☰</button>
+        <div class="mini-mode-pet-img" id="mini-pet-img-container">
+            <img src="Assets/Mons/eggsy.png" alt="Pet" id="mini-pet-img">
+        </div>
+        <div class="mini-mode-infos">
+            <span class="mini-mode-level" id="mini-level">Nv 1</span><span class="mini-mode-name" id="mini-name">Eggsy</span>
+        </div>
+        <div class="mini-mode-element" id="mini-element">
+            <img src="" alt="Element" id="mini-element-img">
         </div>
     </div>
 

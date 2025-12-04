@@ -407,14 +407,154 @@ document.querySelectorAll('.menu-item').forEach((item) => {
     } else if (action === 'bestiary-pet') {
       console.log('Abrir Bestiário');
       window.electronAPI.send('open-bestiary-window');
+    } else if (action === 'mini-mode') {
+      console.log('Ativando Modo Miniatura');
+      toggleMiniMode(true);
     }
   });
 });
 
+// Sistema de Mini-Mode (transforma o index.html em mini-mode)
+let isMiniMode = false;
+
+function toggleMiniMode(enable) {
+  isMiniMode = enable;
+  const body = document.body;
+  
+  if (enable) {
+    // Ativar mini-mode: esconder elementos e redimensionar janela
+    console.log('Ativando Modo Miniatura, petData:', petData);
+    body.classList.add('mini-mode-active');
+    
+    console.log('Enviando set-mini-mode-layout...');
+    window.electronAPI.send('set-mini-mode-layout', { 
+      width: 50, 
+      height: 350,
+      mini: true
+    });
+    
+    // Aguardar renderização dos elementos do mini-mode
+    setTimeout(() => {
+      console.log('Atualizando dados do pet...');
+      updateMiniPetData();
+    }, 100);
+  } else {
+    // Desativar mini-mode: restaurar elementos e tamanho original
+    body.classList.remove('mini-mode-active');
+    window.electronAPI.send('set-mini-mode-layout', { 
+      width: 250, 
+      height: 250,
+      mini: false
+    });
+  }
+}
+
+function updateMiniPetData() {
+  console.log('Atualizando dados do mini-mode, petData:', petData);
+  
+  if (!petData) {
+    console.warn('petData não disponível para mini-mode');
+    return;
+  }
+  
+  // Atualizar level
+  const miniLevel = document.getElementById('mini-level');
+  if (miniLevel) {
+    miniLevel.textContent = `Nv ${petData.level || 1}`;
+    console.log('Level atualizado:', miniLevel.textContent);
+  }
+  
+  // Atualizar nome
+  const miniName = document.getElementById('mini-name');
+  if (miniName) {
+    miniName.textContent = petData.name || 'Eggsy';
+    console.log('Nome atualizado:', miniName.textContent);
+  }
+  
+  // Atualizar imagem do pet
+  const miniPetImg = document.getElementById('mini-pet-img');
+  if (miniPetImg && petData.statusImage) {
+    // O statusImage pode ser: "Ave/fogo/Pidgly/front.gif" ou similar
+    const statusDir = petData.statusImage.replace(/\/(front|back)\.(gif|png)$/i, '');
+    const miniIconPath = `Assets/Mons/${statusDir}/mini-icon.png`;
+    const frontPath = `Assets/Mons/${statusDir}/front.png`;
+    const fallbackPath = 'Assets/Mons/eggsy.png';
+    
+    // Tentar mini-icon.png primeiro
+    miniPetImg.onerror = function() {
+      // Se mini-icon falhar, tentar front.png
+      if (miniPetImg.src !== frontPath) {
+        miniPetImg.onerror = function() {
+          // Se front falhar, usar eggsy.png
+          miniPetImg.onerror = null;
+          miniPetImg.src = fallbackPath;
+        };
+        miniPetImg.src = frontPath;
+      }
+    };
+    miniPetImg.src = miniIconPath;
+    console.log('Imagem do pet atualizada:', miniIconPath);
+  }
+  
+  // Atualizar elemento
+  const miniElementImg = document.getElementById('mini-element-img');
+  if (miniElementImg) {
+    const element = petData.element || 'puro';
+    const imgSrc = `Assets/Elements/${element}.png`;
+    miniElementImg.src = imgSrc;
+    miniElementImg.alt = element;
+    console.log('Elemento atualizado:', imgSrc);
+  }
+  
+  // Atualizar background de raridade
+  const miniContainer = document.querySelector('.mini-mode-container');
+  if (miniContainer) {
+    const rarity = petData.rarity || 'Raro';
+    const gradient = rarityGradients[rarity] || rarityGradients['Raro'];
+    miniContainer.style.background = gradient;
+    console.log('Raridade atualizada:', rarity, gradient);
+  }
+}
+
+// Setup do mini-mode menu toggle
+const miniMenuToggle = document.getElementById('mini-menu-toggle');
+
+if (miniMenuToggle) {
+  miniMenuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    console.log('Abrindo mini-menu...');
+    window.electronAPI.send('open-mini-menu');
+  });
+}
+
+// Adicionar item no menu para voltar ao modo normal
+if (menuDropdown) {
+  const normalModeItem = document.createElement('div');
+  normalModeItem.className = 'menu-item';
+  normalModeItem.dataset.action = 'normal-mode';
+  normalModeItem.textContent = 'Modo Normal';
+  normalModeItem.style.display = 'none'; // Inicialmente escondido
+  normalModeItem.addEventListener('click', () => {
+    console.log('Voltando ao Modo Normal');
+    toggleMiniMode(false);
+  });
+  menuDropdown.appendChild(normalModeItem);
+  
+  // Mostrar/esconder item baseado no modo
+  const originalObserver = new MutationObserver(() => {
+    normalModeItem.style.display = isMiniMode ? 'block' : 'none';
+  });
+}
+
 // Receber dados do pet via IPC
-window.electronAPI.on('pet-data', (event, petData) => {
-  console.log('Dados do pet recebidos via IPC:', petData);
-  loadPet(petData);
+window.electronAPI.on('pet-data', (event, receivedPetData) => {
+  console.log('Dados do pet recebidos via IPC:', receivedPetData);
+  loadPet(receivedPetData);
+  
+  // Se estamos em mini-mode, atualizar também os dados do mini-mode
+  if (isMiniMode) {
+    updateMiniPetData();
+  }
 });
 
 // Escutar o evento de erro de batalha e exibir o alerta
@@ -438,6 +578,62 @@ exitYesBtn?.addEventListener('click', () => {
 exitNoBtn?.addEventListener('click', () => {
   if (exitOverlay) {
     exitOverlay.style.display = 'none';
+  }
+});
+
+// Função para processar ações do menu
+function handleMenuAction(action) {
+  console.log('Processando ação do menu:', action);
+  
+  switch(action) {
+    case 'bestiary':
+      window.electronAPI.send('open-bestiary-window');
+      break;
+    case 'status':
+      window.electronAPI.send('open-status-window');
+      break;
+    case 'presentes':
+      window.electronAPI.send('open-gift-window');
+      break;
+    case 'train':
+      window.electronAPI.send('open-train-menu-window');
+      break;
+    case 'battle':
+      // Verificar se o pet tem golpes
+      const moves = petData.knownMoves || petData.moves || [];
+      if (moves.length === 0) {
+        if (battleAlert) {
+          battleAlert.textContent = 'Primeiro deve aprender algum golpe para se defender';
+          battleAlert.style.display = 'block';
+          setTimeout(() => {
+            battleAlert.style.display = 'none';
+          }, 3000);
+        }
+        return;
+      }
+      window.electronAPI.send('open-battle-mode-window');
+      break;
+    case 'items':
+      window.electronAPI.send('itens-pet');
+      break;
+    case 'store':
+      window.electronAPI.send('store-pet');
+      break;
+    case 'pets':
+      window.electronAPI.send('open-load-pet-window');
+      break;
+    default:
+      console.log('Ação não reconhecida:', action);
+  }
+}
+
+// Receber ações do mini-menu (em janela separada)
+window.electronAPI.on('mini-menu-action', (event, action) => {
+  console.log('Ação recebida do mini-menu:', action);
+  if (action === 'normal-mode') {
+    toggleMiniMode(false);
+  } else {
+    handleMenuAction(action);
   }
 });
 

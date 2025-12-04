@@ -11,6 +11,39 @@ const { createLogger } = require('../utils/logger');
 const logger = createLogger('PetHandlers');
 
 /**
+ * Atualizar ícone da barra de tarefas com a imagem do pet
+ */
+function updateTaskbarIcon(trayWindow, pet) {
+  if (!trayWindow || trayWindow.isDestroyed() || !pet) return;
+  
+  if (pet.statusImage) {
+    const path = require('path');
+    const fs = require('fs');
+    const { nativeImage } = require('electron');
+    
+    // Tentar front.png primeiro
+    const frontPath = path.join(__dirname, '../../Assets/Mons', pet.statusImage.replace(/\.(gif|png)$/i, '.png'));
+    
+    if (fs.existsSync(frontPath)) {
+      try {
+        const image = nativeImage.createFromPath(frontPath);
+        const resized = image.resize({ width: 32, height: 32 });
+        
+        // Usar setIcon para o ícone principal e setOverlayIcon para Windows
+        if (process.platform === 'win32') {
+          trayWindow.setOverlayIcon(resized, `${pet.name} - Nv ${pet.level}`);
+        }
+        trayWindow.setIcon(resized);
+        
+        logger.debug(`Ícone da barra de tarefas atualizado: ${frontPath}`);
+      } catch (err) {
+        logger.warn('Erro ao atualizar ícone da barra de tarefas:', err);
+      }
+    }
+  }
+}
+
+/**
  * Helper para resolver idle.gif baseado no statusImage
  */
 function resolveIdleGif(basePath) {
@@ -122,6 +155,7 @@ function setupSelectPetHandler(windowManager, getItems, getCoins, closeAllGameWi
       const sendPetData = () => {
         logger.debug('Enviando pet-data para tray');
         trayWindow.webContents.send('pet-data', pet);
+        updateTaskbarIcon(trayWindow, pet);
       };
 
       if (trayWindow.webContents.isLoading()) {
@@ -253,6 +287,7 @@ function setupAnimationFinishedHandler(windowManager) {
     trayWindow.webContents.on('did-finish-load', () => {
       logger.debug('Enviando pet-data para tray (após animação)');
       trayWindow.webContents.send('pet-data', state.currentPet);
+      updateTaskbarIcon(trayWindow, state.currentPet);
     });
   });
 }
@@ -300,7 +335,12 @@ function registerPetHandlers(
         energy: pet.energy,
       });
       BrowserWindow.getAllWindows().forEach((w) => {
-        if (w.webContents) w.webContents.send('pet-data', pet);
+        if (w.webContents) {
+          w.webContents.send('pet-data', pet);
+          if (w.webContents.getURL().includes('index.html')) {
+            updateTaskbarIcon(w, pet);
+          }
+        }
       });
       logger.info('kadirfull aplicado com sucesso');
     } catch (err) {
@@ -325,7 +365,12 @@ function registerPetHandlers(
     try {
       await petManager.updatePet(pet.petId, { coins: pet.coins });
       BrowserWindow.getAllWindows().forEach((w) => {
-        if (w.webContents) w.webContents.send('pet-data', pet);
+        if (w.webContents) {
+          w.webContents.send('pet-data', pet);
+          if (w.webContents.getURL().includes('index.html')) {
+            updateTaskbarIcon(w, pet);
+          }
+        }
       });
       logger.info(`add-coins: +${coinsToAdd} moedas (${prevCoins} → ${pet.coins})`);
     } catch (err) {
