@@ -189,3 +189,6 @@ class GameStateManager {
 
 // Exporta instância única (singleton)
 const gameState = new GameStateManager()
+
+// Expõe globalmente
+window.gameState = gameState

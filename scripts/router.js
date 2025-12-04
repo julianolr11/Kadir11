@@ -208,7 +208,17 @@ class Router {
   getHistory() {
     return [...this.history]
   }
+
+  /**
+   * Debug: retorna lista de rotas registradas
+   */
+  getRoutes() {
+    return Array.from(this.routes.keys())
+  }
 }
 
 // Exporta instância única (singleton)
 const router = new Router()
+
+// Expõe globalmente
+window.router = router
