@@ -17,6 +17,7 @@ window.initSPA = function() {
   // Esconde tray e mostra SPA
   if (trayContainer) trayContainer.style.display = 'none'
   container.style.display = 'block'
+  container.classList.add('spa-mode')
   
   // Configura container do roteador
   router.setContainer(container)
@@ -79,6 +80,7 @@ window.closeSPA = function() {
   }
   
   container.style.display = 'none'
+  container.classList.remove('spa-mode')
   if (trayContainer) trayContainer.style.display = 'flex'
   
   console.log('[SPA] Fechado e estado sincronizado')

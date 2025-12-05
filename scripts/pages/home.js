@@ -91,23 +91,35 @@ function homePage(state = {}) {
     </div>
 
     <script>
-      // Toggle menu dropdown
-      const menuBtn = document.getElementById('spa-menu-btn');
-      const menuDropdown = document.getElementById('spa-menu-dropdown');
-      
-      if (menuBtn && menuDropdown) {
-        menuBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          menuDropdown.classList.toggle('active');
-        });
+      // Aguardar que o DOM esteja pronto
+      setTimeout(() => {
+        const menuBtn = document.getElementById('spa-menu-btn');
+        const menuDropdown = document.getElementById('spa-menu-dropdown');
         
-        // Fechar ao clicar fora
-        document.addEventListener('click', (e) => {
-          if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
-            menuDropdown.classList.remove('active');
-          }
-        });
-      }
+        console.log('[Home] Inicializando menu:', { menuBtn: !!menuBtn, menuDropdown: !!menuDropdown });
+        
+        if (menuBtn && menuDropdown) {
+          menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('[Home] Menu clicado, toggle active');
+            menuDropdown.classList.toggle('active');
+          });
+          
+          // Fechar ao clicar fora
+          document.addEventListener('click', (e) => {
+            if (e.target !== menuBtn && !menuDropdown.contains(e.target)) {
+              menuDropdown.classList.remove('active');
+            }
+          });
+          
+          console.log('[Home] Menu inicializado ✅');
+        } else {
+          console.error('[Home] Menu ou dropdown não encontrados no DOM');
+        }
+        
+        // Mostrar alertas
+        showAlerts();
+      }, 50);
       
       // Mostrar alertas de fome/felicidade
       function showAlerts() {
@@ -129,9 +141,6 @@ function homePage(state = {}) {
         
         alertIcons.innerHTML = alertsHTML;
       }
-      
-      // Atualizar alertas
-      setTimeout(showAlerts, 100);
       
       // Listener para updates do gameState
       if (window.gameState) {
