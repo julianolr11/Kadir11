@@ -69,7 +69,7 @@ function homePage(state = {}) {
       </div>
       
       <!-- Botão de menu flutuante -->
-      <div class="spa-menu-button" id="spa-menu-btn">
+      <div class="spa-menu-button" id="spa-menu-btn" onclick="window.toggleSPAMenu()">
         <img src="Assets/Icons/Hamburger_icon.svg.png" alt="Menu">
       </div>
       
@@ -99,16 +99,10 @@ function homePage(state = {}) {
         console.log('[Home] Inicializando menu:', { menuBtn: !!menuBtn, menuDropdown: !!menuDropdown });
         
         if (menuBtn && menuDropdown) {
-          menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('[Home] Menu clicado, toggle active');
-            menuDropdown.classList.toggle('active');
-          });
-          
           // Fechar ao clicar fora
           document.addEventListener('click', (e) => {
             if (e.target !== menuBtn && !menuDropdown.contains(e.target)) {
-              menuDropdown.classList.remove('active');
+              window.closeSPAMenu?.();
             }
           });
           
@@ -119,7 +113,7 @@ function homePage(state = {}) {
         
         // Mostrar alertas
         showAlerts();
-      }, 50);
+      }, 150);
       
       // Mostrar alertas de fome/felicidade
       function showAlerts() {

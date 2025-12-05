@@ -86,6 +86,23 @@ window.closeSPA = function() {
   console.log('[SPA] Fechado e estado sincronizado')
 }
 
+// Controles globais do menu do SPA
+window.toggleSPAMenu = function() {
+  const dropdown = document.getElementById('spa-menu-dropdown')
+  if (!dropdown) {
+    console.error('[SPA Menu] Dropdown não encontrado')
+    return
+  }
+  dropdown.classList.toggle('active')
+  console.log('[SPA Menu] Estado:', dropdown.classList.contains('active') ? 'ABERTO' : 'FECHADO')
+}
+
+window.closeSPAMenu = function() {
+  const dropdown = document.getElementById('spa-menu-dropdown')
+  if (!dropdown) return
+  dropdown.classList.remove('active')
+}
+
 // Auto-debug no console
 console.log(`
 ╔════════════════════════════════════════╗
