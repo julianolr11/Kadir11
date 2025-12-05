@@ -531,7 +531,7 @@ html, body {
   transform: translate(-50%, -50%);
   width: 240px;
   height: 240px;
-  border-radius: 20px;
+  border-radius: 12px;
   z-index: 1;
   opacity: 0.9;
 }
@@ -571,12 +571,13 @@ html, body {
 /* Info do pet (nome, level) */
 .spa-pet-info {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 25px;
+  left: 15px;
   z-index: 4;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  top: 29px;
 }
 
 .spa-pet-name {
@@ -640,8 +641,8 @@ html, body {
 /* Botão de menu flutuante */
 .spa-menu-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  top: 14px;
+  right: 14px;
   width: 40px;
   height: 40px;
   background: rgba(42, 50, 62, 0.95);

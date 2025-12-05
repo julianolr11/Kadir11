@@ -24,6 +24,7 @@ window.initSPA = function() {
   
   // Registra páginas
   router.registerAll({
+    '/start': startPage,
     '/home': homePage,
     '/create-pet': createPetPage,
     '/test': testPage,
@@ -59,8 +60,8 @@ window.initSPA = function() {
     })
   }
   
-  // Navega para home
-  router.navigate('/home')
+  // Navega para start (tela inicial)
+  router.navigate('/start')
   
   console.log('[SPA] Inicializado com sucesso')
 }
