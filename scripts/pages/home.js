@@ -1,134 +1,146 @@
 /**
- * Home Page - Primeira página SPA
- * Página simples de teste do roteador
+ * Home Page - Página inicial SPA simplificada
+ * Layout limpo: apenas pet com background de raridade + botão de menu
  */
 
 function homePage(state = {}) {
   const gameState = window.gameState;
+  const currentPet = gameState.get('currentPet') || {
+    name: 'Eggsy',
+    level: 1,
+    element: 'puro',
+    rarity: 'Comum',
+    currentHealth: 100,
+    maxHealth: 100,
+    energy: 100,
+    statusImage: 'eggsy.png'
+  };
+
+  // Gradientes de raridade
+  const rarityGradients = {
+    'Comum': 'linear-gradient(135deg, #808080, #A9A9A9)',
+    'Incomum': 'linear-gradient(135deg, #D3D3D3, #DCDCDC)',
+    'Raro': 'linear-gradient(135deg, #32CD32, #00FA9A)',
+    'MuitoRaro': 'linear-gradient(135deg, #4682B4, #00BFFF)',
+    'Epico': 'linear-gradient(135deg, #800080, #DA70D6)',
+    'Lendario': 'linear-gradient(135deg, #FFD700, #FF8C00)'
+  };
+
+  const rarityBg = rarityGradients[currentPet.rarity] || rarityGradients['Comum'];
+  const healthPercent = (currentPet.currentHealth / currentPet.maxHealth) * 100;
+  const energyPercent = currentPet.energy || 100;
   
   return `
-    <div class="spa-page">
-      <!-- Header -->
-      <div class="spa-page-header">
-        <div>
-          <h1 class="spa-title">🏠 Kadir11 SPA</h1>
-          <p class="spa-text-muted">Single Page Application - FASE 1-4</p>
+    <div class="spa-clean-layout">
+      <!-- Pet centralizado -->
+      <div class="spa-pet-display">
+        <!-- Background de raridade -->
+        <div class="spa-pet-background" style="background: ${rarityBg};"></div>
+        
+        <!-- Textura -->
+        <div class="spa-pet-texture"></div>
+        
+        <!-- Imagem do pet -->
+        <img 
+          src="Assets/Mons/${currentPet.statusImage || currentPet.image || 'eggsy.png'}" 
+          alt="${currentPet.name}"
+          class="spa-pet-image"
+          onerror="this.src='Assets/Mons/eggsy.png'"
+        >
+        
+        <!-- Info do pet -->
+        <div class="spa-pet-info">
+          <div class="spa-pet-name">${currentPet.name}</div>
+          <div class="spa-pet-bars">
+            <div class="spa-status-bar">
+              <div class="spa-status-bar-fill health" style="width: ${healthPercent}%;"></div>
+            </div>
+            <div class="spa-status-bar">
+              <div class="spa-status-bar-fill energy" style="width: ${energyPercent}%;"></div>
+            </div>
+          </div>
+          <div class="spa-pet-level">Nv ${currentPet.level || 1}</div>
+        </div>
+        
+        <!-- Ícones de alerta -->
+        <div class="spa-alert-icons" id="alert-icons">
+          <!-- Alertas serão adicionados aqui dinamicamente -->
         </div>
       </div>
-
-      <!-- Content -->
-      <div class="spa-page-content">
-        <!-- Welcome Card -->
-        <div class="spa-card spa-animate-in" style="background: linear-gradient(135deg, rgba(68, 170, 255, 0.1), rgba(0, 255, 136, 0.1)); border-color: rgba(68, 170, 255, 0.3);">
-          <h2 class="spa-subtitle">🎮 Bem-vindo ao Kadir11!</h2>
-          <p class="spa-text">Esta é a infraestrutura base da aplicação Single Page. Navegue entre as seções usando os botões abaixo.</p>
-        </div>
-
-        <!-- Navigation Grid -->
-        <div style="margin: 24px 0;">
-          <h3 class="spa-subtitle">📍 Navegação</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/home')">🏠 Home</button>
-            <button class="spa-btn spa-btn-success" onclick="router.navigate('/create-pet')">🐣 Criar Pet</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/status')">📊 Status</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/items')">🎒 Items</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/store')">🛍️ Loja</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/pen')">🏠 Meu Pen</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/nests')">🥚 Ninhos</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/hatch-egg')">🐣 Chocar Ovos</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/training-menu')">🏋️ Treino</button>
-            <button class="spa-btn spa-btn-danger" onclick="router.navigate('/battle-menu')">⚔️ Batalha</button>
-            <button class="spa-btn spa-btn-success" onclick="router.navigate('/journey-menu')">🗺️ Jornada</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/bestiary')">📖 Bestiário</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/store')">🛒 Loja</button>
-            <button class="spa-btn spa-btn-primary" onclick="router.navigate('/items')">🎒 Inventário</button>
-            <button class="spa-btn spa-btn-warning" onclick="router.navigate('/settings')">⚙️ Config</button>
-          </div>
-        </div>
-
-        <!-- Game State -->
-        <div class="spa-card spa-animate-slide" style="margin-top: 24px; border-color: rgba(68, 170, 255, 0.3);">
-          <h3 class="spa-subtitle">📈 Estado do Jogo</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
-            <div>
-              <div class="spa-stat">
-                <span class="spa-stat-label">💰 Moedas</span>
-                <span class="spa-stat-value">${gameState.get('coins') || 0}</span>
-              </div>
-              <div class="spa-stat">
-                <span class="spa-stat-label">🎛️ Mini-mode</span>
-                <span class="spa-stat-value">${gameState.get('isMiniMode') ? '✓ Ativo' : '✗ Inativo'}</span>
-              </div>
-            </div>
-            <div>
-              <div class="spa-stat">
-                <span class="spa-stat-label">🐾 Pet Ativo</span>
-                <span class="spa-stat-value">${gameState.get('currentPet')?.name || '—'}</span>
-              </div>
-              <div class="spa-stat">
-                <span class="spa-stat-label">🆔 ID do Pet</span>
-                <span class="spa-stat-value" style="font-size: 0.9em; font-family: monospace;">${gameState.get('currentPet')?.id || '—'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Router Info -->
-        <div class="spa-card" style="margin-top: 16px; border-color: rgba(0, 255, 136, 0.3);">
-          <h3 class="spa-subtitle">🛣️ Informações do Router</h3>
-          <div style="margin-top: 12px;">
-            <div class="spa-stat">
-              <span class="spa-stat-label">Página Atual</span>
-              <span class="spa-stat-value">${router.getCurrentPage()}</span>
-            </div>
-            <div class="spa-stat">
-              <span class="spa-stat-label">Histórico</span>
-              <span class="spa-stat-value" style="font-size: 0.9em; word-break: break-all;">${router.getHistory().join(' → ')}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Test Actions -->
-        <div style="margin: 24px 0;">
-          <h3 class="spa-subtitle">🧪 Ações de Teste</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <button class="spa-btn spa-btn-success spa-btn-small" onclick="
-              gameState.set('coins', gameState.get('coins') + 10);
-              location.hash = '#/home';
-            ">➕ +10 Moedas</button>
-            <button class="spa-btn spa-btn-warning spa-btn-small" onclick="
-              gameState.set('isMiniMode', !gameState.get('isMiniMode'));
-              location.hash = '#/home';
-            ">🎛️ Toggle Mini-mode</button>
-            <button class="spa-btn spa-btn-primary spa-btn-small" onclick="
-              gameState.set('currentPet', { 
-                id: '000001', 
-                name: 'Test Pet',
-                level: 5,
-                element: 'fogo',
-                rarity: 'raro',
-                life: 100,
-                maxLife: 100,
-                force: 8,
-                defense: 6,
-                speed: 7,
-                intelligence: 5,
-                moves: ['Arranhão', 'Mordida', 'Ataque Rápido']
-              });
-              location.hash = '#/home';
-            ">🐾 Simular Pet</button>
-            <button class="spa-btn spa-btn-danger spa-btn-small" onclick="router.back()">⬅️ Voltar</button>
-          </div>
-        </div>
+      
+      <!-- Botão de menu flutuante -->
+      <div class="spa-menu-button" id="spa-menu-btn">
+        <img src="Assets/Icons/Hamburger_icon.svg.png" alt="Menu">
       </div>
-
-      <!-- Footer -->
-      <div class="spa-page-footer">
-        <button class="spa-btn spa-btn-primary" onclick="window.closeSPA()">✕ Fechar SPA</button>
-        <div style="text-align: right; font-size: 0.85em; color: var(--color-text-muted); align-self: center;">
-          SPA Completo (23 Rotas) | ${new Date().toLocaleString('pt-BR')}
-        </div>
+      
+      <!-- Dropdown do menu -->
+      <div class="spa-menu-dropdown" id="spa-menu-dropdown">
+        <div class="spa-menu-item" onclick="router.navigate('/status')">📊 Status</div>
+        <div class="spa-menu-item" onclick="router.navigate('/create-pet')">🐣 Criar Pet</div>
+        <div class="spa-menu-item" onclick="router.navigate('/pen')">🏠 Meus Pets</div>
+        <div class="spa-menu-item" onclick="router.navigate('/items')">🎒 Inventário</div>
+        <div class="spa-menu-item" onclick="router.navigate('/store')">🛍️ Loja</div>
+        <div class="spa-menu-item" onclick="router.navigate('/nests')">🥚 Ninhos</div>
+        <div class="spa-menu-item" onclick="router.navigate('/training-menu')">🏋️ Treinar</div>
+        <div class="spa-menu-item" onclick="router.navigate('/battle-menu')">⚔️ Batalhar</div>
+        <div class="spa-menu-item" onclick="router.navigate('/journey-menu')">🗺️ Jornada</div>
+        <div class="spa-menu-item" onclick="router.navigate('/bestiary')">📖 Bestiário</div>
+        <div class="spa-menu-item" onclick="router.navigate('/settings')">⚙️ Configurações</div>
+        <div class="spa-menu-item" onclick="closeSPA()" style="color: #ff4444;">✕ Fechar SPA</div>
       </div>
     </div>
+
+    <script>
+      // Toggle menu dropdown
+      const menuBtn = document.getElementById('spa-menu-btn');
+      const menuDropdown = document.getElementById('spa-menu-dropdown');
+      
+      if (menuBtn && menuDropdown) {
+        menuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          menuDropdown.classList.toggle('active');
+        });
+        
+        // Fechar ao clicar fora
+        document.addEventListener('click', (e) => {
+          if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+            menuDropdown.classList.remove('active');
+          }
+        });
+      }
+      
+      // Mostrar alertas de fome/felicidade
+      function showAlerts() {
+        const alertIcons = document.getElementById('alert-icons');
+        if (!alertIcons) return;
+        
+        const pet = window.gameState?.get('currentPet');
+        if (!pet) return;
+        
+        let alertsHTML = '';
+        
+        if (pet.hunger < 30) {
+          alertsHTML += '<img src="Assets/Shop/meat1.png" alt="Fome" class="spa-alert-icon" onerror="this.src=\\'Assets/Shop/health-potion.png\\'">';
+        }
+        
+        if (pet.happiness < 30) {
+          alertsHTML += '<img src="Assets/Shop/sad.png" alt="Felicidade" class="spa-alert-icon" onerror="this.src=\\'Assets/Shop/smile.png\\'">';
+        }
+        
+        alertIcons.innerHTML = alertsHTML;
+      }
+      
+      // Atualizar alertas
+      setTimeout(showAlerts, 100);
+      
+      // Listener para updates do gameState
+      if (window.gameState) {
+        window.gameState.subscribe((state) => {
+          if (router.getCurrentPage() === 'home') {
+            showAlerts();
+          }
+        });
+      }
+    </script>
   `;
 }

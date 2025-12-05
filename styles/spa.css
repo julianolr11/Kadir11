@@ -489,3 +489,249 @@ html, body {
   border-left-color: var(--color-accent-green);
   background: rgba(0, 255, 136, 0.05);
 }
+
+/* =========================== */
+/* SPA CLEAN LAYOUT            */
+/* =========================== */
+
+/* Layout limpo: apenas pet + menu */
+.spa-clean-layout {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: linear-gradient(135deg, #0a0e1a 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pet centralizado */
+.spa-pet-display {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background de raridade */
+.spa-pet-background {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 20px;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* Textura sobre o background */
+.spa-pet-texture {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  background: url('../Assets/Rarity/texture.png');
+  background-size: cover;
+  border-radius: 20px;
+  opacity: 0.6;
+  z-index: 2;
+}
+
+/* Imagem do pet */
+.spa-pet-image {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  z-index: 3;
+  image-rendering: pixelated;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+  animation: petFloat 4s ease-in-out infinite;
+}
+
+@keyframes petFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+/* Info do pet (nome, level) */
+.spa-pet-info {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spa-pet-name {
+  color: #ffffff;
+  font-family: 'PixelOperator', sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+.spa-pet-level {
+  color: #ffffff;
+  font-family: 'PixelOperator', sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  padding: 3px 7px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+/* Barras de status (HP, Energy) */
+.spa-pet-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.spa-status-bar {
+  width: 60px;
+  height: 7px;
+  background-color: #444;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.spa-status-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.spa-status-bar-fill.health {
+  background: linear-gradient(90deg, #ff4444, #ff6b6b);
+}
+
+.spa-status-bar-fill.energy {
+  background: linear-gradient(90deg, #00b7eb, #4dabf7);
+}
+
+/* Botão de menu flutuante */
+.spa-menu-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(42, 50, 62, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.spa-menu-button:hover {
+  background: rgba(68, 170, 255, 0.8);
+  border-color: #44aaff;
+  transform: scale(1.1);
+}
+
+.spa-menu-button img {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+}
+
+/* Dropdown do menu */
+.spa-menu-dropdown {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: rgba(42, 50, 62, 0.95);
+  border: 2px solid rgba(68, 170, 255, 0.5);
+  border-radius: 12px;
+  padding: 8px;
+  z-index: 99;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  animation: menuSlideIn 0.3s ease;
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spa-menu-dropdown.active {
+  display: flex;
+}
+
+.spa-menu-item {
+  color: #ffffff;
+  font-family: 'PixelOperator', sans-serif;
+  font-size: 15px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.spa-menu-item:hover {
+  background: rgba(68, 170, 255, 0.3);
+  color: #44aaff;
+  transform: translateX(4px);
+}
+
+/* Ícones de alerta (fome, felicidade) */
+.spa-alert-icons {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spa-alert-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  animation: alertBlink 2s infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+@keyframes alertBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
