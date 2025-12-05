@@ -29,6 +29,7 @@ function homePage(state = {}) {
           <h3 class="spa-subtitle">📍 Navegação</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/home')">🏠 Home</button>
+            <button class="spa-btn spa-btn-success" onclick="router.navigate('/create-pet')">🐣 Criar Pet</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/status')">📊 Status</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/items')">🎒 Items</button>
             <button class="spa-btn spa-btn-primary" onclick="router.navigate('/store')">🛍️ Loja</button>

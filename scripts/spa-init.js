@@ -24,6 +24,7 @@ window.initSPA = function() {
   // Registra páginas
   router.registerAll({
     '/home': homePage,
+    '/create-pet': createPetPage,
     '/test': testPage,
     '/debug': debugPage,
     '/status': statusPage,
